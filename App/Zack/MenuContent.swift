@@ -133,6 +133,11 @@ struct MenuContent: View {
                 }
                 Button("Kontext lesen in 3 s") { model.debugReadContext() }
                 Button("Esc für 10 s registrieren (K2)") { model.debugRegisterEscape() }
+                Button("Bearbeiten-Test …") { model.debugShowEditingSpike() }
+                Section("Abschnittstest") { Button("Eintrag im Abschnitt") {} }
+                Picker("Titel \(Date.now.formatted(date: .omitted, time: .standard))", selection: .constant(0)) {
+                    Text("Option").tag(0)
+                }
             }
         }
     }

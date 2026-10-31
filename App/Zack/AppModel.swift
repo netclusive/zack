@@ -613,6 +613,11 @@ final class AppModel {
             }
         }
 
+        /// Debug: opens the window that checks editing shortcuts (spike S1).
+        func debugShowEditingSpike() {
+            windows.show(id: "editing-spike", title: "Bearbeiten-Test") { EditingSpikeView() }
+        }
+
         /// Debug: holds Esc as a global shortcut for 10 s and logs whether the system allowed it.
         func debugRegisterEscape() {
             guard let shortcuts else { return }
