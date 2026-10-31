@@ -41,14 +41,13 @@ public final class FileEditor<Format: EntryFormat> {
     }
 
     @discardableResult
-    public func update(line: Int, to entry: Format.Entry) -> [EntryIssue] {
+    public func update(line: Int, from old: Format.Entry, to new: Format.Entry) -> [EntryIssue] {
         guard state == .loaded else { return [] }
-        // Only entry lines can be edited; anything else is a caller bug.
-        precondition(document.items.contains { $0.line == line }, "line \(line) is not an entry")
-        let issues = Format.issues(in: entry)
+        let issues = Format.issues(in: new)
         guard issues.isEmpty else { return issues }
+        guard isCurrent(line: line, entry: old) else { return [] }
         var edited = document
-        edited.replace(line: line, with: entry)
+        edited.replace(line: line, with: new)
         commit(edited)
         return []
     }
@@ -64,11 +63,21 @@ public final class FileEditor<Format: EntryFormat> {
         return []
     }
 
-    public func remove(line: Int) {
+    public func remove(line: Int, expecting old: Format.Entry) {
         guard state == .loaded else { return }
+        guard isCurrent(line: line, entry: old) else { return }
         var edited = document
         edited.remove(line: line)
         commit(edited)
+    }
+
+    /// A stale line (outside edit, wrong entry) is never written: reload and tell the user.
+    private func isCurrent(line: Int, entry: Format.Entry) -> Bool {
+        if document.items.contains(where: { $0.line == line && $0.entry == entry }) { return true }
+        logger.error("Stale line ignored")
+        reload()
+        notice = EditorText.changedOnDisk
+        return false
     }
 
     private func commit(_ edited: EntryDocument<Format>) {

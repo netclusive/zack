@@ -22,7 +22,11 @@ struct FileEditorTests {
         defer { try? FileManager.default.removeItem(at: files.directory) }
         try write("# Kopf\nVMware\nKibana\n", to: files.vocabularyURL)
         let editor = FileEditor<VocabularyFormat>(files: files, kind: .vocabulary)
-        #expect(editor.update(line: 2, to: VocabularyEntry(spelling: "Kibana", heardAs: "Kiwana")).isEmpty)
+        #expect(
+            editor.update(
+                line: 2, from: VocabularyEntry(spelling: "Kibana"),
+                to: VocabularyEntry(spelling: "Kibana", heardAs: "Kiwana")
+            ).isEmpty)
         #expect(try read(files.vocabularyURL) == "# Kopf\nVMware\nKiwana => Kibana\n")
     }
 
@@ -31,9 +35,10 @@ struct FileEditorTests {
         try write("VMware\n", to: files.vocabularyURL)
         let editor = FileEditor<VocabularyFormat>(files: files, kind: .vocabulary)
         #expect(
-            editor.update(line: 0, to: VocabularyEntry(spelling: "a => b")) == [
-                EntryIssue(field: .spelling, problem: .arrow)
-            ])
+            editor.update(line: 0, from: VocabularyEntry(spelling: "VMware"), to: VocabularyEntry(spelling: "a => b"))
+                == [
+                    EntryIssue(field: .spelling, problem: .arrow)
+                ])
         #expect(try read(files.vocabularyURL) == "VMware\n")
     }
 
@@ -66,8 +71,45 @@ struct FileEditorTests {
         let editor = FileEditor<SnippetFormat>(files: files, kind: .snippets)
         editor.add(Snippet(name: "Adresse", text: "Max Mustermann\nexample.com"))
         #expect(try read(files.snippetsURL) == "# Kopf\nGruß => Hallo\nAdresse => Max Mustermann\\nexample.com\n")
-        editor.remove(line: 1)
+        editor.remove(line: 1, expecting: Snippet(name: "Gruß", text: "Hallo"))
         #expect(try read(files.snippetsURL) == "# Kopf\nAdresse => Max Mustermann\\nexample.com\n")
+    }
+
+    @Test func staleIndexOutOfRangeDoesNotWrite() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try write("VMware\nGitHub\n", to: files.vocabularyURL)
+        let editor = FileEditor<VocabularyFormat>(files: files, kind: .vocabulary)
+        try write("VMware\n", to: files.vocabularyURL)
+        editor.reload()
+        let issues = editor.update(
+            line: 1, from: VocabularyEntry(spelling: "GitHub"), to: VocabularyEntry(spelling: "Kibana"))
+        #expect(issues.isEmpty)
+        #expect(try read(files.vocabularyURL) == "VMware\n")
+        #expect(editor.notice == EditorText.changedOnDisk)
+    }
+
+    @Test func staleIndexOnACommentDoesNotDeleteIt() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try write("VMware\nGitHub\n", to: files.vocabularyURL)
+        let editor = FileEditor<VocabularyFormat>(files: files, kind: .vocabulary)
+        try write("# Kopf\nVMware\n", to: files.vocabularyURL)
+        editor.reload()
+        editor.remove(line: 0, expecting: VocabularyEntry(spelling: "VMware"))
+        #expect(try read(files.vocabularyURL) == "# Kopf\nVMware\n")
+        #expect(editor.notice == EditorText.changedOnDisk)
+    }
+
+    @Test func staleIndexOnAnotherEntryDoesNotTouchIt() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try write("VMware\nGitHub\n", to: files.vocabularyURL)
+        let editor = FileEditor<VocabularyFormat>(files: files, kind: .vocabulary)
+        try write("Kibana\nVMware\nGitHub\n", to: files.vocabularyURL)
+        editor.reload()
+        editor.update(
+            line: 0, from: VocabularyEntry(spelling: "VMware"),
+            to: VocabularyEntry(spelling: "VMware", heardAs: "vm ware"))
+        #expect(try read(files.vocabularyURL) == "Kibana\nVMware\nGitHub\n")
+        #expect(editor.notice == EditorText.changedOnDisk)
     }
 
     @Test func reloadPicksUpAnExternalChange() throws {
