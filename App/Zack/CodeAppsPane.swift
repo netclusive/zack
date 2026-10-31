@@ -30,6 +30,7 @@ private struct CodeAppsList: View {
     let editor: FileEditor<CodeAppsFormat>
     let openFile: () -> Void
 
+    @State private var query = ""
     @State private var selection: Int?
     @State private var hints: Hints?
 
@@ -41,8 +42,10 @@ private struct CodeAppsList: View {
             )
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
+            TextField("Suchen", text: $query)
+                .textFieldStyle(.roundedBorder)
             List(selection: $selection) {
-                ForEach(document.items) { item in
+                ForEach(document.items(matching: query)) { item in
                     row(item.entry)
                         .tag(item.line)
                 }
