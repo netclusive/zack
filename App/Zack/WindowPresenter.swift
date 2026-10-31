@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import ZackDesktop
 
 /// Settings and about windows, managed here so they can open at launch and from the pill.
 @MainActor
@@ -8,8 +9,8 @@ final class WindowPresenter {
     private var observers: [String: [any NSObjectProtocol]] = [:]
 
     /// `onClose` runs when the user closes the window; a later `show` opens it again. With `size` the window can be
-    /// resized and minimised and starts at `size`; `minSize` is its smallest content size. `onBecomeKey` runs every
-    /// time the window becomes key.
+    /// resized and minimised and starts at `size`; `minSize`, used only with `size`, is its smallest content size.
+    /// `onBecomeKey` runs every time the window becomes key.
     func show(
         id: String, title: String, size: CGSize? = nil, minSize: CGSize? = nil,
         onClose: (@MainActor () -> Void)? = nil, onBecomeKey: (@MainActor () -> Void)? = nil,
@@ -19,16 +20,14 @@ final class WindowPresenter {
             window.makeKeyAndOrderFront(nil)
         } else {
             let hosting = NSHostingController(rootView: content())
-            // A sized window keeps its size; SwiftUI's ideal size would resize it with every change of content.
-            if size != nil { hosting.sizingOptions = [] }
-            let window = NSWindow(contentViewController: hosting)
-            window.title = title
-            window.styleMask = [.titled, .closable]
+            let window: NSWindow
             if let size {
-                window.styleMask.formUnion([.resizable, .miniaturizable])
-                window.setContentSize(size)
+                window = SizedWindow.make(hosting: hosting, size: size, minSize: minSize)
+            } else {
+                window = NSWindow(contentViewController: hosting)
+                window.styleMask = [.titled, .closable]
             }
-            if let minSize { window.contentMinSize = minSize }
+            window.title = title
             window.isReleasedWhenClosed = false
             window.center()
             windows[id] = window
