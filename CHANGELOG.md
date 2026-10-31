@@ -10,10 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - After you allow it, Zack checks once a day for a new version, offers it, and can install it automatically when it quits. Turn this on or off in the menu.
+- A settings window (⌘,) collects all options: general, dictionary, snippets, code apps, updates and setup.
+- Edit the dictionary, snippets and code apps right in Zack. The text files stay valid and editable, and comments in them are kept.
 
 ### Changed
 
 - Zack is open source under the Apache License 2.0.
+- The menu is shorter and shows only the status and everyday actions.
+- "Regeltext statt KI-Fassung" is now "Ohne KI-Glättung einfügen".
+- Setup is part of the settings window.
 
 ### Removed
 

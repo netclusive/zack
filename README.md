@@ -3,9 +3,10 @@
 Local push-to-talk dictation for macOS. Everything runs on the Mac, no cloud. The interface is German, and Zack is
 built and tested for German dictation.
 
-Zack.app is a menu bar app: hold fn (or the right Option key, menu "Taste"), speak, release, and the text is
-inserted into the active window. ⌃⌥V inserts the last dictation again at the cursor, ⌃⌥O replaces an AI-cleaned
-one with the rule text. `zack-bench` compares recognition and cleanup engines on a test corpus.
+Zack.app is a menu bar app: hold fn (or the right Option key, "Settings › Allgemein › Taste"), speak, release,
+and the text is inserted into the active window. ⌃⌥V inserts the last dictation again at the cursor, ⌃⌥O replaces
+an AI-cleaned one with the rule text. The settings window (⌘,) holds all options. `zack-bench` compares recognition
+and cleanup engines on a test corpus.
 
 Ready-made builds are published as [GitHub releases](https://github.com/netclusive/zack/releases).
 
@@ -16,21 +17,24 @@ Zack needs macOS 26 or later on Apple Silicon; AI cleanup needs Apple Intelligen
 1. Download the latest `Zack-<version>.zip` from the [releases page](https://github.com/netclusive/zack/releases).
 2. Open the ZIP and move `Zack.app` to the Applications folder, then start it.
 3. Allow Microphone and Accessibility when asked.
-4. The setup window offers the speech model for download (about 600 MB, see below).
+4. "Settings › Einrichtung" offers the speech model for download (about 600 MB, see below).
 
 ## Using Zack
 
 - Permissions: Microphone; Accessibility for the key in other apps and for Cmd+V. Without Accessibility the text
   stays on the clipboard.
-- Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. The setup window moves a copy from
+- Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Einrichtung" moves a copy from
   zack-bench (`~/Library/Application Support/FluidAudio/Models`) or downloads it on click (about 600 MB from
   Hugging Face, USA; only the IP address is transmitted). The app never downloads on its own.
 - Files: `vocabulary.txt` and `snippets.txt` in `~/Library/Application Support/Zack`, created with examples. Lines
-  starting with `#` are ignored.
+  starting with `#` are ignored. Edit them in "Settings › Wörterbuch / Textbausteine / Code-Apps" or in any text
+  editor; Zack changes only the lines you edit and leaves comments in place.
   - `vocabulary.txt`: one term per line, which Zack writes exactly as given and passes to the recognition as a hint;
     `wrong => right` replaces a spelling.
   - `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break; dictating "Baustein <Name>"
     inserts the text.
+  - Known limits: a literal `\n` in snippet text becomes a line break, and spaces at the start and end of a field
+    are dropped.
 - Text before the cursor (needs Accessibility), to add a space and adapt capitalisation: Zack reads at most the 500
   characters before the cursor, or the field text up to 100,000 characters if the app offers nothing narrower, and
   keeps only the current line of it. It stays in memory only, is never logged and is dropped when the dictation
@@ -38,15 +42,16 @@ Zack needs macOS 26 or later on Apple Silicon; AI cleanup needs Apple Intelligen
   next click or an app switch.
 - Code mode: `code-apps.txt` in `~/Library/Application Support/Zack` lists the apps (bundle IDs, or prefixes ending
   in `*`) where spoken file names and case commands become code and short commands get no trailing period. The
-  menu switches the current app on or off; the file is read again for every dictation.
+  menu switches the current app on or off, "Settings › Code-Apps" adds apps; the file is read again for every
+  dictation.
 - Password fields: Zack does not dictate into them and shows a hint instead.
 - Privacy: audio and text stay in memory, the clipboard entry is marked transient and restored afterwards, logs
   contain durations, engines and error types only. AI cleanup uses Apple's on-device model only.
-- Microphone readiness (menu "Mikrofon bereithalten"): by default the microphone stays open for two minutes after
-  a dictation, so the first words are not cut off; "Immer" keeps it open, "Aus" closes it after each dictation.
-  While it is open, only the last half second is kept in memory, continuously overwritten, never recognised or
-  stored, and macOS shows the orange microphone indicator.
-- Microphone choice (menu "Mikrofon wählen"): "Wie macOS" follows the system input; picking a device applies to Zack
+- Microphone readiness ("Settings › Allgemein › Mikrofon bereithalten"): by default the microphone stays open for
+  two minutes after a dictation, so the first words are not cut off; "Immer" keeps it open, "Aus" closes it after
+  each dictation. While it is open, only the last half second is kept in memory, continuously overwritten, never
+  recognised or stored, and macOS shows the orange microphone indicator.
+- Microphone choice (menu "Mikrofon: <device>"): "Wie macOS" follows the system input; picking a device applies to Zack
   only and leaves the macOS default untouched. If the chosen device is not connected, Zack uses the macOS default
   and switches back as soon as the device returns.
 
@@ -54,15 +59,15 @@ Zack needs macOS 26 or later on Apple Silicon; AI cleanup needs Apple Intelligen
 
 Official builds update themselves through [Sparkle](https://sparkle-project.org). On the second launch Zack asks
 whether it may check for updates; the prompt has a checkbox for automatic installing. After you agree, it checks
-once a day. Menu items:
+once a day. The switches are in "Settings › Updates", "Nach Updates suchen …" is in the menu:
 
-- "Nach Updates suchen …" checks right away.
+- "Nach Updates suchen …" (menu) and "Jetzt suchen" (settings) check right away.
 - "Automatisch nach Updates suchen" turns the daily check on or off.
 - "Updates automatisch installieren" downloads in the background and installs when Zack quits.
 - "Update auf <version> …" appears when an update waits (with automatic installing off); a click shows the update
   and its changes.
 
-Privacy: the update check runs only after your consent, once a day, and can be turned off in the menu. Feed and
+Privacy: the update check runs only after your consent, once a day, and can be turned off in the settings. Feed and
 downloads come from GitHub (GitHub Inc., USA). A request carries your IP address and the user agent
 `Zack/<version> Sparkle/<version>`; Sparkle sends no system profile.
 
@@ -77,7 +82,7 @@ Requirements:
 - a German system voice, preferably Anna: the tests synthesize their speech sample with it
 
 Builds you make yourself get no updates: feed URL and public key are empty in `App/Zack.xcconfig`, and only
-`scripts/release.sh` sets them. The menu then shows "Updates nur in offiziellen Builds".
+`scripts/release.sh` sets them. "Settings › Updates" then shows "Updates gibt es nur in offiziellen Builds."
 
 Build and install:
 
@@ -151,7 +156,7 @@ Recordings and results contain voice and text and are not tracked by Git.
 ## Model downloads
 
 In `zack-bench`, the first run of an engine downloads its model and needs network access; the app downloads only
-on click in the setup window. Later runs work offline.
+on click in "Settings › Einrichtung". Later runs work offline.
 
 | Engine | Source | Stored in | Size |
 |---|---|---|---|
