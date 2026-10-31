@@ -85,10 +85,10 @@ private struct VocabularyTable: View {
         let duplicates = document.laterDuplicates
         ScrollViewReader { proxy in
             VStack(alignment: .leading, spacing: 12) {
+                // No fixedSize on text outside a scroll view: it raises the pane's height above the window's.
                 Text(
                     "Zack schreibt diese Begriffe genau so und gibt sie der Erkennung als Hinweis. Optional: wie die Erkennung sie falsch hört."
                 )
-                .fixedSize(horizontal: false, vertical: true)
                 TextField("Suchen", text: $query)
                     .textFieldStyle(.roundedBorder)
                 Table(rows(document), selection: tableSelection) {

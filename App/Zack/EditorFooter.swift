@@ -34,8 +34,8 @@ struct EditorFooter: View {
                     }
                 }
             }
+            // No fixedSize: under a list it raises the pane's height above the window's.
             .font(.callout)
-            .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
             Button("In Texteditor öffnen", action: openFile)
         }
@@ -69,7 +69,6 @@ struct ProblemList: View {
         }
         .font(.callout)
         .foregroundStyle(Brand.problem)
-        .fixedSize(horizontal: false, vertical: true)
         .onChange(of: messages, initial: true) { _, messages in
             if !messages.isEmpty { AccessibilityNotification.Announcement(messages.joined(separator: " ")).post() }
         }

@@ -37,11 +37,11 @@ private struct CodeAppsList: View {
     var body: some View {
         let document = editor.document
         VStack(alignment: .leading, spacing: 12) {
+            // No fixedSize on text outside a scroll view: it raises the pane's height above the window's.
             Text(
                 "In diesen Apps diktiert Zack im Code-Modus: Dateinamen und Schreibweisen werden zu Code, kurze Befehle bekommen keinen Punkt."
             )
             .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
             TextField("Suchen", text: $query)
                 .textFieldStyle(.roundedBorder)
             List(selection: $selection) {
