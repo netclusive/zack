@@ -8,10 +8,20 @@ public enum BrandPalette {
     public static let gray: UInt32 = 0x494c53
     /// #0d7772
     public static let turquoise: UInt32 = 0x0d7772
+    /// Not a brand color: validation problems in the light appearance (#d70015, Apple's high-contrast system red).
+    public static let problemLight: UInt32 = 0xd70015
+    /// Validation problems in the dark appearance (#ff453a, Apple's dark system red).
+    public static let problemDark: UInt32 = 0xff453a
 
     /// WCAG 2 contrast ratio of white text on the color.
     public static func contrastWithWhite(_ rgb: UInt32) -> Double {
         1.05 / (luminance(rgb) + 0.05)
+    }
+
+    /// WCAG 2 contrast ratio between two colors, in either order.
+    public static func contrast(_ first: UInt32, _ second: UInt32) -> Double {
+        let (a, b) = (luminance(first), luminance(second))
+        return (max(a, b) + 0.05) / (min(a, b) + 0.05)
     }
 
     /// Per-channel sRGB interpolation, rounded; `fraction` is clamped to 0...1.

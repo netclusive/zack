@@ -36,6 +36,8 @@ private struct SnippetsEditor: View {
 
     /// The chosen snippet as typed; `anchor` is nil until a new snippet is saved.
     struct Draft: Equatable {
+        /// Stays the same across saves of this snippet; a different snippet gets a new draft and new fields.
+        let id = UUID()
         var anchor: Anchor?
         var name: String
         var text: String
@@ -86,8 +88,9 @@ private struct SnippetsEditor: View {
             save(leaving: false)
         }
         .onChange(of: editor.document) { dropStaleDraft() }
+        // Moving the focus does not leave the snippet: a new one with a blank field keeps waiting.
         .onChange(of: focus) { old, new in
-            if old != nil, old != new { save(leaving: new == nil) }
+            if old != nil, old != new { save(leaving: false) }
         }
         .onDisappear { save(leaving: true) }
         .onWindowWillClose { save(leaving: true) }
@@ -143,6 +146,8 @@ private struct SnippetsEditor: View {
         }
         .formStyle(.grouped)
         .disabled(draft == nil)
+        // New fields for another snippet: no field editor keeps text from the previous one.
+        .id(draft?.id)
     }
 
     @ViewBuilder
@@ -168,14 +173,19 @@ private struct SnippetsEditor: View {
     @ViewBuilder
     private func flag(_ field: EntryField) -> some View {
         if issues.contains(where: { $0.field == field }) {
-            RoundedRectangle(cornerRadius: 4).stroke(.red)
+            RoundedRectangle(cornerRadius: 4).stroke(Brand.problem)
         }
     }
 
     private func field(_ keyPath: WritableKeyPath<Draft, String>) -> Binding<String> {
-        Binding(
+        let owner = draft?.id
+        return Binding(
             get: { draft?[keyPath: keyPath] ?? "" },
-            set: { draft?[keyPath: keyPath] = $0 })
+            set: { value in
+                // A late write from fields that showed another snippet changes nothing.
+                guard let owner, draft?.id == owner else { return }
+                draft?[keyPath: keyPath] = value
+            })
     }
 
     private var listSelection: Binding<RowID?> {
@@ -209,7 +219,7 @@ private struct SnippetsEditor: View {
         refused = false
         guard case .line(let line) = row, let item = editor.document.items.first(where: { $0.line == line }) else {
             // The new row is only chosen by "+".
-            draft = nil
+            dropDraft()
             return
         }
         draft = Draft(anchor: Anchor(line: item.line, entry: item.entry), name: item.entry.name, text: item.entry.text)
@@ -227,8 +237,7 @@ private struct SnippetsEditor: View {
         guard let current = draft else { return }
         guard current.anchor != nil else {
             // Never saved: nothing to delete in the file.
-            draft = nil
-            refused = false
+            dropDraft()
             return
         }
         // Save pending text first, so the question names the saved snippet and the removal matches the file.
@@ -238,9 +247,15 @@ private struct SnippetsEditor: View {
 
     private func remove(_ anchor: Anchor) {
         editor.remove(line: anchor.line, expecting: anchor.entry)
+        dropDraft()
+        if editor.notice == nil { lostEdit = nil }
+    }
+
+    /// No snippet chosen; the editing of its fields ends with it.
+    private func dropDraft() {
         draft = nil
         refused = false
-        if editor.notice == nil { lostEdit = nil }
+        focus = nil
     }
 
     /// Writes the chosen snippet if it changed; false while it has problems. A new snippet waits for both fields
@@ -260,10 +275,7 @@ private struct SnippetsEditor: View {
             let blankName = Self.isBlank(current.name)
             let blankText = Self.isBlank(current.text)
             if blankName, blankText {
-                if leaving {
-                    draft = nil
-                    refused = false
-                }
+                if leaving { dropDraft() }
                 return true
             }
             if !leaving, blankName || blankText { return true }
@@ -278,7 +290,7 @@ private struct SnippetsEditor: View {
             let saved = editor.document.items.first(where: { $0.line == line })
         else {
             // Refused: the file was reloaded and the notice says the edit is lost.
-            draft = nil
+            dropDraft()
             return true
         }
         lostEdit = nil
@@ -294,8 +306,7 @@ private struct SnippetsEditor: View {
             !editor.document.items.contains(where: { $0.line == anchor.line && $0.entry == anchor.entry })
         else { return }
         if current.changesFile, editor.notice == nil { lostEdit = EditorText.changedOnDisk }
-        draft = nil
-        refused = false
+        dropDraft()
     }
 
     // MARK: Fields

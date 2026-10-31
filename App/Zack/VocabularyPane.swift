@@ -77,6 +77,8 @@ private struct VocabularyTable: View {
     /// Set when a reload drops typed text; the editor's own notice covers refused writes.
     @State private var lostEdit: String?
     @FocusState private var focus: FieldKey?
+    /// A field whose row now shows another entry; its editing was ended, and nothing it sends is saved.
+    @State private var detachedFocus: FieldKey?
 
     var body: some View {
         let document = editor.document
@@ -139,7 +141,7 @@ private struct VocabularyTable: View {
             .onExitCommand { discard(key) }
             .overlay {
                 if isFlagged(key) {
-                    RoundedRectangle(cornerRadius: 3).stroke(.red)
+                    RoundedRectangle(cornerRadius: 3).stroke(Brand.problem)
                 }
             }
     }
@@ -156,10 +158,14 @@ private struct VocabularyTable: View {
             set: { text in
                 switch key.row {
                 case .new:
-                    newEntry = Self.setting(key.field, to: text, in: newEntry ?? VocabularyEntry(spelling: ""))
+                    // A late write after the row was dropped must not bring it back.
+                    guard let entry = newEntry else { return }
+                    newEntry = Self.setting(key.field, to: text, in: entry)
                 case .line(let line):
-                    guard let item else { return }
+                    // A field that showed an entry no longer at this line (reload, removal) writes nothing.
+                    guard key != detachedFocus, let item, isCurrent(line, item.entry) else { return }
                     var draft = drafts[line] ?? LineDraft(base: item.entry)
+                    guard draft.base == item.entry else { return }
                     draft.set(key.field, text)
                     drafts[line] = draft
                 }
@@ -216,6 +222,8 @@ private struct VocabularyTable: View {
         case .new: dropNewEntry()
         case .saved(let line, let entry):
             selection = nil
+            // From this line on, the rows show other entries afterwards; a field there stops editing.
+            if case .line(let focused) = focus?.row, focused >= line { detachFocus() }
             editor.remove(line: line, expecting: entry)
             // A refused removal reloaded the file; stale drafts go when the document changes.
             guard editor.notice == nil, editor.state == .loaded else { return }
@@ -258,15 +266,25 @@ private struct VocabularyTable: View {
         }
     }
 
-    /// Leaving a field saves its line; the new row saves once the focus leaves the whole row.
+    /// Leaving a field saves its line; the new row saves once the focus leaves the whole row. A detached field saves
+    /// nothing.
     private func focusMoved(from old: FieldKey?, to new: FieldKey?) {
-        if let old, old != new {
+        if let old, old != new, old != detachedFocus {
             switch old.row {
             case .line: save(old.row, leavingRow: true)
             case .new: if new?.row != .new { save(.new, leavingRow: true) }
             }
         }
-        if let row = new?.row { select(row) }
+        if let new {
+            detachedFocus = nil
+            select(new.row)
+        }
+    }
+
+    /// Ends the editing of the focused field, whose row now shows another entry.
+    private func detachFocus() {
+        detachedFocus = focus
+        focus = nil
     }
 
     private func save(_ row: RowID, leavingRow: Bool) {
@@ -325,19 +343,30 @@ private struct VocabularyTable: View {
         if selection == .new { selection = nil }
     }
 
-    /// After any change of the document: drafts and the selection whose line no longer holds their entry go.
+    /// After any change of the document: drafts and the selection whose line no longer holds their entry go, and so
+    /// does the editing of a field in such a row. Focusing a row selects it, so a focused row without a draft is
+    /// caught through the selection.
     private func dropStaleDrafts() {
         let items = editor.document.items
         func isCurrent(_ line: Int, _ entry: VocabularyEntry) -> Bool {
             items.contains { $0.line == line && $0.entry == entry }
         }
-        let stale = drafts.filter { !isCurrent($0.key, $0.value.base) }
-        for line in stale.keys {
+        var staleLines = Set(drafts.filter { !isCurrent($0.key, $0.value.base) }.keys)
+        let lostTyping = staleLines.contains { drafts[$0]?.changesFile == true }
+        for line in staleLines {
             drafts[line] = nil
             refused.remove(.line(line))
         }
-        if case .saved(let line, let entry) = selection, !isCurrent(line, entry) { selection = nil }
-        if stale.values.contains(where: \.changesFile), editor.notice == nil { lostEdit = EditorText.changedOnDisk }
+        if case .saved(let line, let entry) = selection, !isCurrent(line, entry) {
+            selection = nil
+            staleLines.insert(line)
+        }
+        if case .line(let focused) = focus?.row, staleLines.contains(focused) { detachFocus() }
+        if lostTyping, editor.notice == nil { lostEdit = EditorText.changedOnDisk }
+    }
+
+    private func isCurrent(_ line: Int, _ entry: VocabularyEntry) -> Bool {
+        editor.document.items.contains { $0.line == line && $0.entry == entry }
     }
 
     // MARK: Fields

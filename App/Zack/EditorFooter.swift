@@ -1,6 +1,4 @@
 import Accessibility
-import AppKit
-import Combine
 import SwiftUI
 import ZackCore
 import ZackDesktop
@@ -68,7 +66,7 @@ struct ProblemList: View {
             ForEach(messages, id: \.self) { Text($0) }
         }
         .font(.callout)
-        .foregroundStyle(.red)
+        .foregroundStyle(Brand.problem)
         .fixedSize(horizontal: false, vertical: true)
         .onChange(of: messages, initial: true) { _, messages in
             if !messages.isEmpty { AccessibilityNotification.Announcement(messages.joined(separator: " ")).post() }
@@ -99,13 +97,5 @@ struct UnreadableFileNote: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-extension View {
-    /// Runs `action` while this view still exists, just before a window closes, so ⌘W keeps a pending draft.
-    /// Any window counts: saving a draft early is harmless.
-    func onWindowWillClose(perform action: @escaping () -> Void) -> some View {
-        onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in action() }
     }
 }
