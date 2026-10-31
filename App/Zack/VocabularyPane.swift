@@ -347,10 +347,6 @@ private struct VocabularyTable: View {
     /// does the editing of a field in such a row. Focusing a row selects it, so a focused row without a draft is
     /// caught through the selection.
     private func dropStaleDrafts() {
-        let items = editor.document.items
-        func isCurrent(_ line: Int, _ entry: VocabularyEntry) -> Bool {
-            items.contains { $0.line == line && $0.entry == entry }
-        }
         var staleLines = Set(drafts.filter { !isCurrent($0.key, $0.value.base) }.keys)
         let lostTyping = staleLines.contains { drafts[$0]?.changesFile == true }
         for line in staleLines {

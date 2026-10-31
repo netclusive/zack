@@ -17,10 +17,12 @@ struct BrandPaletteTests {
     }
 
     @Test func problemRedIsReadableOnWindowAndFormBackgrounds() {
-        // Light: white form rows and the #ececec window background; dark: the #1e1e1e window background.
+        // Light: white form rows and the #ececec window background. Dark: the #1e1e1e window background and the
+        // #282828 background of a grouped form and its section footers (measured on macOS 27).
         #expect(BrandPalette.contrast(BrandPalette.problemLight, 0xffffff) >= 4.5)
         #expect(BrandPalette.contrast(BrandPalette.problemLight, 0xececec) >= 4.5)
         #expect(BrandPalette.contrast(BrandPalette.problemDark, 0x1e1e1e) >= 4.5)
+        #expect(BrandPalette.contrast(BrandPalette.problemDark, 0x282828) >= 4.5)
     }
 
     @Test func contrastIsSymmetricAndAgreesWithWhiteText() {
