@@ -61,6 +61,9 @@ final class AppModel {
 
     /// Set by `AppDelegate` right after creating both; the updates pane reads it.
     @ObservationIgnored var updater: Updater?
+    /// Created in `start()`; nil without user files. The panes observe the editors themselves.
+    @ObservationIgnored private(set) var vocabularyEditor: FileEditor<VocabularyFormat>?
+    @ObservationIgnored private(set) var snippetsEditor: FileEditor<SnippetFormat>?
 
     @ObservationIgnored private let settings = Settings()
     @ObservationIgnored private let signposts = Signposts()
@@ -156,6 +159,10 @@ final class AppModel {
             try files?.createMissing()
         } catch {
             logger.error("user files: \(String(describing: type(of: error)), privacy: .public)")
+        }
+        if let files {
+            vocabularyEditor = FileEditor(files: files, kind: .vocabulary)
+            snippetsEditor = FileEditor(files: files, kind: .snippets)
         }
         pill = PillPanelController(signposts: signposts) { [weak self] in self?.showSetup() }
         pill?.prepare()
@@ -306,6 +313,17 @@ final class AppModel {
         if let url = files?.codeAppsURL { NSWorkspace.shared.open(url) }
     }
 
+    /// Opens the file in the default text editor, for lines the editors cannot show.
+    func openInTextEditor(_ kind: UserFileKind) {
+        if let url = files?.url(for: kind) { NSWorkspace.shared.open(url) }
+    }
+
+    /// Reads the files again, so changes made elsewhere show when the settings window comes to the front.
+    func reloadEditors() {
+        vocabularyEditor?.reload()
+        snippetsEditor?.reload()
+    }
+
     func statusClicked() {
         if status.opensSetup { showSetup() }
     }
@@ -322,6 +340,11 @@ final class AppModel {
         windows.show(
             id: Self.settingsWindow, title: settingsPane.title, size: CGSize(width: 720, height: 480),
             minSize: CGSize(width: 640, height: 420), onClose: { [weak self] in self?.stopSetupPolling() },
+            // Files and Apple Intelligence may have changed while another app was in front.
+            onBecomeKey: { [weak self] in
+                self?.reloadEditors()
+                self?.refresh()
+            },
             content: { SettingsView(model: self, updater: updater) })
         windows.setTitle(settingsPane.title, id: Self.settingsWindow)
         updateSetupPolling()

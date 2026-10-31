@@ -19,8 +19,12 @@ struct SettingsView: View {
         } detail: {
             switch model.settingsPane {
             case .general: GeneralPane(model: model)
-            // Editors follow; until then the pane shows its name.
-            case .vocabulary, .snippets, .codeApps: Text(model.settingsPane.title)
+            case .vocabulary:
+                VocabularyPane(editor: model.vocabularyEditor) { model.openInTextEditor(.vocabulary) }
+            case .snippets:
+                SnippetsPane(editor: model.snippetsEditor) { model.openInTextEditor(.snippets) }
+            // The code apps editor follows; until then the pane shows its name.
+            case .codeApps: Text(model.settingsPane.title)
             case .updates: UpdatesPane(updater: updater)
             case .setup: ScrollView { SetupView(model: model) }
             }
