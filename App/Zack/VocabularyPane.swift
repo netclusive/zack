@@ -16,9 +16,9 @@ struct VocabularyPane: View {
     }
 }
 
-/// Each cell edits a draft; Return or leaving the field saves it, Esc drops it. A draft belongs to the line and the
-/// entry it started from: when the document changes and that pair is gone, the draft goes too, so it is never saved
-/// over a reloaded file.
+/// Each cell edits a draft; Return, leaving the field or the window losing key status saves it, Esc drops it. A draft
+/// belongs to the line and the entry it started from: when the document changes and that pair is gone, the draft goes
+/// too, so it is never saved over a reloaded file.
 private struct VocabularyTable: View {
     typealias Item = EntryDocument<VocabularyFormat>.Item
 
@@ -120,6 +120,8 @@ private struct VocabularyTable: View {
         .onChange(of: focus) { old, new in focusMoved(from: old, to: new) }
         .onDisappear(perform: saveAll)
         .onWindowWillClose(perform: saveAll)
+        // Another app may dictate next, and Zack reads the file for each dictation.
+        .onWindowDidResignKey(perform: savePending)
     }
 
     // MARK: Rows and cells
@@ -344,6 +346,13 @@ private struct VocabularyTable: View {
     private func saveAll() {
         for line in drafts.keys.sorted() { saveLine(line) }
         saveNewEntry(discardIfEmpty: true)
+    }
+
+    /// The window losing key status saves like a focus change: what is valid is written, an invalid draft stays
+    /// marked, and the new row stays even when blank.
+    private func savePending() {
+        for line in drafts.keys.sorted() { saveLine(line) }
+        saveNewEntry(discardIfEmpty: false)
     }
 
     private func dropNewEntry() {

@@ -352,6 +352,11 @@ final class AppModel {
         updateSetupPolling()
     }
 
+    /// Closes the settings window if it is open; its panes save pending edits synchronously while it closes.
+    func closeSettings() {
+        windows.close(id: Self.settingsWindow)
+    }
+
     private static let settingsWindow = "settings"
 
     /// Polls exactly while the settings window is open on the setup pane.

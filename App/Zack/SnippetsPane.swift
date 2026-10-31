@@ -17,8 +17,9 @@ struct SnippetsPane: View {
 }
 
 /// The chosen snippet is edited as a draft. The text saves 0.5 s after the last keystroke; leaving the fields, Return
-/// in the name, choosing another snippet, leaving the pane and closing the window save as well. A draft belongs to the
-/// line and the entry it started from: when the document changes and that pair is gone, the draft goes too.
+/// in the name, choosing another snippet, leaving the pane, the window losing key status and closing the window save
+/// as well. A draft belongs to the line and the entry it started from: when the document changes and that pair is
+/// gone, the draft goes too.
 private struct SnippetsEditor: View {
     enum RowID: Hashable {
         case line(Int)
@@ -94,6 +95,8 @@ private struct SnippetsEditor: View {
         }
         .onDisappear { save(leaving: true) }
         .onWindowWillClose { save(leaving: true) }
+        // Like a focus change: another app may dictate next, and Zack reads the file for each dictation.
+        .onWindowDidResignKey { save(leaving: false) }
         .confirmationDialog(
             removalTitle, isPresented: removalPresented, titleVisibility: .visible, presenting: pendingRemoval
         ) { anchor in

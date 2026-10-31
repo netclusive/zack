@@ -37,4 +37,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.start()
         updater.start()
     }
+
+    /// Quitting or logging out saves pending edits: the editors' close hooks run inside the close, before exit.
+    func applicationWillTerminate(_ notification: Notification) {
+        model.closeSettings()
+    }
 }
