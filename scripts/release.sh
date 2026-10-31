@@ -19,8 +19,8 @@ readonly TEST_KEY_ACCOUNT="zack-test"
 readonly LOCAL_FEED_URL="http://127.0.0.1:8000/appcast.xml"
 readonly LOCAL_DOWNLOAD_PREFIX="http://127.0.0.1:8000"
 readonly ENTITLEMENT="com.apple.security.device.audio-input"
-# Public EdDSA key for the Sparkle feed; must be set before the first release.
-ED_PUBLIC_KEY=""
+# Public EdDSA key for the Sparkle feed; the private key is in the login keychain (generate_keys, default account).
+ED_PUBLIC_KEY="5YWYp4u+EBOFNvklOCAI7zynBumo/inbbikw+C9oE8A="
 
 # Set by main and preflight; ZIP by package_feed.
 MODE="" WORK="" VERSION="" OUT="" NOTES="" TEAM="" MASK_TEAMS="" SPARKLE_BIN="" FEED="" KEY="" ZIP="" ZIP_URL=""
