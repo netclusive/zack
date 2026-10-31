@@ -64,6 +64,7 @@ final class AppModel {
     /// Created in `start()`; nil without user files. The panes observe the editors themselves.
     @ObservationIgnored private(set) var vocabularyEditor: FileEditor<VocabularyFormat>?
     @ObservationIgnored private(set) var snippetsEditor: FileEditor<SnippetFormat>?
+    @ObservationIgnored private(set) var codeAppsEditor: FileEditor<CodeAppsFormat>?
 
     @ObservationIgnored private let settings = Settings()
     @ObservationIgnored private let signposts = Signposts()
@@ -163,6 +164,7 @@ final class AppModel {
         if let files {
             vocabularyEditor = FileEditor(files: files, kind: .vocabulary)
             snippetsEditor = FileEditor(files: files, kind: .snippets)
+            codeAppsEditor = FileEditor(files: files, kind: .codeApps)
         }
         pill = PillPanelController(signposts: signposts) { [weak self] in self?.showSetup() }
         pill?.prepare()
@@ -306,6 +308,8 @@ final class AppModel {
         } catch {
             logger.error("code apps: \(String(describing: type(of: error)), privacy: .public)")
         }
+        // An open code apps pane shows the change at once.
+        codeAppsEditor?.reload()
         refresh()
     }
 
@@ -322,6 +326,7 @@ final class AppModel {
     func reloadEditors() {
         vocabularyEditor?.reload()
         snippetsEditor?.reload()
+        codeAppsEditor?.reload()
     }
 
     func statusClicked() {

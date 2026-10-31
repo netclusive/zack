@@ -23,8 +23,8 @@ struct SettingsView: View {
                 VocabularyPane(editor: model.vocabularyEditor) { model.openInTextEditor(.vocabulary) }
             case .snippets:
                 SnippetsPane(editor: model.snippetsEditor) { model.openInTextEditor(.snippets) }
-            // The code apps editor follows; until then the pane shows its name.
-            case .codeApps: Text(model.settingsPane.title)
+            case .codeApps:
+                CodeAppsPane(editor: model.codeAppsEditor) { model.openInTextEditor(.codeApps) }
             case .updates: UpdatesPane(updater: updater)
             case .setup: ScrollView { SetupView(model: model) }
             }
