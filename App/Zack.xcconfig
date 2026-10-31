@@ -1,0 +1,5 @@
+// Shared by Debug and Release. The team ID comes from the ignored Local.xcconfig.
+// Update feed and public EdDSA key stay empty, so the updater stays off; release builds set both on the command line.
+ZACK_FEED_URL =
+ZACK_ED_PUBLIC_KEY =
+#include "Local.xcconfig"

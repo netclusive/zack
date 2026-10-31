@@ -1,0 +1,64 @@
+# XcodeGen spec for Zack.app; `xcodegen generate --spec App/project.yml` writes App/Zack.xcodeproj (ignored by Git).
+name: Zack
+options:
+  bundleIdPrefix: com.netclusive
+  deploymentTarget:
+    macOS: "26.0"
+configFiles:
+  Debug: Zack.xcconfig
+  Release: Zack.xcconfig
+packages:
+  zack:
+    path: ..
+targets:
+  Zack:
+    type: application
+    platform: macOS
+    sources:
+      - path: Zack
+    dependencies:
+      - package: zack
+        products:
+          - ZackCore
+          - ZackDesktop
+          - ZackParakeet
+          - ZackApple
+          - ZackUpdate
+    postBuildScripts:
+      # Runs before Xcode's CodeSign step and, through the declared input, after the resource bundle is copied. FluidAudio's resource bundle holds only the speech synthesis lexicon
+      # (LuxTTS, derived from espeak-ng output, no licence stated); Zack never synthesises speech, and
+      # `Bundle.module` is used only in FluidAudio's TTS/LuxTts/G2p sources.
+      - name: Remove unused speech synthesis lexicon
+        # Always runs: the copy step may put the bundle back on any build.
+        basedOnDependencyAnalysis: false
+        inputFiles:
+          - $(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Resources/FluidAudio_FluidAudio.bundle
+        outputFiles:
+          - $(DERIVED_FILE_DIR)/lexicon-removed.stamp
+        script: |
+          rm -rf "$TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/Resources/FluidAudio_FluidAudio.bundle"
+          touch "$DERIVED_FILE_DIR/lexicon-removed.stamp"
+    settings:
+      base:
+        PRODUCT_NAME: Zack
+        PRODUCT_BUNDLE_IDENTIFIER: com.netclusive.zack
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: $(MARKETING_VERSION)
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        ARCHS: arm64
+        INFOPLIST_FILE: Support/Info.plist
+        GENERATE_INFOPLIST_FILE: "NO"
+        CODE_SIGN_ENTITLEMENTS: Support/Zack.entitlements
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: Apple Development
+        ENABLE_HARDENED_RUNTIME: "YES"
+        SWIFT_VERSION: "6.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: Zack
+        DEAD_CODE_STRIPPING: "YES"
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+        Release:
+          # No get-task-allow: debuggers must not attach to a build that sees dictations and the clipboard.
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: "NO"
+    scheme: {}

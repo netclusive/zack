@@ -1,0 +1,27 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:0.04706,0.16471,0.27843,1.00000",
+      "srgb:0.02353,0.07451,0.12157,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "wave-z.svg",
+          "name" : "wave-z"
+        }
+      ],
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.8
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}
