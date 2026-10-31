@@ -47,6 +47,23 @@ struct CodeAppsTests {
         #expect(CodeApps.toggled("com.jetbrains.goland", in: "com.jetbrains.*\n") == "com.jetbrains.*\n")
     }
 
+    @Test func codeAppItemsMatchTheParser() {
+        let document = EntryDocument<CodeAppsFormat>(text: UserFiles.codeAppsTemplate)
+        #expect(document.unreadableCount == 0)
+        #expect(document.items.count == 7)
+        let apps = CodeApps(parsing: UserFiles.codeAppsTemplate)
+        for item in document.items {
+            switch item.entry {
+            case .app(let id): #expect(apps.match(id) == .exact)
+            case .prefix(let prefix): #expect(apps.match(prefix + "rider") == .prefix)
+            }
+        }
+    }
+
+    @Test func lonePrefixStarIsUnreadable() {
+        #expect(EntryDocument<CodeAppsFormat>(text: "*\ncom.example.Editor\n").unreadableCount == 1)
+    }
+
     @Test func templateCoversEditorsAndTerminals() {
         let defaults = CodeApps(parsing: UserFiles.codeAppsTemplate)
         for id in [
