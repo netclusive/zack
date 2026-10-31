@@ -213,7 +213,7 @@ private struct SnippetsEditor: View {
 
     // MARK: Actions
 
-    /// A snippet with problems stays chosen until it is fixed or its field is reset with Esc.
+    /// A snippet with problems or a failed write stays chosen until it is saved or its field is reset with Esc.
     private func choose(_ row: RowID?) {
         guard row != currentRow, save(leaving: true) else { return }
         refused = false
@@ -258,8 +258,8 @@ private struct SnippetsEditor: View {
         focus = nil
     }
 
-    /// Writes the chosen snippet if it changed; false while it has problems. A new snippet waits for both fields
-    /// unless the user leaves it; leaving it blank drops it.
+    /// Writes the chosen snippet if it changed; false while it has problems or its write failed. A new snippet waits
+    /// for both fields unless the user leaves it; leaving it blank drops it.
     @discardableResult
     private func save(leaving: Bool) -> Bool {
         guard var current = draft, current.changesFile else {
@@ -285,6 +285,8 @@ private struct SnippetsEditor: View {
             }
         }
         refused = false
+        // A failed write keeps the snippet chosen with its draft for another try.
+        if let notice = editor.notice, notice != EditorText.changedOnDisk, editor.state == .loaded { return false }
         let line = current.anchor?.line ?? editor.document.items.last?.line
         guard editor.notice == nil, editor.state == .loaded,
             let saved = editor.document.items.first(where: { $0.line == line })

@@ -305,12 +305,15 @@ private struct VocabularyTable: View {
             refused.insert(.line(line))
             return
         }
-        drafts[line] = nil
         refused.remove(.line(line))
-        // A refused write reloaded the file and set the notice.
-        guard editor.notice == nil, editor.state == .loaded,
-            let saved = editor.document.items.first(where: { $0.line == line })
-        else { return }
+        // A refused write reloaded the file and set the notice. A failed write keeps the draft for another try; after
+        // a conflict the notice says it is lost.
+        guard editor.notice == nil, editor.state == .loaded else {
+            if editor.notice == EditorText.changedOnDisk { drafts[line] = nil }
+            return
+        }
+        drafts[line] = nil
+        guard let saved = editor.document.items.first(where: { $0.line == line }) else { return }
         lostEdit = nil
         if case .saved(line, _) = selection { selection = .saved(line: line, entry: saved.entry) }
     }
@@ -325,8 +328,14 @@ private struct VocabularyTable: View {
             refused.insert(.new)
             return
         }
+        refused.remove(.new)
+        // A failed write keeps the row for another try; after a conflict the notice says it is lost.
+        guard editor.notice == nil, editor.state == .loaded else {
+            if editor.notice == EditorText.changedOnDisk { dropNewEntry() }
+            return
+        }
         dropNewEntry()
-        guard editor.notice == nil, editor.state == .loaded, let saved = editor.document.items.last else { return }
+        guard let saved = editor.document.items.last else { return }
         lostEdit = nil
         selection = .saved(line: saved.line, entry: saved.entry)
     }
