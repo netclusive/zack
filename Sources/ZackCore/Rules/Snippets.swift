@@ -30,20 +30,21 @@ public struct SnippetRule: TextRule {
     private let texts: [String: String]
 
     public init(_ snippets: [Snippet]) {
-        texts = Dictionary(snippets.map { (Self.key($0.name), $0.text) }, uniquingKeysWith: { first, _ in first })
+        texts = Dictionary(
+            snippets.map { (Self.normalizedName($0.name), $0.text) }, uniquingKeysWith: { first, _ in first })
     }
 
     public func match(_ text: String) -> String? {
         let words = TextTools.words(text)
         guard words.count >= 2, words[0] == "baustein" else { return nil }
-        return texts[Self.key(words.dropFirst().joined(separator: " "))]
+        return texts[Self.normalizedName(words.dropFirst().joined(separator: " "))]
     }
 
     public func apply(_ text: String, context: RuleContext) -> String {
         match(text) ?? text
     }
 
-    private static func key(_ name: String) -> String {
+    public static func normalizedName(_ name: String) -> String {
         // Speech engines often spell umlauts out, so fold them on both sides (words are already lowercased).
         let folds = [("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")]
         return folds.reduce(TextTools.words(name).joined(separator: " ")) {
