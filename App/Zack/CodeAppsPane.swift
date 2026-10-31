@@ -52,7 +52,7 @@ private struct CodeAppsList: View {
             EditorFooter(
                 onAdd: addApps, onRemove: removeSelected, canRemove: selectedItem(in: document) != nil,
                 unreadableCount: document.unreadableCount, notice: editor.notice ?? shownHints(for: document),
-                openFile: openFile)
+                openFile: openFile, addLabel: "App hinzufügen …")
         }
         .padding(20)
         .onChange(of: editor.document) {
