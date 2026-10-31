@@ -98,13 +98,18 @@ public struct UserFiles: Sendable {
             .write(to: codeAppsURL.resolvingSymlinksInPath(), options: .atomic)
     }
 
-    /// UTF-8 first; files saved by a Windows editor fall back to Windows-1252, then Latin-1, so umlauts survive.
+    /// UTF-16 with a byte order mark; else UTF-8 first, and files saved by a Windows editor fall back to
+    /// Windows-1252, then Latin-1, so umlauts survive. Text with NUL (binary data, UTF-16 without a byte order mark)
+    /// is unreadable.
     static func readText(_ url: URL) -> String? {
         guard let data = try? Data(contentsOf: url) else { return nil }
-        for encoding in [String.Encoding.utf8, .windowsCP1252, .isoLatin1] {
-            if let text = String(data: data, encoding: encoding) { return text }
-        }
-        return nil
+        let encodings: [String.Encoding] =
+            data.starts(with: [0xFF, 0xFE]) || data.starts(with: [0xFE, 0xFF])
+            ? [.utf16] : [.utf8, .windowsCP1252, .isoLatin1]
+        guard let text = encodings.lazy.compactMap({ String(data: data, encoding: $0) }).first,
+            !text.utf8.contains(0)
+        else { return nil }
+        return text
     }
 
     static let vocabularyTemplate = """

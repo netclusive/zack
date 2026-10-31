@@ -23,6 +23,27 @@ struct UserFilesEditingTests {
         #expect(try Data(contentsOf: files.vocabularyURL) == Data("Müller\nMeier\n".utf8))
     }
 
+    @Test func readsUTF16WithAByteOrderMark() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try FileManager.default.createDirectory(at: files.directory, withIntermediateDirectories: true)
+        let littleEndian = try #require("Müller\n".data(using: .utf16LittleEndian))
+        try (Data([0xFF, 0xFE]) + littleEndian).write(to: files.vocabularyURL)
+        #expect(try files.readForEditing(.vocabulary) == "Müller\n")
+        #expect(files.load().vocabulary.terms == ["Müller"])
+        let bigEndian = try #require("Gruß => Viele Grüße\n".data(using: .utf16BigEndian))
+        try (Data([0xFE, 0xFF]) + bigEndian).write(to: files.snippetsURL)
+        #expect(try files.readForEditing(.snippets) == "Gruß => Viele Grüße\n")
+    }
+
+    @Test func nulBytesWithoutAByteOrderMarkAreUnreadable() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try FileManager.default.createDirectory(at: files.directory, withIntermediateDirectories: true)
+        // UTF-16 without a byte order mark: every second byte of "Müller" is NUL.
+        try #require("Müller\n".data(using: .utf16LittleEndian)).write(to: files.vocabularyURL)
+        #expect(throws: UserFileError.unreadable) { try files.readForEditing(.vocabulary) }
+        #expect(files.load().vocabulary == Vocabulary())
+    }
+
     @Test func writeRefusesWhenTheFileChangedOnDisk() throws {
         defer { try? FileManager.default.removeItem(at: files.directory) }
         let read = try files.readForEditing(.snippets)
