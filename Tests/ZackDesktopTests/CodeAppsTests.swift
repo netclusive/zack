@@ -43,6 +43,11 @@ struct CodeAppsTests {
                 == "com.apple.Terminal\r\ncom.apple.TextEdit\n")
     }
 
+    /// Removal takes the line with its own ending only; the last line keeps having none.
+    @Test func toggleRemovesLosslesslyBeforeALastLineWithoutBreak() {
+        #expect(CodeApps.toggled("com.example.A", in: "com.example.A\ncom.example.B") == "com.example.B")
+    }
+
     @Test func toggleLeavesPrefixMatchesAlone() {
         #expect(CodeApps.toggled("com.jetbrains.goland", in: "com.jetbrains.*\n") == "com.jetbrains.*\n")
     }
