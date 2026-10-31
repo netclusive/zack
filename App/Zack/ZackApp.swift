@@ -26,8 +26,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         let model = AppModel()
         self.model = model
-        updater = Updater(
+        let updater = Updater(
             configuration: UpdateConfiguration(bundle: .main), isDictating: { [model] in model.dictation != .idle })
+        self.updater = updater
+        model.updater = updater
         super.init()
     }
 

@@ -104,7 +104,8 @@ struct MenuContent: View {
         Button("Code-Apps bearbeiten …") { model.openCodeApps() }
         UpdateMenuSection(updater: updater)
         Divider()
-        Button("Einrichtung prüfen …") { model.showSetup() }
+        Button("Einstellungen …") { model.showSettings() }
+            .keyboardShortcut(",")
         Button("Über Zack") { model.showAbout() }
         #if DEBUG
             DebugMenu(model: model)
