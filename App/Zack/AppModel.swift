@@ -293,14 +293,6 @@ final class AppModel {
         Task { await controller.retry() }
     }
 
-    func openVocabulary() {
-        if let url = files?.vocabularyURL { NSWorkspace.shared.open(url) }
-    }
-
-    func openSnippets() {
-        if let url = files?.snippetsURL { NSWorkspace.shared.open(url) }
-    }
-
     func toggleCodeMode() {
         guard let bundleID = codeModeApp?.bundleID else { return }
         do {
@@ -311,10 +303,6 @@ final class AppModel {
         // An open code apps pane shows the change at once.
         codeAppsEditor?.reload()
         refresh()
-    }
-
-    func openCodeApps() {
-        if let url = files?.codeAppsURL { NSWorkspace.shared.open(url) }
     }
 
     /// Opens the file in the default text editor, for lines the editors cannot show.

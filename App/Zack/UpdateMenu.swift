@@ -13,20 +13,14 @@ struct UpdateAvailableRow: View {
     }
 }
 
-/// Update block above the setup entries; builds without a feed show only a note.
+/// The manual check; builds without a feed show nothing (the settings window explains it).
 struct UpdateMenuSection: View {
-    @Bindable var updater: Updater
+    let updater: Updater
 
     var body: some View {
-        Divider()
-        if updater.menuState == .unavailable, let title = updater.menuState.title {
-            Text(title)
-        } else {
+        if updater.menuState != .unavailable {
             Button("Nach Updates suchen …") { updater.checkForUpdates() }
                 .disabled(!updater.canCheck)
-            Toggle("Automatisch nach Updates suchen", isOn: $updater.automaticallyChecks)
-            Toggle("Updates automatisch installieren", isOn: $updater.automaticallyInstalls)
-                .disabled(!updater.automaticallyChecks)
         }
     }
 }
