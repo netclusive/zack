@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The benchmark no longer includes the GPU language model as an AI cleanup candidate.
 - The benchmark no longer includes Whisper as a speech recognition candidate.
 
+### Fixed
+
+- If the dictionary, snippets or code apps file is a symbolic link, Zack now saves to the linked file and keeps the link.
+
 ## [0.4.0] - 2026-10-30
 
 ### Added

@@ -31,6 +31,23 @@ struct UserFilesEditingTests {
         #expect(try String(contentsOf: files.snippetsURL, encoding: .utf8) == "Adresse => example.com\n")
     }
 
+    @Test func writeKeepsASymlinkedFileALink() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        let target = try link(files.vocabularyURL, holding: "Müller\n")
+        let read = try files.readForEditing(.vocabulary)
+        try files.write("Müller\nMeier\n", to: .vocabulary, replacing: read)
+        #expect(try FileManager.default.destinationOfSymbolicLink(atPath: files.vocabularyURL.path) == "target.txt")
+        #expect(try String(contentsOf: target, encoding: .utf8) == "Müller\nMeier\n")
+    }
+
+    @Test func toggleCodeModeKeepsASymlinkedFileALink() throws {
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        let target = try link(files.codeAppsURL, holding: "com.example.Editor\n")
+        try files.toggleCodeMode(for: "com.example.Terminal")
+        #expect(try FileManager.default.destinationOfSymbolicLink(atPath: files.codeAppsURL.path) == "target.txt")
+        #expect(try String(contentsOf: target, encoding: .utf8) == "com.example.Editor\ncom.example.Terminal\n")
+    }
+
     @Test func readForEditingReportsAnUnreadableFile() throws {
         defer { try? FileManager.default.removeItem(at: files.directory) }
         try FileManager.default.createDirectory(at: files.vocabularyURL, withIntermediateDirectories: true)
@@ -46,5 +63,14 @@ struct UserFilesEditingTests {
     @Test func unreadableLinesUsesSingularAndPlural() {
         #expect(EditorText.unreadableLines(1) == "1 Zeile in der Datei kann Zack nicht lesen.")
         #expect(EditorText.unreadableLines(2) == "2 Zeilen in der Datei kann Zack nicht lesen.")
+    }
+
+    /// Makes `url` a relative symlink to `target.txt` in the same folder, which holds `text`; returns the target.
+    private func link(_ url: URL, holding text: String) throws -> URL {
+        try FileManager.default.createDirectory(at: files.directory, withIntermediateDirectories: true)
+        let target = files.directory.appending(path: "target.txt")
+        try Data(text.utf8).write(to: target)
+        try FileManager.default.createSymbolicLink(atPath: url.path, withDestinationPath: "target.txt")
+        return target
     }
 }

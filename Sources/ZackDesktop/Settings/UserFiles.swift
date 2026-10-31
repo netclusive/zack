@@ -52,7 +52,8 @@ public struct UserFiles: Sendable {
         // A missing or unreadable file counts as changed and is never overwritten.
         guard Self.readText(url) == expected else { throw .changedOnDisk }
         do {
-            try Data(text.utf8).write(to: url, options: .atomic)
+            // An atomic write onto a symlink would replace the link; write to its target instead.
+            try Data(text.utf8).write(to: url.resolvingSymlinksInPath(), options: .atomic)
         } catch {
             throw .writeFailed(error.localizedDescription)
         }
@@ -93,7 +94,8 @@ public struct UserFiles: Sendable {
             current = Self.codeAppsTemplate
         }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try Data(CodeApps.toggled(bundleID, in: current).utf8).write(to: codeAppsURL, options: .atomic)
+        try Data(CodeApps.toggled(bundleID, in: current).utf8)
+            .write(to: codeAppsURL.resolvingSymlinksInPath(), options: .atomic)
     }
 
     /// UTF-8 first; files saved by a Windows editor fall back to Windows-1252, then Latin-1, so umlauts survive.
