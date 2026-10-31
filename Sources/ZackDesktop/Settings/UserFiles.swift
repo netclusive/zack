@@ -1,6 +1,13 @@
 import Foundation
 import ZackCore
 
+public enum UserFileKind: String, CaseIterable, Sendable { case vocabulary, snippets, codeApps }
+
+public enum UserFileError: Error, Equatable, Sendable {
+    case unreadable, changedOnDisk
+    case writeFailed(String)
+}
+
 /// Dictionary and snippets as plain text files, editable in any editor.
 public struct UserFiles: Sendable {
     public let directory: URL
@@ -16,9 +23,40 @@ public struct UserFiles: Sendable {
         return UserFiles(directory: support.appending(path: "Zack", directoryHint: .isDirectory))
     }
 
-    public var vocabularyURL: URL { directory.appending(path: "vocabulary.txt") }
-    public var snippetsURL: URL { directory.appending(path: "snippets.txt") }
-    public var codeAppsURL: URL { directory.appending(path: "code-apps.txt") }
+    public var vocabularyURL: URL { url(for: .vocabulary) }
+    public var snippetsURL: URL { url(for: .snippets) }
+    public var codeAppsURL: URL { url(for: .codeApps) }
+
+    public func url(for kind: UserFileKind) -> URL {
+        switch kind {
+        case .vocabulary: directory.appending(path: "vocabulary.txt")
+        case .snippets: directory.appending(path: "snippets.txt")
+        case .codeApps: directory.appending(path: "code-apps.txt")
+        }
+    }
+
+    /// Creates missing files first; an existing file that cannot be read as text throws `.unreadable`.
+    public func readForEditing(_ kind: UserFileKind) throws(UserFileError) -> String {
+        do {
+            try createMissing()
+        } catch {
+            throw .writeFailed(error.localizedDescription)
+        }
+        guard let text = Self.readText(url(for: kind)) else { throw .unreadable }
+        return text
+    }
+
+    /// Reads the file again; throws `.changedOnDisk` if it differs from `expected`, else writes `text` atomically as UTF-8.
+    public func write(_ text: String, to kind: UserFileKind, replacing expected: String) throws(UserFileError) {
+        let url = url(for: kind)
+        // A missing or unreadable file counts as changed and is never overwritten.
+        guard Self.readText(url) == expected else { throw .changedOnDisk }
+        do {
+            try Data(text.utf8).write(to: url, options: .atomic)
+        } catch {
+            throw .writeFailed(error.localizedDescription)
+        }
+    }
 
     /// Creates missing files with commented examples; existing files stay untouched.
     public func createMissing() throws {
