@@ -114,10 +114,50 @@ struct UserFilesEditingTests {
         let german = UserFiles(directory: files.directory, language: { .german })
         defer { try? FileManager.default.removeItem(at: files.directory) }
         try german.createMissing()
-        #expect(try String(contentsOf: german.vocabularyURL, encoding: .utf8) == UserFiles.vocabularyTemplate)
-        #expect(try String(contentsOf: german.snippetsURL, encoding: .utf8) == UserFiles.snippetsTemplate)
-        #expect(try String(contentsOf: german.codeAppsURL, encoding: .utf8) == UserFiles.codeAppsTemplate)
+        #expect(try String(contentsOf: german.vocabularyURL, encoding: .utf8) == Self.germanVocabulary)
+        #expect(try String(contentsOf: german.snippetsURL, encoding: .utf8) == Self.germanSnippets)
+        #expect(try String(contentsOf: german.codeAppsURL, encoding: .utf8) == Self.germanCodeApps)
     }
+
+    private static let germanVocabulary = """
+        # Wörterbuch für Zack
+        # Ein Begriff pro Zeile: Zack schreibt ihn genau so und gibt ihn der Erkennung als Hinweis.
+        # Ersetzung: falsch => richtig
+        # Zeilen mit # am Anfang gelten nicht. Beispiele, zum Aktivieren das # entfernen:
+        # VMware
+        # git hub => GitHub
+
+        """
+
+    private static let germanSnippets = """
+        # Textbausteine für Zack
+        # Eine Zeile pro Baustein: Name => Text, Zeilenumbruch als \\n
+        # Das Diktat „Baustein <Name>“ fügt den Text ein. Beispiel, zum Aktivieren das # entfernen:
+        # Gruß => Viele Grüße\\nMax Mustermann
+
+        """
+
+    private static let germanCodeApps = """
+        # Code-Modus für Zack
+        # Eine Bundle-ID pro Zeile: In diesen Apps diktiert Zack im Code-Modus.
+        # Ein * am Ende gilt für alle IDs mit diesem Anfang. Zeilen mit # am Anfang gelten nicht.
+        # Im Menü schaltet „Code-Modus in <App>“ die zuletzt aktive App ein oder aus.
+        # Terminal
+        com.apple.Terminal
+        # iTerm2
+        com.googlecode.iterm2
+        # Ghostty
+        com.mitchellh.ghostty
+        # Visual Studio Code
+        com.microsoft.VSCode
+        # Cursor
+        com.todesktop.230313mzl4w4u92
+        # Xcode
+        com.apple.dt.Xcode
+        # JetBrains-IDEs
+        com.jetbrains.*
+
+        """
 
     @Test func createMissingKeepsExistingFilesInOtherLanguage() throws {
         let english = UserFiles(directory: files.directory, language: { .english })
