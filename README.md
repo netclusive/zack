@@ -3,57 +3,90 @@
 Local push-to-talk dictation for macOS. Everything runs on the Mac, no cloud. The interface is German, and Zack is
 built and tested for German dictation.
 
-Zack.app is a menu bar app: hold fn (or the right Option key, "Settings › Allgemein › Taste"), speak, release,
-and the text is inserted into the active window. ⌃⌥V inserts the last dictation again at the cursor, ⌃⌥O replaces
-an AI-cleaned one with the rule text. The settings window (⌘,) holds all options. `zack-bench` compares recognition
-and cleanup engines on a test corpus.
-
-Ready-made builds are published as [GitHub releases](https://github.com/netclusive/zack/releases).
+Zack.app is a menu bar app: hold fn (or the right Option key), speak, release, and the text is inserted into the
+active window. `zack-bench` compares recognition and cleanup engines on a test corpus.
 
 ## Install
 
 Zack needs macOS 26 or later on Apple Silicon; AI cleanup needs Apple Intelligence turned on.
 
-1. Download the latest `Zack-<version>.zip` from the [releases page](https://github.com/netclusive/zack/releases).
+There is no ready-made build yet; until the first one appears on the
+[releases page](https://github.com/netclusive/zack/releases), build Zack from source (see below).
+With a release:
+
+1. Download the latest `Zack-<version>.zip` from the releases page.
 2. Open the ZIP and move `Zack.app` to the Applications folder, then start it.
 3. Allow Microphone and Accessibility when asked.
 4. "Settings › Einrichtung" offers the speech model for download (about 600 MB, see below).
 
 ## Using Zack
 
-- Permissions: Microphone; Accessibility for the key in other apps and for Cmd+V. Without Accessibility the text
-  stays on the clipboard.
+### Dictation
+
+- Hold the key ("Settings › Allgemein › Taste"), speak, release: Zack recognises the speech, applies its text rules
+  (dictionary, snippets) and inserts the result at the cursor. A short tap is ignored, and pressing another key
+  while holding cancels, so shortcuts such as fn + arrow keep working.
+- Esc while the pill shows "Erkenne …" or "KI glättet …" cancels: nothing is inserted, and the result is kept as
+  the last dictation.
+- Menu section "Letztes Diktat": "Einfügen" (⌃⌥V) inserts the last dictation again at the cursor, "Ohne
+  KI-Glättung einfügen" (⌃⌥O) replaces an AI-cleaned dictation with the rule text, "Kopieren" copies it. "Erneut
+  versuchen" appears after a failed recognition. A shortcut another app already holds is marked "(Kürzel belegt)".
+- AI cleanup ("Settings › Allgemein › KI-Glättung bei Selbstkorrekturen"): if a dictation contains a
+  self-correction such as "Montag, nein, Dienstag", Apple's on-device model smooths the sentence.
+- Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
+  the menu shows "Secure Input aktiv"; dictation works, only cancelling with another key does not.
+
+### Settings and permissions
+
+- The settings window ("Einstellungen …" in the menu, ⌘,) has the panes Allgemein (key, microphone readiness,
+  launch at login, AI cleanup), Wörterbuch, Textbausteine, Code-Apps, Updates and Einrichtung. If a permission or
+  the speech model is missing, Zack opens it in Einrichtung.
+- Permissions: Microphone, and Accessibility for inserting with Cmd+V, for reading the text before the cursor and
+  for cancelling with another key. The key itself works without Accessibility; the text then stays on the
+  clipboard.
 - Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Einrichtung" moves a copy from
   zack-bench (`~/Library/Application Support/FluidAudio/Models`) or downloads it on click (about 600 MB from
   Hugging Face, USA; only the IP address is transmitted). The app never downloads on its own.
-- Files: `vocabulary.txt` and `snippets.txt` in `~/Library/Application Support/Zack`, created with examples. Lines
-  starting with `#` are ignored. Edit them in "Settings › Wörterbuch / Textbausteine / Code-Apps" or in any text
-  editor; Zack changes only the lines you edit and leaves comments in place.
-  - `vocabulary.txt`: one term per line, which Zack writes exactly as given and passes to the recognition as a hint;
-    `wrong => right` replaces a spelling.
-  - `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break; dictating "Baustein <Name>"
-    inserts the text.
-  - Known limits: a literal `\n` in snippet text becomes a line break, and spaces at the start and end of a field
-    are dropped.
-- Text before the cursor (needs Accessibility), to add a space and adapt capitalisation: Zack reads at most the 500
-  characters before the cursor, or the field text up to 100,000 characters if the app offers nothing narrower, and
-  keeps only the current line of it. It stays in memory only, is never logged and is dropped when the dictation
-  ends. Where an app does not expose it, Zack falls back to the last own dictation until the next key press, the
-  next click or an app switch.
-- Code mode: `code-apps.txt` in `~/Library/Application Support/Zack` lists the apps (bundle IDs, or prefixes ending
-  in `*`) where spoken file names and case commands become code and short commands get no trailing period. The
-  menu switches the current app on or off, "Settings › Code-Apps" adds apps; the file is read again for every
-  dictation.
-- Password fields: Zack does not dictate into them and shows a hint instead.
-- Privacy: audio and text stay in memory, the clipboard entry is marked transient and restored afterwards, logs
-  contain durations, engines and error types only. AI cleanup uses Apple's on-device model only.
-- Microphone readiness ("Settings › Allgemein › Mikrofon bereithalten"): by default the microphone stays open for
-  two minutes after a dictation, so the first words are not cut off; "Immer" keeps it open, "Aus" closes it after
-  each dictation. While it is open, only the last half second is kept in memory, continuously overwritten, never
+
+### Files
+
+`vocabulary.txt`, `snippets.txt` and `code-apps.txt` live in `~/Library/Application Support/Zack` and are created
+with examples. Lines starting with `#` are ignored. Edit them in "Settings › Wörterbuch / Textbausteine /
+Code-Apps" or in any text editor: Zack changes only the lines you edit, keeps comments and lines it cannot read,
+and reloads a file changed elsewhere.
+
+- `vocabulary.txt`: one term per line, which Zack writes exactly as given and passes to the recognition as a hint;
+  `wrong => right` replaces a spelling.
+- `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break; dictating "Baustein <Name>" inserts
+  the text. Known limits: a literal `\n` in snippet text becomes a line break, and spaces at the start and end of a
+  field are dropped.
+- `code-apps.txt`: the apps for code mode (bundle IDs, or prefixes ending in `*`). In these apps spoken file names
+  and case commands become code, and short commands get no trailing period. The menu switches the current app on
+  or off, "Settings › Code-Apps" adds apps; the file is read again for every dictation.
+
+### Context
+
+Zack reads the text before the cursor (needs Accessibility) to add a space and adapt capitalisation: at most the
+500 characters before the cursor, or the field text up to 100,000 characters if the app offers nothing narrower,
+and keeps only the current line of it. It stays in memory only, is never logged and is dropped when the dictation
+ends. Where an app does not expose it, Zack falls back to its last own dictation until the next key press, the
+next click or an app switch.
+
+### Microphone
+
+- Readiness ("Settings › Allgemein › Mikrofon bereithalten"): by default the microphone stays open for two minutes
+  after a dictation, so the first words are not cut off; "Immer" keeps it open, "Aus" closes it after each
+  dictation. While it is open, only the last half second is kept in memory, continuously overwritten, never
   recognised or stored, and macOS shows the orange microphone indicator.
-- Microphone choice (menu "Mikrofon: <device>"): "Wie macOS" follows the system input; picking a device applies to Zack
-  only and leaves the macOS default untouched. If the chosen device is not connected, Zack uses the macOS default
-  and switches back as soon as the device returns.
+- Choice (menu "Mikrofon: <device>"): "Wie macOS" follows the system input; picking a device applies to Zack only
+  and leaves the macOS default untouched. If the chosen device is not connected, Zack uses the macOS default and
+  switches back as soon as the device returns.
+
+### Privacy
+
+Audio and text stay in memory, the clipboard entry is marked transient and restored afterwards, and logs contain
+durations, engines and error types only. AI cleanup uses Apple's on-device model only. Zack goes online only for
+the model download you start and, in official builds, for the update check you allow (see below).
 
 ## Updates
 
@@ -92,7 +125,7 @@ Build and install:
 
 `./build.sh` is the quality gate: secret scan, lint, tests, the release script's self-test and the builds. It
 generates `App/Zack.xcodeproj` with XcodeGen (not tracked) and builds the release app; `scripts/build-app.sh Debug`
-builds a debug app with a paste test in the menu.
+builds a debug app with a "Debug" menu of test tools (paste test, context reading).
 
 Latency: `scripts/latency.sh --record 30m` records the app's signposts while you dictate and then reports p50 and
 p95 (stop early with Ctrl-C). The system log keeps them for a few minutes only, so `--last` suits short checks.
@@ -130,6 +163,9 @@ Run from the repository root:
   `bench/corpus/audio-synth`.
 - `record` records the cases with the microphone in `bench/corpus/audio`. It skips existing recordings;
   `--all` records them again, `--id <case>` records one case.
+- `mic-check` measures the start latency of the microphone, the time to the first audio and to the first
+  non-silent audio, over `--repeat <n>` passes (default 5). `--device <name>` picks an input device instead of the
+  macOS default.
 - `run` transcribes every case that has a recording, applies the text rules and the cleaner, and writes a JSON
   result. `--transcriber` is one of `apple-speech`, `apple-dictation`, `parakeet-v3`, `parakeet-ultra`;
   `--cleaner` is `none` (default) or `apple-fm` (needs Apple Intelligence). `--repeat <n>` (default 5) processes
