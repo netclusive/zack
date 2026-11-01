@@ -33,6 +33,7 @@ struct CodeModeMenuItem: Equatable {
 final class AppModel {
     private(set) var hotkey: HotkeyKey
     private(set) var aiCleanup: Bool
+    private(set) var dictationLanguage: DictationLanguage
     private(set) var microphoneReadiness: MicrophoneReadiness
     private(set) var launchAtLogin = false
     private(set) var dictation = DictationState.idle
@@ -74,7 +75,7 @@ final class AppModel {
     @ObservationIgnored private let capture: MicrophoneCapture
     @ObservationIgnored private let modelReady = Flag()
     @ObservationIgnored private let modelSetup = try? ModelSetup.standard()
-    @ObservationIgnored private let files = try? UserFiles.standard()
+    @ObservationIgnored private let files: UserFiles?
     @ObservationIgnored private let windows = WindowPresenter()
     @ObservationIgnored private let logger = Logger(subsystem: Signposts.subsystem, category: "app")
     @ObservationIgnored private var inserter: Inserter!
@@ -101,6 +102,12 @@ final class AppModel {
         aiCleanup = settings.aiCleanup
         microphoneReadiness = settings.microphoneReadiness
         let settings = settings
+        // Resolved before the example files exist, so an existing vocabulary file still means German.
+        let hasExistingFiles = (try? UserFiles.standard()).map {
+            FileManager.default.fileExists(atPath: $0.vocabularyURL.path)
+        }
+        dictationLanguage = settings.resolveDictationLanguage(hasExistingFiles: hasExistingFiles ?? false)
+        files = try? UserFiles.standard(language: { settings.dictationLanguage })
         // Runs on the capture's control queue and on AVAudioEngine's notification queue:
         // only settings and static reads.
         input = EngineAudioInput(device: {
@@ -126,7 +133,8 @@ final class AppModel {
             signposts: signposts, readiness: { settings.microphoneReadiness },
             focus: focus, memory: memory,
             // Read per dictation, on the controller actor.
-            codeMode: { files?.loadCodeApps().mode(for: $0) ?? .prose })
+            codeMode: { files?.loadCodeApps().mode(for: $0) ?? .prose },
+            language: { settings.dictationLanguage })
     }
 
     /// A model that failed to load counts as missing: yellow, and a click opens the setup.
@@ -225,6 +233,12 @@ final class AppModel {
         settings.hotkey = key
         hotkey = key
         hotkeyMonitor?.key = key
+    }
+
+    /// Applies from the next dictation; existing files stay as they are.
+    func setDictationLanguage(_ language: DictationLanguage) {
+        settings.dictationLanguage = language
+        dictationLanguage = language
     }
 
     func setAICleanup(_ on: Bool) {

@@ -1,13 +1,22 @@
 import SwiftUI
+import ZackCore
 import ZackDesktop
 
-/// "Allgemein": hotkey, microphone readiness, login item and the AI cleanup.
+/// "Allgemein": language, hotkey, microphone readiness, login item and the AI cleanup.
 struct GeneralPane: View {
     let model: AppModel
 
     var body: some View {
         Form {
             Section {
+                Picker(
+                    "Sprache",
+                    selection: Binding(get: { model.dictationLanguage }, set: { model.setDictationLanguage($0) })
+                ) {
+                    ForEach(DictationLanguage.allCases, id: \.self) { language in
+                        Text(language.title).tag(language)
+                    }
+                }
                 Picker("Taste", selection: Binding(get: { model.hotkey }, set: { model.setHotkey($0) })) {
                     ForEach(HotkeyKey.allCases, id: \.self) { key in
                         Text(key.title).tag(key)

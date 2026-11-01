@@ -102,3 +102,15 @@ extension LanguagePackTests {
         #expect(CleanerPrompt.wrap("x", language: language).hasPrefix("<\(tag)>\n"))
     }
 }
+
+extension LanguagePackTests {
+    @Test(
+        arguments: [
+            (["de-DE"], false, DictationLanguage.german), (["de-AT", "en-US"], false, .german),
+            (["en-US"], false, .english), (["fr-FR"], false, .english), ([], false, .english),
+            (["en-US"], true, .german),
+        ] as [([String], Bool, DictationLanguage)])
+    func initialLanguage(preferred: [String], existing: Bool, expected: DictationLanguage) {
+        #expect(DictationLanguage.initial(preferredLanguages: preferred, hasExistingFiles: existing) == expected)
+    }
+}

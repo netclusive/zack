@@ -192,6 +192,8 @@ final class RecordingCleaner: Cleaner {
 
     private struct State {
         var prewarms: [Prewarm] = []
+        var prewarmLanguages: [DictationLanguage] = []
+        var cleanLanguages: [DictationLanguage] = []
         var discards = 0
         var cleans = 0
     }
@@ -205,17 +207,25 @@ final class RecordingCleaner: Cleaner {
     }
 
     var prewarms: [Prewarm] { state.withLock { $0.prewarms } }
+    var prewarmLanguages: [DictationLanguage] { state.withLock { $0.prewarmLanguages } }
+    var cleanLanguages: [DictationLanguage] { state.withLock { $0.cleanLanguages } }
     var discards: Int { state.withLock { $0.discards } }
     var cleans: Int { state.withLock { $0.cleans } }
 
     func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
     {
-        state.withLock { $0.cleans += 1 }
+        state.withLock {
+            $0.cleans += 1
+            $0.cleanLanguages.append(language)
+        }
         return output
     }
 
     func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {
-        state.withLock { $0.prewarms.append(Prewarm(mode: mode, vocabulary: vocabulary)) }
+        state.withLock {
+            $0.prewarms.append(Prewarm(mode: mode, vocabulary: vocabulary))
+            $0.prewarmLanguages.append(language)
+        }
     }
 
     func discardPrewarmed() {

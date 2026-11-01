@@ -1,4 +1,5 @@
 import Foundation
+import ZackCore
 
 /// User choices in UserDefaults; tests pass their own suite.
 /// `UserDefaults` is documented as thread-safe but not marked `Sendable` in the SDK.
@@ -6,6 +7,7 @@ public struct Settings: @unchecked Sendable {
     enum Key {
         static let hotkey = "hotkey"
         static let aiCleanup = "aiCleanup"
+        static let dictationLanguage = "dictationLanguage"
         static let microphoneReadiness = "microphoneReadiness"
         static let microphoneUID = "microphoneUID"
         static let microphoneName = "microphoneName"
@@ -26,6 +28,25 @@ public struct Settings: @unchecked Sendable {
     public var aiCleanup: Bool {
         get { defaults.object(forKey: Key.aiCleanup) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Key.aiCleanup) }
+    }
+
+    /// Dictation language; a missing or unknown value reads as German.
+    public var dictationLanguage: DictationLanguage {
+        get { defaults.string(forKey: Key.dictationLanguage).flatMap(DictationLanguage.init(rawValue:)) ?? .german }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: Key.dictationLanguage) }
+    }
+
+    /// Returns the stored language; without a valid one it is derived once, stored and returned.
+    public func resolveDictationLanguage(
+        hasExistingFiles: Bool, preferredLanguages: [String] = Locale.preferredLanguages
+    ) -> DictationLanguage {
+        if let stored = defaults.string(forKey: Key.dictationLanguage).flatMap(DictationLanguage.init(rawValue:)) {
+            return stored
+        }
+        let language = DictationLanguage.initial(
+            preferredLanguages: preferredLanguages, hasExistingFiles: hasExistingFiles)
+        dictationLanguage = language
+        return language
     }
 
     /// "Mikrofon bereithalten"; two minutes after a dictation by default.

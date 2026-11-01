@@ -94,4 +94,38 @@ struct UserFilesEditingTests {
         try FileManager.default.createSymbolicLink(atPath: url.path, withDestinationPath: "target.txt")
         return target
     }
+
+    @Test func englishExampleFilesAreCreated() throws {
+        let english = UserFiles(directory: files.directory, language: { .english })
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try english.createMissing()
+        let snippets = try String(contentsOf: english.snippetsURL, encoding: .utf8)
+        #expect(snippets.contains("snippet <name>"))
+        #expect(snippets.contains("Jane Doe"))
+        #expect(!snippets.contains("Baustein"))
+        #expect(try String(contentsOf: english.vocabularyURL, encoding: .utf8).contains("wrong => right"))
+        let apps = try String(contentsOf: english.codeAppsURL, encoding: .utf8)
+        let germanIDs = CodeApps(parsing: UserFiles.codeAppsTemplate)
+        #expect(germanIDs == CodeApps(parsing: apps))
+        #expect(EntryDocument<SnippetFormat>(text: snippets).items.isEmpty)
+    }
+
+    @Test func germanExampleFilesAreUnchanged() throws {
+        let german = UserFiles(directory: files.directory, language: { .german })
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try german.createMissing()
+        #expect(try String(contentsOf: german.vocabularyURL, encoding: .utf8) == UserFiles.vocabularyTemplate)
+        #expect(try String(contentsOf: german.snippetsURL, encoding: .utf8) == UserFiles.snippetsTemplate)
+        #expect(try String(contentsOf: german.codeAppsURL, encoding: .utf8) == UserFiles.codeAppsTemplate)
+    }
+
+    @Test func createMissingKeepsExistingFilesInOtherLanguage() throws {
+        let english = UserFiles(directory: files.directory, language: { .english })
+        defer { try? FileManager.default.removeItem(at: files.directory) }
+        try FileManager.default.createDirectory(at: files.directory, withIntermediateDirectories: true)
+        try Data(UserFiles.vocabularyTemplate.utf8).write(to: english.vocabularyURL)
+        try english.createMissing()
+        #expect(try String(contentsOf: english.vocabularyURL, encoding: .utf8) == UserFiles.vocabularyTemplate)
+        #expect(try String(contentsOf: english.snippetsURL, encoding: .utf8).contains("Jane Doe"))
+    }
 }

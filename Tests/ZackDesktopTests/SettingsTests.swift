@@ -25,6 +25,35 @@ struct SettingsTests {
         }
     }
 
+    @Test func missingLanguageResolvesFromSystemAndIsStored() throws {
+        try withSuite { defaults in
+            let settings = Settings(defaults: defaults)
+            #expect(
+                settings.resolveDictationLanguage(hasExistingFiles: false, preferredLanguages: ["en-US"]) == .english)
+            #expect(settings.dictationLanguage == .english)
+            #expect(defaults.string(forKey: "dictationLanguage") == "en")
+        }
+    }
+
+    @Test func storedLanguageWinsOverSystem() throws {
+        try withSuite { defaults in
+            let settings = Settings(defaults: defaults)
+            settings.dictationLanguage = .german
+            #expect(
+                settings.resolveDictationLanguage(hasExistingFiles: false, preferredLanguages: ["en-US"]) == .german)
+        }
+    }
+
+    @Test func invalidStoredLanguageIsResolvedAgain() throws {
+        try withSuite { defaults in
+            defaults.set("fr", forKey: "dictationLanguage")
+            let settings = Settings(defaults: defaults)
+            #expect(
+                settings.resolveDictationLanguage(hasExistingFiles: false, preferredLanguages: ["en-US"]) == .english)
+            #expect(defaults.string(forKey: "dictationLanguage") == "en")
+        }
+    }
+
     @Test func choicesPersist() throws {
         try withSuite { defaults in
             Settings(defaults: defaults).hotkey = .rightOption
