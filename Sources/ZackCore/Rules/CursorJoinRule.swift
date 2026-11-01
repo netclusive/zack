@@ -64,7 +64,8 @@ public struct CursorJoinRule: TextRule {
         }
     }
 
-    static func isLowercasable(firstWordOf text: String, language: DictationLanguage = .german, keeping terms: Set<String> = []
+    static func isLowercasable(
+        firstWordOf text: String, language: DictationLanguage = .german, keeping terms: Set<String> = []
     ) -> Bool {
         let pack = language.pack
         guard let firstWord = text.split(separator: " ").first else { return false }
