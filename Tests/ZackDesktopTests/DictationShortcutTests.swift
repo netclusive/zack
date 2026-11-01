@@ -51,7 +51,8 @@ struct DictationShortcutTests {
 
     func makeController(
         transcriber: any Transcriber = FakeTranscriber("Hallo Welt."), cleaner: (any Cleaner)? = nil,
-        focus: FakeFocusSource? = nil, memory: CursorMemory = CursorMemory()
+        focus: FakeFocusSource? = nil, memory: CursorMemory = CursorMemory(),
+        language: @escaping @Sendable () -> DictationLanguage = { .german }
     ) -> DictationController<TestClock> {
         hasCleaner.set(cleaner != nil)
         let inserter = Inserter(
@@ -67,7 +68,8 @@ struct DictationShortcutTests {
         return DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor(cleaner: cleaner) }, modelReady: { true }, microphoneAllowed: { true },
-            signposts: signposts, focus: focus, memory: memory)
+            signposts: signposts, focus: focus, memory: memory,
+            language: language)
     }
 
     /// Key down, pill shown, `samples` spoken, key up after one second. Latency marks begin as in the app: at key
@@ -383,6 +385,28 @@ struct DictationShortcutTests {
         await controller.insertLast(app: textEdit)
         #expect(keystrokes.pasted == ["Der Server läuft.", " der Server läuft."])
         #expect(await controller.state == .inserted(.pasted))
+    }
+
+    @Test func insertLastJoinsWithTheLanguageOfTheDictation() async {
+        let focus = FakeFocusSource()
+        focus.queue(FocusSnapshot(element: field, selection: TextRange(location: 0, length: 0), textBeforeCursor: ""))
+        let calls = TestValue(0)
+        let current = TestValue(DictationLanguage.english)
+        let controller = makeController(
+            transcriber: FakeTranscriber("Meeting tomorrow."), focus: focus,
+            language: {
+                calls.set(calls.current + 1)
+                return current.current
+            })
+        await dictate(controller, tone(), app: textEdit)
+        current.set(.german)
+        let readsBefore = calls.current
+        focus.queue(
+            FocusSnapshot(
+                element: other, selection: TextRange(location: 11, length: 0), textBeforeCursor: "I think the"))
+        await controller.insertLast(app: textEdit)
+        #expect(keystrokes.pasted.last == " meeting tomorrow.")
+        #expect(calls.current == readsBefore)
     }
 
     @Test func insertLastWithoutDictationShowsAHint() async {

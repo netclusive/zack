@@ -113,6 +113,8 @@ public actor DictationController<C: Clock<Duration>> {
     public private(set) var state = DictationState.idle
     /// Final text of the last dictation, for "Letztes Diktat kopieren".
     public private(set) var lastText: String?
+    /// Language of the dictation that gave `lastText`, so a repeat joins it under the same rules.
+    private var lastLanguage = DictationLanguage.german
     /// The dictation or retry whose recognition gave `lastText`; a password field found by its key-down read later
     /// still drops the text. For a retry that is enough: it only runs once its recording's read is known.
     private var lastTextSession: Int?
@@ -183,6 +185,7 @@ public actor DictationController<C: Clock<Duration>> {
         let at: C.Instant
         /// The dictation or retry it came from, as `lastTextSession`.
         let session: Int
+        let language: DictationLanguage
     }
     private var ruleTextEntry: RuleTextEntry?
 
@@ -390,7 +393,7 @@ public actor DictationController<C: Clock<Duration>> {
         }
         let resolved = ContextResolver.resolve(snapshot, memory: memory.text(app: app, element: snapshot.element))
         let context = RuleContext(
-            mode: codeMode(app?.bundleID), textBeforeCursor: resolved.text, language: language())
+            mode: codeMode(app?.bundleID), textBeforeCursor: resolved.text, language: lastLanguage)
         let outcome = await inserter.insert(CursorJoinRule().apply(text, context: context))
         // The text landed, so the memory knows it, whatever the pill shows.
         if outcome == .pasted { memory.remember(text, app: app, element: snapshot.element) }
@@ -435,6 +438,7 @@ public actor DictationController<C: Clock<Duration>> {
             outcome = .clipboardOnly
         }
         lastText = entry.ruleBody
+        lastLanguage = entry.language
         lastTextSession = entry.session
         logger.info("rule text: pasted \(outcome == .pasted, privacy: .public)")
         guard session == started, state.acceptsNewDictation else { return }
@@ -545,6 +549,7 @@ public actor DictationController<C: Clock<Duration>> {
             return
         }
         lastText = result.body
+        lastLanguage = language
         lastTextSession = current
         // Esc: the text stays for "Letztes Diktat kopieren", nothing else happens.
         guard !isAborted(current) else { return }
@@ -577,7 +582,8 @@ public actor DictationController<C: Clock<Duration>> {
             result.usedCleaner && !keyDownIsSecure
             ? RuleTextEntry(
                 app: app, element: snapshot.element, start: snapshot.selection?.location, inserted: result.final,
-                ruleText: result.ruledFinal, ruleBody: result.ruled, at: clock.now, session: current) : nil
+                ruleText: result.ruledFinal, ruleBody: result.ruled, at: clock.now, session: current,
+                language: language) : nil
         publish(.inserted(outcome))
         scheduleReset(after: DictationLimits.insertedVisible)
     }
@@ -651,7 +657,7 @@ public actor DictationController<C: Clock<Duration>> {
     }
 
     /// Readies one cleaner session every `prewarmInterval` until the capture ends; the cleanup at release takes it.
-    /// A prewarmed session only serves a cleanup with the same mode, so it uses the mode of this dictation.
+    /// A prewarmed session only serves a cleanup with the same mode, so it uses the mode and language of this dictation.
     private func startPrewarming() {
         let mode = mode
         let language = dictationLanguage
@@ -753,6 +759,7 @@ public actor DictationController<C: Clock<Duration>> {
     private func dropResult(of current: Int) {
         if lastTextSession == current {
             lastText = nil
+            lastLanguage = .german
             lastTextSession = nil
             memory.forget()
         }
