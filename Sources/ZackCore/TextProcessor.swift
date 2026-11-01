@@ -44,7 +44,7 @@ public struct TextProcessor: Sendable {
                 cleanerDuration: nil)
         }
         let ruled = applyRules(raw, context: context)
-        guard let cleaner, SignalWords.contains(ruled, language: context.language) else {
+        guard let cleaner, SignalWords.contains(ruled, language: context.language, original: raw) else {
             let final = cursorRule.apply(ruled, context: context)
             return ProcessingResult(
                 raw: raw, ruled: ruled, final: final, ruledFinal: final, body: ruled,
@@ -70,7 +70,8 @@ public struct TextProcessor: Sendable {
     /// True if `process` would call the cleaner: no snippet, a cleaner is set and a signal word survives the rules.
     public func needsCleaner(_ raw: String, context: RuleContext) -> Bool {
         guard cleaner != nil, snippetRule.match(raw, language: context.language) == nil else { return false }
-        return SignalWords.contains(applyRules(raw, context: context), language: context.language)
+        return SignalWords.contains(
+            applyRules(raw, context: context), language: context.language, original: raw)
     }
 
     private func applyRules(_ raw: String, context: RuleContext) -> String {

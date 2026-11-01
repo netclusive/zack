@@ -12,7 +12,7 @@
     {"id": "p08", "group": "prose", "mode": "prose", "spoken": "That is exactly what I mean.", "expected": "That is exactly what I mean.", "terms": []},
     {"id": "t01", "group": "terms", "mode": "prose", "spoken": "I merged the hotfix and deployed it to staging.", "expected": "I merged the hotfix and deployed it to staging.", "terms": ["hotfix", "merged", "staging", "deployed"]},
     {"id": "t02", "group": "terms", "mode": "prose", "spoken": "The pull request is approved, can you merge it?", "expected": "The pull request is approved, can you merge it?", "terms": ["pull request", "approved", "merge"]},
-    {"id": "t03", "group": "terms", "mode": "prose", "spoken": "Please wait for the rebase of your branch before you push.", "expected": "Please wait for the rebase of your branch before you push.", "terms": ["rebase", "branch", "push"]},
+    {"id": "t03", "group": "terms", "mode": "prose", "spoken": "Please rebase your branch and wait for the push.", "expected": "Please rebase your branch and wait for the push.", "terms": ["rebase", "branch", "push"]},
     {"id": "t04", "group": "terms", "mode": "prose", "spoken": "The rollout failed because the load balancer timed out.", "expected": "The rollout failed because the load balancer timed out.", "terms": ["rollout", "load balancer"]},
     {"id": "t05", "group": "terms", "mode": "prose", "spoken": "We have no rollback plan for the next release.", "expected": "We have no rollback plan for the next release.", "terms": ["rollback", "release"]},
     {"id": "t06", "group": "terms", "mode": "prose", "spoken": "The pipeline runs a linter and the unit tests on every commit.", "expected": "The pipeline runs a linter and the unit tests on every commit.", "terms": ["pipeline", "linter", "commit"]},

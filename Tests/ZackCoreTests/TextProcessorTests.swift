@@ -165,3 +165,28 @@ struct StubCleaner: Cleaner {
     #expect(result.usedCleaner)
     #expect(result.final == "Let's meet on Wednesday.")
 }
+
+@Test(arguments: [
+    "Let's meet on Tuesday, um, no, Wednesday.",
+    "Send it to sales, um, I mean support.",
+    "Call me in the morning, er, no, in the afternoon.",
+    "The budget comes from marketing, um, wait, from sales.",
+    "The error only occurs in Chrome, um, make that Safari.",
+    "Let's meet on Tuesday, uh no, Wednesday.",
+])
+func englishCommaSurvivesFillerRemoval(text: String) async {
+    let context = RuleContext(language: .english)
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Let's meet on Wednesday."))
+    #expect(processor.needsCleaner(text, context: context))
+    let result = await processor.process(text, context: context)
+    #expect(result.usedCleaner || result.cleanerRejected)
+}
+
+@Test func englishFillerWithoutCommaDoesNotCountAsComma() async {
+    let text = "There is no problem, um, with the server."
+    let context = RuleContext(language: .english)
+    let processor = TextProcessor(cleaner: StubCleaner(output: "egal"))
+    #expect(!processor.needsCleaner(text, context: context))
+    let result = await processor.process(text, context: context)
+    #expect(!result.usedCleaner && !result.cleanerRejected)
+}
