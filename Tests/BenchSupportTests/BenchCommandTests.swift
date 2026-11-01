@@ -41,10 +41,13 @@ private let extras: [String: CleanerFactory] = [
         zack-bench <command> [options]
 
           synth   [--language de|en] [--audio-dir bench/corpus/audio-synth] [--voice Anna] [--id <case>]
+                  (en: Samantha, bench/corpus/audio-synth-en)
           record  [--language de|en] [--audio-dir bench/corpus/audio] [--id <case>] [--all]
+                  (en: bench/corpus/audio-en)
           mic-check [--repeat 5] [--device <Name>]
           run     --transcriber <id> [--language de|en] [--cleaner none] [--repeat 5]
                   [--audio-dir bench/corpus/audio] [--results bench/results]
+                  (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
 
         transcribers: apple-speech, apple-dictation, parakeet-v3, parakeet-ultra
