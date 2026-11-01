@@ -3,10 +3,13 @@ import NaturalLanguage
 
 /// Adapts spacing and the case of the first letter to the text left of the cursor.
 /// Lowercases only words the tagger classifies as non-nouns, so German nouns keep their capital letter.
+/// Packs with `lowercasesNouns` also lowercase common nouns, but not names, "I" or acronyms.
 public struct CursorJoinRule: TextRule {
     private static let lowercasable: Set<NLTag> = [
         .verb, .adjective, .adverb, .pronoun, .determiner, .preposition, .conjunction, .particle, .interjection,
     ]
+
+    private static let properNames: Set<NLTag> = [.personalName, .placeName, .organizationName]
 
     public init() {}
 
@@ -60,11 +63,18 @@ public struct CursorJoinRule: TextRule {
         guard let firstWord = text.split(separator: " ").first else { return false }
         let letters = firstWord.filter(\.isLetter)
         if letters.count > 1, letters.allSatisfy(\.isUppercase) { return false }  // acronyms such as API
-        let tagger = NLTagger(tagSchemes: [.lexicalClass])
+        if pack.lowercasesNouns, firstWord == "I" || firstWord.hasPrefix("I'") || firstWord.hasPrefix("I\u{2019}") {
+            return false
+        }
+        let tagger = NLTagger(tagSchemes: [.lexicalClass, .nameType])
         tagger.string = text
         tagger.setLanguage(pack.taggerLanguage, range: text.startIndex..<text.endIndex)
         guard let start = text.firstIndex(where: \.isLetter) else { return false }
         let (tag, _) = tagger.tag(at: start, unit: .word, scheme: .lexicalClass)
-        return tag.map { lowercasable.contains($0) } ?? false
+        guard let tag else { return false }
+        guard pack.lowercasesNouns, tag == .noun else { return lowercasable.contains(tag) }
+        // Proper names keep their capital letter.
+        let (name, _) = tagger.tag(at: start, unit: .word, scheme: .nameType)
+        return name.map { !properNames.contains($0) } ?? true
     }
 }

@@ -65,3 +65,22 @@ func cursorJoinAddsNoSpaceAfterPathAndOperatorCharactersInCodeMode(before: Strin
 @Test func cursorJoinKeepsSpaceAfterOperatorCharactersInProse() {
     #expect(CursorJoinRule().apply("bar", context: RuleContext(textBeforeCursor: "foo-")) == " bar")
 }
+
+@Test(arguments: [
+    ("We checked the logs and ", "Server restarted.", "server restarted."),
+    ("We flew to ", "London on Monday.", "London on Monday."),
+    ("Yesterday ", "I fixed it.", "I fixed it."),
+    ("and ", "I\u{2019}m done.", "I\u{2019}m done."),
+    ("and ", "I'll check.", "I'll check."),
+    ("We emailed ", "Jane about it.", "Jane about it."),
+    ("We use ", "API keys.", "API keys."),
+])
+func englishCursorJoinLowercasesOnlyPlainWords(before: String, text: String, expected: String) {
+    let context = RuleContext(textBeforeCursor: before, language: .english)
+    #expect(CursorJoinRule().apply(text, context: context) == expected)
+}
+
+@Test func germanCursorJoinKeepsNouns() {
+    let context = RuleContext(textBeforeCursor: "und dann ")
+    #expect(CursorJoinRule().apply("Server neu gestartet.", context: context) == "Server neu gestartet.")
+}

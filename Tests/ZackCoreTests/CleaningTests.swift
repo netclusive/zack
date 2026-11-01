@@ -132,3 +132,15 @@ func signalWordsNeedSomethingToCorrect(text: String, expected: Bool) {
     let body = String(wrapped.dropFirst("<diktat>\n".count).dropLast("\n</diktat>".count))
     #expect(CleanerPrompt.unescape(body) == code)
 }
+
+@Test(arguments: [
+    ("Let's meet on Tuesday, no, Wednesday.", true),
+    ("Send it to sales, I mean support.", true),
+    ("Correction: four servers.", true),
+    ("No, that is not right.", false),
+    ("Wait for the build.", false),
+    ("Everything works.", false),
+])
+func englishSignalWords(text: String, expected: Bool) {
+    #expect(SignalWords.contains(text, language: .english) == expected)
+}

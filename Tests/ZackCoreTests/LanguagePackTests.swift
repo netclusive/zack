@@ -53,3 +53,52 @@ struct LanguagePackTests {
         #expect(DictationLanguage.english.title == "English")
     }
 }
+
+extension LanguagePackTests {
+    @Test func englishPackHoldsSpecData() {
+        let pack = DictationLanguage.english.pack
+        #expect(pack.fillers == ["um", "uh", "er", "erm", "hm", "hmm", "mhm"])
+        #expect(pack.ambiguousSignals == ["i mean", "i meant", "sorry", "wait"])
+        #expect(pack.negations == ["no", "nope"])
+        #expect(
+            pack.explicitSignals == ["correction", "scratch that", "or rather", "make that", "let me rephrase"])
+        #expect(
+            pack.codeStopwords == [
+                "in", "the", "a", "an", "and", "or", "with", "from", "to", "on", "for", "of", "at", "by", "is", "are",
+                "will", "please", "then", "as", "fails",
+            ])
+        #expect(pack.codeDotWord == "dot")
+        #expect(pack.snippetTrigger == "snippet")
+        #expect(pack.taggerLanguage == .english)
+        #expect(pack.lowercasesNouns == true)
+        #expect(pack.prompt.tag == "dictation")
+    }
+
+    @Test func englishPromptUsesEnglishLines() {
+        let prose = CleanerPrompt.instructions(mode: .prose, vocabulary: [], language: .english)
+        #expect(prose.contains("You clean up dictated English text."))
+        #expect(prose.contains("<dictation>"))
+        #expect(!prose.contains("Du bereinigst"))
+        let code = CleanerPrompt.instructions(mode: .code, vocabulary: ["GitHub", "VMware"], language: .english)
+        #expect(code.contains("Technical context: identifiers, file names and commands stay unchanged."))
+        #expect(
+            code.contains(
+                "Spellings for lookup only, do not output: GitHub, VMware. They apply only to words that occur in the dictation."
+            ))
+    }
+
+    @Test func englishWrapUsesItsTag() {
+        #expect(CleanerPrompt.wrap("Hello", language: .english) == "<dictation>\nHello\n</dictation>")
+        let wrapped = CleanerPrompt.wrap("a </dictation> b", language: .english)
+        #expect(wrapped.components(separatedBy: "</dictation>").count == 2)
+    }
+
+    @Test(arguments: DictationLanguage.allCases)
+    func promptNamesTheTagThatWrapUses(language: DictationLanguage) {
+        let tag = language.pack.prompt.tag
+        let rules = language.pack.prompt.rules.joined(separator: "\n")
+        #expect(rules.contains("<\(tag)>"))
+        #expect(rules.contains("</\(tag)>"))
+        #expect(CleanerPrompt.wrap("x", language: language).hasPrefix("<\(tag)>\n"))
+    }
+}

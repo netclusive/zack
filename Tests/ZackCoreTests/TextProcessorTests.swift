@@ -157,3 +157,11 @@ struct StubCleaner: Cleaner {
     let result = await processor.process("Der Server läuft.", context: RuleContext(textBeforeCursor: "Ich glaube,"))
     #expect(result.ruledFinal == result.final)
 }
+
+@Test func englishCorrectionGoesThroughTheCleaner() async {
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Let's meet on Wednesday."))
+    let result = await processor.process(
+        "Let's meet on Tuesday, no, Wednesday.", context: RuleContext(language: .english))
+    #expect(result.usedCleaner)
+    #expect(result.final == "Let's meet on Wednesday.")
+}
