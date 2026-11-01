@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - After you allow it, Zack checks once a day for a new version, offers it, and can install it automatically when it quits. Turn this on or off in the settings.
 - A settings window (⌘,) collects all options: general, dictionary, snippets, code apps, updates and setup.
 - Edit the dictionary, snippets and code apps right in Zack. The text files stay valid and editable, and comments in them are kept.
+- Dictate in English: choose German or English in the settings; text rules, AI cleanup of self-corrections, code mode and snippets follow the language.
 
 ### Changed
 

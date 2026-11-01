@@ -52,3 +52,24 @@ func fillerRuleHandlesFillerOnlySentencesAndHyphens(input: String, expected: Str
 func fillerRuleCleansPunctuationLeftByRemovedFillers(input: String, expected: String) {
     #expect(FillerRule().apply(input, context: RuleContext()) == expected)
 }
+
+@Test func fillerRuleRemovesEnglishFillers() {
+    let context = RuleContext(language: .english)
+    #expect(
+        FillerRule().apply("Um, the invoice for October is not complete.", context: context)
+            == "The invoice for October is not complete.")
+}
+
+@Test func germanUmIsNotAFiller() {
+    #expect(FillerRule().apply("Wir treffen uns um zehn.", context: RuleContext()) == "Wir treffen uns um zehn.")
+}
+
+@Test(arguments: [
+    ("He was taken to the ER.", "He was taken to the ER."),
+    ("The ER team called.", "The ER team called."),
+    ("Um, the invoice is ready.", "The invoice is ready."),
+])
+func englishFillerRuleKeepsAcronyms(input: String, expected: String) {
+    let context = RuleContext(language: .english)
+    #expect(FillerRule().apply(input, context: context) == expected)
+}

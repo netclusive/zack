@@ -22,6 +22,6 @@ func tidyCleansSpacing(input: String, expected: String) {
 }
 
 @Test func fillersDoNotContainGermanWords() {
-    #expect(!TextTools.fillers.contains("um"))
-    #expect(TextTools.fillers.contains("ähm"))
+    #expect(!DictationLanguage.german.pack.fillers.contains("um"))
+    #expect(DictationLanguage.german.pack.fillers.contains("ähm"))
 }

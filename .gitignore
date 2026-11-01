@@ -37,6 +37,9 @@ plans/
 # Bench data (voice recordings are personal data)
 bench/corpus/audio/
 bench/corpus/audio-synth/
+bench/corpus/audio-en/
+bench/corpus/audio-synth-en/
+bench/corpus/audio-synth-en-daniel/
 bench/results/
 
 # Downloaded models

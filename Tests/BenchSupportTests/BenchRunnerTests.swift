@@ -147,3 +147,27 @@ private func fixture() throws -> (Corpus, URL) {
     #expect(summary.failedLaterPasses == 1)
     #expect(BenchReport.markdown([summary]).contains("| 2 | 0 (+1) |"))
 }
+
+@Test func runnerAppliesItsLanguageToRulesAndWordErrorRate() async throws {
+    let json = """
+        {"vocabulary":[],"snippets":[],"cases":[
+         {"id":"a","group":"prose","mode":"prose","spoken":"The build is green.","expected":"The build is green.","terms":[]}]}
+        """
+    let directory = FileManager.default.temporaryDirectory.appending(path: "zack-runner-\(UUID().uuidString)")
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    try WAVFile.encode(AudioClip(samples: Array(repeating: 0.1, count: 1600)))
+        .write(to: directory.appending(path: "a.wav"))
+    let corpus = try Corpus.decode(Data(json.utf8))
+    func run(_ language: DictationLanguage) async throws -> CaseResult {
+        let runner = BenchRunner(
+            corpus: corpus, transcriber: FakeTranscriber { _, _ in "Um, the build is green." }, cleaner: nil,
+            audioDirectory: directory, repeats: 1, language: language, log: { _ in })
+        return try #require(try await runner.run().cases.first)
+    }
+    let english = try await run(.english)
+    #expect(english.wer == 0)
+    #expect(english.final == "The build is green.")
+    let german = try await run(.german)
+    #expect(german.wer > 0)
+}

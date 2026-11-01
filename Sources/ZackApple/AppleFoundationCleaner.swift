@@ -63,23 +63,27 @@ public struct AppleFoundationCleaner: Cleaner {
     }
 
     /// With the byte estimate an upper bound: a fit here is a fit for the model.
-    static func fitsByEstimate(_ text: String, instructions: String, contextSize: Int) -> Bool {
+    static func fitsByEstimate(
+        _ text: String, instructions: String, contextSize: Int, language: DictationLanguage = .german
+    ) -> Bool {
         fits(
             instructionTokens: estimatedTokens(for: instructions),
-            promptTokens: estimatedTokens(for: CleanerPrompt.wrap(text)),
+            promptTokens: estimatedTokens(for: CleanerPrompt.wrap(text, language: language)),
             inputTokens: estimatedTokens(for: text), contextSize: contextSize)
     }
 
     /// Input tokens for the output cap, or nil if the dictation does not fit. Short dictations use the estimate
     /// (no counting call, which costs about 25 ms each). Longer ones are counted exactly with the model from
     /// macOS 26.4 on; before that the estimate decides and they keep the rule-based text.
-    static func inputTokens(_ text: String, instructions: String, model: SystemLanguageModel) async throws -> Int? {
-        if fitsByEstimate(text, instructions: instructions, contextSize: model.contextSize) {
+    static func inputTokens(
+        _ text: String, instructions: String, model: SystemLanguageModel, language: DictationLanguage = .german
+    ) async throws -> Int? {
+        if fitsByEstimate(text, instructions: instructions, contextSize: model.contextSize, language: language) {
             return estimatedTokens(for: text)
         }
         guard #available(macOS 26.4, *) else { return nil }
         let instructionTokens = try await model.tokenCount(for: Instructions(instructions))
-        let promptTokens = try await model.tokenCount(for: CleanerPrompt.wrap(text))
+        let promptTokens = try await model.tokenCount(for: CleanerPrompt.wrap(text, language: language))
         // The wrapped prompt also stands in for the dictation: slightly more than its tokens, never less.
         let fit = fits(
             instructionTokens: instructionTokens, promptTokens: promptTokens, inputTokens: promptTokens,
@@ -103,9 +107,9 @@ public struct AppleFoundationCleaner: Cleaner {
     }
 
     /// Readies one session for the cleanup that may follow; repeated calls keep that session warm.
-    public func prewarm(mode: TextMode, vocabulary: [String]) {
+    public func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage = .german) {
         guard Self.availability == .available else { return }
-        let instructions = CleanerPrompt.instructions(mode: mode, vocabulary: vocabulary)
+        let instructions = CleanerPrompt.instructions(mode: mode, vocabulary: vocabulary, language: language)
         slot.session(for: instructions) {
             LanguageModelSession(model: SystemLanguageModel.default, instructions: instructions)
         }.prewarm()
@@ -115,11 +119,16 @@ public struct AppleFoundationCleaner: Cleaner {
         slot.clear()
     }
 
-    public func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String {
+    public func clean(
+        _ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage = .german
+    ) async throws -> String {
         try Self.requireAvailable(id: id)
         let model = SystemLanguageModel.default
-        let instructions = CleanerPrompt.instructions(mode: mode, vocabulary: vocabulary)
-        guard let inputTokens = try await Self.inputTokens(text, instructions: instructions, model: model) else {
+        let instructions = CleanerPrompt.instructions(mode: mode, vocabulary: vocabulary, language: language)
+        guard
+            let inputTokens = try await Self.inputTokens(
+                text, instructions: instructions, model: model, language: language)
+        else {
             throw ZackError.inputTooLong
         }
         // One session per dictation, never reused: no context leaks between dictations. A prewarmed session has no
@@ -127,7 +136,7 @@ public struct AppleFoundationCleaner: Cleaner {
         // the instructions.
         let session = slot.take(for: instructions) ?? LanguageModelSession(model: model, instructions: instructions)
         let response = try await session.respond(
-            to: CleanerPrompt.wrap(text), options: Self.options(forInputTokens: inputTokens))
+            to: CleanerPrompt.wrap(text, language: language), options: Self.options(forInputTokens: inputTokens))
         return CleanerPrompt.unescape(response.content).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

@@ -34,3 +34,10 @@ func snippetNamesFoldUmlauts(input: String) {
     let rule = SnippetRule([Snippet(name: "Grüße", text: "Viele Grüße")])
     #expect(rule.apply(input, context: RuleContext()) == "Viele Grüße")
 }
+
+@Test func englishSnippetMatchesWithCaseAndPunctuation() {
+    let rule = SnippetRule([Snippet(name: "signature", text: "Best regards\nJane Doe")])
+    #expect(rule.match("Snippet signature.", language: .english) == "Best regards\nJane Doe")
+    #expect(rule.match("Baustein signature", language: .english) == nil)
+    #expect(rule.match("snippet signature", language: .german) == nil)
+}

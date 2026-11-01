@@ -8,7 +8,8 @@ struct StubCleaner: Cleaner {
     let output: String
     var delay: Duration = .zero
 
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String {
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    {
         if delay > .zero { try await Task.sleep(for: delay) }
         return output
     }
@@ -155,4 +156,46 @@ struct StubCleaner: Cleaner {
     let processor = TextProcessor()
     let result = await processor.process("Der Server läuft.", context: RuleContext(textBeforeCursor: "Ich glaube,"))
     #expect(result.ruledFinal == result.final)
+}
+
+@Test func englishCorrectionGoesThroughTheCleaner() async {
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Let's meet on Wednesday."))
+    let result = await processor.process(
+        "Let's meet on Tuesday, no, Wednesday.", context: RuleContext(language: .english))
+    #expect(result.usedCleaner)
+    #expect(result.final == "Let's meet on Wednesday.")
+}
+
+/// Parakeet often writes the pause before "no" as a sentence end; a period counts like a comma.
+@Test(arguments: ["Let's meet on Tuesday. No, Wednesday.", "Let's meet on Tuesday. Um, no, Wednesday."])
+func englishCorrectionAfterPeriodGoesThroughTheCleaner(text: String) async {
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Let's meet on Wednesday."))
+    let result = await processor.process(text, context: RuleContext(language: .english))
+    #expect(result.usedCleaner)
+    #expect(result.final == "Let's meet on Wednesday.")
+}
+
+@Test(arguments: [
+    "Let's meet on Tuesday, um, no, Wednesday.",
+    "Send it to sales, um, I mean support.",
+    "Call me in the morning, er, no, in the afternoon.",
+    "The budget comes from marketing, um, wait, from sales.",
+    "The error only occurs in Chrome, um, make that Safari.",
+    "Let's meet on Tuesday, uh no, Wednesday.",
+])
+func englishCommaSurvivesFillerRemoval(text: String) async {
+    let context = RuleContext(language: .english)
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Let's meet on Wednesday."))
+    #expect(processor.needsCleaner(text, context: context))
+    let result = await processor.process(text, context: context)
+    #expect(result.usedCleaner || result.cleanerRejected)
+}
+
+@Test func englishFillerWithoutCommaDoesNotCountAsComma() async {
+    let text = "There is no problem, um, with the server."
+    let context = RuleContext(language: .english)
+    let processor = TextProcessor(cleaner: StubCleaner(output: "egal"))
+    #expect(!processor.needsCleaner(text, context: context))
+    let result = await processor.process(text, context: context)
+    #expect(!result.usedCleaner && !result.cleanerRejected)
 }

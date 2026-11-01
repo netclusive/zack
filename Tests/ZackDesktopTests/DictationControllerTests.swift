@@ -42,7 +42,8 @@ struct DictationControllerTests {
 
     func makeController(
         transcriber: FakeTranscriber = FakeTranscriber("Hallo Welt."), cleaner: (any Cleaner)? = nil,
-        modelReady: Bool = true, microphone: Bool = true, accessibility: Bool = true
+        modelReady: Bool = true, microphone: Bool = true, accessibility: Bool = true,
+        language: @escaping @Sendable () -> DictationLanguage = { .german }
     ) -> DictationController<TestClock> {
         let inserter = Inserter(
             clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { accessibility },
@@ -50,7 +51,8 @@ struct DictationControllerTests {
         return DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor(vocabulary: Vocabulary(terms: ["GitHub"]), cleaner: cleaner) },
-            modelReady: { modelReady }, microphoneAllowed: { microphone }, signposts: signposts)
+            modelReady: { modelReady }, microphoneAllowed: { microphone }, signposts: signposts,
+            language: language)
     }
 
     /// Key down, pill shown, `samples` spoken, key up after one second. Latency marks begin as in the app: at key
@@ -344,6 +346,28 @@ struct DictationControllerTests {
         clock.advance(by: .seconds(10))
         await settle()
         #expect(cleaner.prewarms.isEmpty)
+    }
+
+    @Test func controllerReadsLanguageOncePerDictation() async {
+        let cleaner = RecordingCleaner()
+        let calls = Mutex(0)
+        let controller = makeController(
+            transcriber: FakeTranscriber("The meeting is on Tuesday, scratch that, on Wednesday."), cleaner: cleaner,
+            language: {
+                calls.withLock {
+                    $0 += 1
+                    return $0 == 1 ? .english : .german
+                }
+            })
+        await startRecording(controller)
+        #expect(await eventually { cleaner.prewarms.count == 1 })
+        clock.advance(by: .seconds(3))
+        #expect(await eventually { cleaner.prewarms.count == 2 })
+        input.push(tone())
+        await controller.finish()
+        #expect(cleaner.cleanLanguages == [.english])
+        #expect(Set(cleaner.prewarmLanguages) == [.english])
+        #expect(calls.withLock { $0 } == 1)
     }
 
     @Test func withoutACleanerNothingIsPrewarmed() async {

@@ -104,6 +104,28 @@ func signalWordsNeedSomethingToCorrect(text: String, expected: Bool) {
     }
 }
 
+@Test func englishSignalWordsMatchCorrectionsOnly() async throws {
+    let corpus = try Corpus.decode(Data(contentsOf: englishCorpusURL()))
+    let processor = TextProcessor(vocabulary: corpus.parsedVocabulary, snippets: corpus.parsedSnippets)
+    for testCase in corpus.cases {
+        let ruled = await processor.process(
+            testCase.spoken, context: RuleContext(mode: testCase.mode, language: .english)
+        ).ruled
+        #expect(SignalWords.contains(ruled, language: .english) == (testCase.group == "correction"), "\(testCase.id)")
+    }
+}
+
+@Test func englishPlausibilityAcceptsCorrections() async throws {
+    let corpus = try Corpus.decode(Data(contentsOf: englishCorpusURL()))
+    let processor = TextProcessor(vocabulary: corpus.parsedVocabulary, snippets: corpus.parsedSnippets)
+    for testCase in corpus.cases where testCase.group == "correction" {
+        let ruled = await processor.process(
+            testCase.spoken, context: RuleContext(mode: testCase.mode, language: .english)
+        ).ruled
+        #expect(Plausibility.accept(input: ruled, output: testCase.expected), "\(testCase.id)")
+    }
+}
+
 @Test func promptNamesDictationDelimiters() {
     let prompt = CleanerPrompt.instructions(mode: .prose, vocabulary: [])
     #expect(prompt.contains("<diktat>"))
@@ -131,4 +153,34 @@ func signalWordsNeedSomethingToCorrect(text: String, expected: Bool) {
     #expect(wrapped.contains("c > d"))
     let body = String(wrapped.dropFirst("<diktat>\n".count).dropLast("\n</diktat>".count))
     #expect(CleanerPrompt.unescape(body) == code)
+}
+
+@Test(arguments: [
+    ("Let's meet on Tuesday, no, Wednesday.", true),
+    ("Send it to sales, I mean support.", true),
+    ("The budget comes from marketing, wait, from sales.", true),
+    ("The error only occurs in Chrome, make that Safari.", true),
+    ("Correction: four servers.", true),
+    ("The invoice goes to accounting, scratch that, to purchasing.", true),
+    ("Let's meet on Tuesday ,  NO, Wednesday.", true),
+    ("There is no problem here, and then, no, never mind.", true),
+    ("Let's meet on Tuesday. No, Wednesday.", true),
+    ("Send it to Max. No, to Erika.", true),
+    ("Let's meet on Tuesday . No, Wednesday.", true),
+    ("Is the build green? No, it is still red.", false),
+    ("That went well! No, really.", false),
+    ("Open readme.md no matter what.", false),
+    ("There is no problem with the server.", false),
+    ("I have no idea why the build failed.", false),
+    ("It is no longer needed.", false),
+    ("Can you make that change before Friday?", false),
+    ("We need to wait for the build.", false),
+    ("I am sorry for the late reply.", false),
+    ("That is exactly what I mean.", false),
+    ("No, that is not right.", false),
+    ("Wait for the build.", false),
+    ("Everything works.", false),
+])
+func englishSignalWords(text: String, expected: Bool) {
+    #expect(SignalWords.contains(text, language: .english) == expected)
 }

@@ -5,11 +5,12 @@ import ZackDesktop
 /// "Textbausteine": the names on the left, the chosen snippet on the right.
 struct SnippetsPane: View {
     let editor: FileEditor<SnippetFormat>?
+    let language: DictationLanguage
     let openFile: () -> Void
 
     var body: some View {
         if let editor, editor.state == .loaded {
-            SnippetsEditor(editor: editor, openFile: openFile)
+            SnippetsEditor(editor: editor, language: language, openFile: openFile)
         } else {
             UnreadableFileNote(openFile: editor == nil ? nil : openFile)
         }
@@ -53,6 +54,7 @@ private struct SnippetsEditor: View {
     }
 
     let editor: FileEditor<SnippetFormat>
+    let language: DictationLanguage
     let openFile: () -> Void
 
     @State private var query = ""
@@ -157,7 +159,7 @@ private struct SnippetsEditor: View {
     private func notes(duplicates: Set<Int>) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             if let name = draft?.name.trimmingCharacters(in: .whitespaces), !name.isEmpty {
-                Text(verbatim: "‚Baustein \(name)‘ diktieren fügt den Text ein.")
+                Text(verbatim: "‚\(language.pack.snippetTrigger.capitalized) \(name)‘ diktieren fügt den Text ein.")
                     .foregroundStyle(.secondary)
             }
             if let line = draft?.anchor?.line, duplicates.contains(line) {

@@ -11,16 +11,22 @@ public enum UserFileError: Error, Equatable, Sendable {
 /// Dictionary and snippets as plain text files, editable in any editor.
 public struct UserFiles: Sendable {
     public let directory: URL
+    private let language: @Sendable () -> DictationLanguage
 
-    public init(directory: URL) {
+    /// `language` picks the example texts of newly created files; it is read at each use.
+    public init(directory: URL, language: @escaping @Sendable () -> DictationLanguage = { .german }) {
         self.directory = directory
+        self.language = language
     }
 
     /// `~/Library/Application Support/Zack`.
-    public static func standard() throws -> UserFiles {
+    public static func standard(language: @escaping @Sendable () -> DictationLanguage = { .german }) throws
+        -> UserFiles
+    {
         let support = try FileManager.default.url(
             for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        return UserFiles(directory: support.appending(path: "Zack", directoryHint: .isDirectory))
+        return UserFiles(
+            directory: support.appending(path: "Zack", directoryHint: .isDirectory), language: language)
     }
 
     public var vocabularyURL: URL { url(for: .vocabulary) }
@@ -62,12 +68,10 @@ public struct UserFiles: Sendable {
     /// Creates missing files with commented examples; existing files stay untouched.
     public func createMissing() throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        for (url, template) in [
-            (vocabularyURL, Self.vocabularyTemplate), (snippetsURL, Self.snippetsTemplate),
-            (codeAppsURL, Self.codeAppsTemplate),
-        ]
-        where !FileManager.default.fileExists(atPath: url.path) {
-            try Data(template.utf8).write(to: url, options: .withoutOverwriting)
+        let language = language()
+        for kind in UserFileKind.allCases where !FileManager.default.fileExists(atPath: url(for: kind).path) {
+            try Data(Self.template(for: kind, language: language).utf8)
+                .write(to: url(for: kind), options: .withoutOverwriting)
         }
     }
 
@@ -91,7 +95,7 @@ public struct UserFiles: Sendable {
             guard let text = Self.readText(codeAppsURL) else { throw CocoaError(.fileReadUnknown) }
             current = text
         } else {
-            current = Self.codeAppsTemplate
+            current = Self.template(for: .codeApps, language: language())
         }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try Data(CodeApps.toggled(bundleID, in: current).utf8)
@@ -110,6 +114,18 @@ public struct UserFiles: Sendable {
             !text.utf8.contains(0)
         else { return nil }
         return text
+    }
+
+    /// Commented example text for a new file of `kind`.
+    public static func template(for kind: UserFileKind, language: DictationLanguage) -> String {
+        switch (kind, language) {
+        case (.vocabulary, .german): vocabularyTemplate
+        case (.vocabulary, .english): englishVocabularyTemplate
+        case (.snippets, .german): snippetsTemplate
+        case (.snippets, .english): englishSnippetsTemplate
+        case (.codeApps, .german): codeAppsTemplate
+        case (.codeApps, .english): englishCodeAppsTemplate
+        }
     }
 
     static let vocabularyTemplate = """
@@ -148,6 +164,46 @@ public struct UserFiles: Sendable {
         # Xcode
         com.apple.dt.Xcode
         # JetBrains-IDEs
+        com.jetbrains.*
+
+        """
+
+    static let englishVocabularyTemplate = """
+        # Vocabulary for Zack
+        # One term per line: Zack writes it exactly like this and passes it to the recognizer as a hint.
+        # Replacement: wrong => right
+        # Lines starting with # are ignored. Examples, remove the # to activate:
+        # VMware
+        # git hub => GitHub
+
+        """
+
+    static let englishSnippetsTemplate = """
+        # Snippets for Zack
+        # One snippet per line: name => text, line break as \\n
+        # Dictating "snippet <name>" inserts the text. Example, remove the # to activate:
+        # signature => Best regards\\nJane Doe
+
+        """
+
+    static let englishCodeAppsTemplate = """
+        # Code mode for Zack
+        # One bundle ID per line: Zack dictates in code mode in these apps.
+        # A * at the end matches all IDs with this beginning. Lines starting with # are ignored.
+        # The menu item "Code-Modus in <App>" switches the last active app on or off.
+        # Terminal
+        com.apple.Terminal
+        # iTerm2
+        com.googlecode.iterm2
+        # Ghostty
+        com.mitchellh.ghostty
+        # Visual Studio Code
+        com.microsoft.VSCode
+        # Cursor
+        com.todesktop.230313mzl4w4u92
+        # Xcode
+        com.apple.dt.Xcode
+        # JetBrains IDEs
         com.jetbrains.*
 
         """

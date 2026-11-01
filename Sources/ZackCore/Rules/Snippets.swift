@@ -25,7 +25,7 @@ public enum SnippetFile {
     }
 }
 
-/// Replaces a dictation that consists only of "Baustein <Name>" with the stored text.
+/// Replaces a dictation of the language's snippet word ("Baustein", "snippet") and a name with the stored text.
 public struct SnippetRule: TextRule {
     private let texts: [String: String]
 
@@ -34,14 +34,14 @@ public struct SnippetRule: TextRule {
             snippets.map { (Self.normalizedName($0.name), $0.text) }, uniquingKeysWith: { first, _ in first })
     }
 
-    public func match(_ text: String) -> String? {
+    public func match(_ text: String, language: DictationLanguage = .german) -> String? {
         let words = TextTools.words(text)
-        guard words.count >= 2, words[0] == "baustein" else { return nil }
+        guard words.count >= 2, words[0] == language.pack.snippetTrigger else { return nil }
         return texts[Self.normalizedName(words.dropFirst().joined(separator: " "))]
     }
 
     public func apply(_ text: String, context: RuleContext) -> String {
-        match(text) ?? text
+        match(text, language: context.language) ?? text
     }
 
     public static func normalizedName(_ name: String) -> String {

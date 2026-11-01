@@ -1,18 +1,40 @@
 import Foundation
 
 public enum TextTools {
-    /// Filler words removed from dictations and ignored by metrics. "um" is a German preposition, so it is excluded.
-    public static let fillers: Set<String> = ["äh", "ähm", "öh", "öhm", "hm", "hmm", "mhm", "uh"]
-
     private static let innerWordCharacters = CharacterSet(charactersIn: "._-/")
     private static let wordCharacters = CharacterSet.alphanumerics.union(innerWordCharacters)
 
     /// Lowercased words without surrounding punctuation; dots, underscores, dashes and slashes inside words are kept.
     public static func words(_ text: String) -> [String] {
-        text.lowercased()
-            .components(separatedBy: wordCharacters.inverted)
-            .map { $0.trimmingCharacters(in: innerWordCharacters) }
-            .filter { !$0.isEmpty }
+        wordsWithCommas(text).map(\.word)
+    }
+
+    /// The words of `words(_:)`, each flagged when a comma lies between it and the previous word, or the previous
+    /// word ends with a period. A period inside a word ("readme.md") does not count.
+    public static func wordsWithCommas(_ text: String) -> [(word: String, afterComma: Bool)] {
+        var result: [(word: String, afterComma: Bool)] = []
+        var token = String.UnicodeScalarView()
+        var sawComma = false
+        func flush() {
+            let endsWithPeriod = token.last == "."
+            let word = String(token).trimmingCharacters(in: innerWordCharacters)
+            token = String.UnicodeScalarView()
+            if !word.isEmpty {
+                result.append((word, sawComma))
+                sawComma = false
+            }
+            if endsWithPeriod { sawComma = true }
+        }
+        for scalar in text.lowercased().unicodeScalars {
+            if wordCharacters.contains(scalar) {
+                token.append(scalar)
+            } else {
+                flush()
+                if scalar == "," { sawComma = true }
+            }
+        }
+        flush()
+        return result
     }
 
     /// Collapses spaces, removes spaces before punctuation and leading separators; keeps line breaks.

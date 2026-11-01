@@ -1,7 +1,7 @@
 # Zack
 
-Local push-to-talk dictation for macOS. Everything runs on the Mac, no cloud. The interface is German, and Zack is
-built and tested for German dictation.
+Local push-to-talk dictation for macOS. Everything runs on the Mac, no cloud. The interface is German; dictation
+works in German or English, one language per user ("Settings › Allgemein › Sprache").
 
 Zack.app is a menu bar app: hold fn (or the right Option key), speak, release, and the text is inserted into the
 active window. `zack-bench` compares recognition and cleanup engines on a test corpus.
@@ -26,21 +26,25 @@ With a release:
 - Hold the key ("Settings › Allgemein › Taste"), speak, release: Zack recognises the speech, applies its text rules
   (dictionary, snippets) and inserts the result at the cursor. A short tap is ignored, and pressing another key
   while holding cancels, so shortcuts such as fn + arrow keep working.
+- Language ("Settings › Allgemein › Sprache"): Deutsch or English. On first start Zack follows the macOS language;
+  an existing installation stays German. The text rules, AI cleanup, code mode and snippets follow the language,
+  and a change applies from the next dictation.
 - Esc while the pill shows "Erkenne …" or "KI glättet …" cancels: nothing is inserted, and the result is kept as
   the last dictation.
 - Menu section "Letztes Diktat": "Einfügen" (⌃⌥V) inserts the last dictation again at the cursor, "Ohne
   KI-Glättung einfügen" (⌃⌥O) replaces an AI-cleaned dictation with the rule text, "Kopieren" copies it. "Erneut
   versuchen" appears after a failed recognition. A shortcut another app already holds is marked "(Kürzel belegt)".
 - AI cleanup ("Settings › Allgemein › KI-Glättung bei Selbstkorrekturen"): if a dictation contains a
-  self-correction such as "Montag, nein, Dienstag", Apple's on-device model smooths the sentence.
+  self-correction such as "Montag, nein, Dienstag" or "Tuesday, no, Wednesday", Apple's on-device model smooths
+  the sentence.
 - Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
   the menu shows "Secure Input aktiv"; dictation works, only cancelling with another key does not.
 
 ### Settings and permissions
 
-- The settings window ("Einstellungen …" in the menu, ⌘,) has the panes Allgemein (key, microphone readiness,
-  launch at login, AI cleanup), Wörterbuch, Textbausteine, Code-Apps, Updates and Einrichtung. If a permission or
-  the speech model is missing, Zack opens it in Einrichtung.
+- The settings window ("Einstellungen …" in the menu, ⌘,) has the panes Allgemein (language, key, microphone
+  readiness, launch at login, AI cleanup), Wörterbuch, Textbausteine, Code-Apps, Updates and Einrichtung. If a
+  permission or the speech model is missing, Zack opens it in Einrichtung.
 - Permissions: Microphone, and Accessibility for inserting with Cmd+V, for reading the text before the cursor and
   for cancelling with another key. The key itself works without Accessibility; the text then stays on the
   clipboard.
@@ -51,18 +55,20 @@ With a release:
 ### Files
 
 `vocabulary.txt`, `snippets.txt` and `code-apps.txt` live in `~/Library/Application Support/Zack` and are created
-with examples. Lines starting with `#` are ignored. Edit them in "Settings › Wörterbuch / Textbausteine /
-Code-Apps" or in any text editor: Zack changes only the lines you edit, keeps comments and lines it cannot read,
-and reloads a file changed elsewhere.
+with examples in the dictation language; existing files stay as they are when the language changes. Lines
+starting with `#` are ignored. Edit them in "Settings › Wörterbuch / Textbausteine / Code-Apps" or in any text
+editor: Zack changes only the lines you edit, keeps comments and lines it cannot read, and reloads a file changed
+elsewhere.
 
 - `vocabulary.txt`: one term per line, which Zack writes exactly as given and passes to the recognition as a hint;
   `wrong => right` replaces a spelling.
-- `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break; dictating "Baustein <Name>" inserts
-  the text. Known limits: a literal `\n` in snippet text becomes a line break, and spaces at the start and end of a
-  field are dropped.
+- `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break; dictating "Baustein <Name>"
+  (English: "snippet <name>") inserts the text. Known limits: a literal `\n` in snippet text becomes a line
+  break, and spaces at the start and end of a field are dropped.
 - `code-apps.txt`: the apps for code mode (bundle IDs, or prefixes ending in `*`). In these apps spoken file names
-  and case commands become code, and short commands get no trailing period. The menu switches the current app on
-  or off, "Settings › Code-Apps" adds apps; the file is read again for every dictation.
+  ("readme punkt md", English "readme dot md") and case commands become code, and short commands get no trailing
+  period. The menu switches the current app on or off, "Settings › Code-Apps" adds apps; the file is read again
+  for every dictation.
 
 ### Context
 
@@ -187,6 +193,11 @@ Common options: `--audio-dir <dir>` (default `bench/corpus/audio`, for `synth` `
 `--results <dir>` (default `bench/results`), `--corpus <file>` (default `bench/corpus/cases.json`) and
 `--id <case>` for `synth` and `record`. `zack-bench help` lists them.
 
+`--language de|en` (for `synth`, `record` and `run`, default `de`) picks the language; `en` switches the defaults to
+`bench/corpus/cases-en.json`, the voice `Samantha` and the audio folders `bench/corpus/audio-synth-en` (`synth`) and
+`bench/corpus/audio-en` (`record`, `run`), and `run` uses the English rules and an English speech locale. Explicit
+options win over these defaults.
+
 Recordings and results contain voice and text and are not tracked by Git.
 
 ## Model downloads
@@ -196,7 +207,7 @@ on click in "Settings › Einrichtung". Later runs work offline.
 
 | Engine | Source | Stored in | Size |
 |---|---|---|---|
-| `apple-speech`, `apple-dictation` | macOS speech assets for German | managed by macOS | not measured |
+| `apple-speech`, `apple-dictation` | macOS speech assets for German or English (`--language en`) | managed by macOS | not measured |
 | `parakeet-v3` | Hugging Face, via FluidAudio | `~/Library/Application Support/Zack/Models` (earlier downloads in `~/Library/Application Support/FluidAudio/Models` keep working) | about 460 MB |
 | `parakeet-ultra` | Hugging Face, via FluidAudio | `~/Library/Application Support/Zack/Models` (earlier downloads in `~/Library/Application Support/FluidAudio/Models` keep working) | about 600 MB |
 | `apple-fm` | part of Apple Intelligence | managed by macOS | not measured |

@@ -1,3 +1,4 @@
+import Foundation
 import ZackApple
 import ZackCore
 import ZackParakeet
@@ -21,8 +22,10 @@ struct Registry: Sendable {
 
     var cleanerIDs: [String] { Self.builtInCleanerIDs + extraCleaners.keys.sorted() }
 
-    static func transcriber(_ id: String) throws -> any Transcriber {
-        if let kind = AppleTranscriber.Kind(rawValue: id) { return AppleTranscriber(kind: kind) }
+    static func transcriber(_ id: String, language: DictationLanguage = .german) throws -> any Transcriber {
+        if let kind = AppleTranscriber.Kind(rawValue: id) {
+            return AppleTranscriber(kind: kind, locale: Locale(identifier: language == .english ? "en-US" : "de-DE"))
+        }
         if let variant = ParakeetTranscriber.Variant(rawValue: id) { return ParakeetTranscriber(variant: variant) }
         throw ArgumentError.invalidValue(option: "--transcriber", value: id, allowed: transcriberIDs)
     }

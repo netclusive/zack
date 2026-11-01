@@ -2,8 +2,11 @@ import Foundation
 
 /// Removes filler words including an adjacent comma and restores capitalization if a capitalized filler is removed.
 public struct FillerRule: TextRule {
-    private static let pattern: NSRegularExpression = {
-        let alternatives = TextTools.fillers.sorted { $0.count > $1.count }.joined(separator: "|")
+    private static let patterns: [DictationLanguage: NSRegularExpression] = Dictionary(
+        uniqueKeysWithValues: DictationLanguage.allCases.map { ($0, makePattern(for: $0)) })
+
+    private static func makePattern(for language: DictationLanguage) -> NSRegularExpression {
+        let alternatives = language.pack.fillers.sorted { $0.count > $1.count }.joined(separator: "|")
         // Letters, digits and hyphens around a filler mean it is part of a longer word such as "uh-oh".
         let filler = #"(?<![\p{L}\p{N}-])(?:"# + alternatives + #")(?![\p{L}\p{N}-])"#
         let terminator = #"[.!?…]+"#
@@ -19,15 +22,24 @@ public struct FillerRule: TextRule {
         return try! NSRegularExpression(
             pattern: [line, sentence, afterColon, inline].joined(separator: "|"),
             options: [.caseInsensitive, .anchorsMatchLines])
-    }()
+    }
 
     public init() {}
 
+    /// A match whose letters are all uppercase (e.g. "ER") is an acronym, not a filler.
+    private static func isAcronym(_ matched: String) -> Bool {
+        let letters = matched.filter(\.isLetter)
+        return letters.count > 1 && letters.allSatisfy(\.isUppercase)
+    }
+
     public func apply(_ text: String, context: RuleContext) -> String {
+        let language = context.language
         let mutable = NSMutableString(string: text)
-        let matches = Self.pattern.matches(in: text, range: NSRange(location: 0, length: mutable.length))
+        let matches = Self.patterns[language]!.matches(
+            in: text, range: NSRange(location: 0, length: mutable.length))
         for match in matches.reversed() {
             let matched = mutable.substring(with: match.range)
+            if language.pack.keepsAcronymFillers, Self.isAcronym(matched) { continue }
             mutable.replaceCharacters(in: match.range, with: " ")
             let next = match.range.location + 1
             guard matched.first(where: \.isLetter)?.isUppercase == true, next < mutable.length else { continue }
