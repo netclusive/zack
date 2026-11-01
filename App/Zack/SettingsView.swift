@@ -22,7 +22,9 @@ struct SettingsView: View {
             case .vocabulary:
                 VocabularyPane(editor: model.vocabularyEditor) { model.openInTextEditor(.vocabulary) }
             case .snippets:
-                SnippetsPane(editor: model.snippetsEditor) { model.openInTextEditor(.snippets) }
+                SnippetsPane(editor: model.snippetsEditor, language: model.dictationLanguage) {
+                    model.openInTextEditor(.snippets)
+                }
             case .codeApps:
                 CodeAppsPane(editor: model.codeAppsEditor) { model.openInTextEditor(.codeApps) }
             case .updates: UpdatesPane(updater: updater)
