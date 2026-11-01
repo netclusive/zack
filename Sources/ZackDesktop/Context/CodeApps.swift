@@ -42,32 +42,17 @@ public struct CodeApps: Equatable, Sendable {
         case .prefix:
             return text
         case .none:
+            // New line always ends in "\n", even in a CRLF file (existing behavior).
             let separator = text.last?.isNewline ?? true ? "" : "\n"
             return text + separator + bundleID + "\n"
         case .exact:
             let id = bundleID.lowercased()
-            var result = ""
-            for line in lines(of: text) {
-                if line.content.trimmingCharacters(in: .whitespaces).lowercased() == id { continue }
-                result += line.content + line.terminator
+            var lines = TextLines(text)
+            for index in lines.lines.indices.reversed()
+            where lines.lines[index].content.trimmingCharacters(in: .whitespaces).lowercased() == id {
+                lines.remove(at: index)
             }
-            return result.isEmpty || result.last?.isNewline == true ? result : result + "\n"
+            return lines.text
         }
-    }
-
-    /// Splits into lines keeping each line's own terminator ("\n", "\r\n"), so untouched lines stay byte for byte.
-    private static func lines(of text: String) -> [(content: String, terminator: String)] {
-        var lines: [(String, String)] = []
-        var content = ""
-        for character in text {
-            if character.isNewline {
-                lines.append((content, String(character)))
-                content = ""
-            } else {
-                content.append(character)
-            }
-        }
-        if !content.isEmpty { lines.append((content, "")) }
-        return lines
     }
 }

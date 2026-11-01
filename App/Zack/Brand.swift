@@ -27,7 +27,15 @@ enum Brand {
             case .blue: (0x0b65ae, 0x5aa5ea)
             case .gray: (0x494c53, 0xa0a3a9)
             }
-        return NSColor(name: nil) { appearance in
+        return dynamic(light: light, dark: dark)
+    }
+
+    /// Validation problems in the line editors, text and field outlines; contrast pinned in `BrandPaletteTests`.
+    static let problem = Color(nsColor: dynamic(light: BrandPalette.problemLight, dark: BrandPalette.problemDark))
+
+    /// Resolves for the appearance it is drawn in.
+    static func dynamic(light: UInt32, dark: UInt32) -> NSColor {
+        NSColor(name: nil) { appearance in
             rgb(appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light)
         }
     }

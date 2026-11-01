@@ -9,16 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- After you allow it, Zack checks once a day for a new version, offers it, and can install it automatically when it quits. Turn this on or off in the menu.
+- After you allow it, Zack checks once a day for a new version, offers it, and can install it automatically when it quits. Turn this on or off in the settings.
+- A settings window (⌘,) collects all options: general, dictionary, snippets, code apps, updates and setup.
+- Edit the dictionary, snippets and code apps right in Zack. The text files stay valid and editable, and comments in them are kept.
 
 ### Changed
 
 - Zack is open source under the Apache License 2.0.
+- The menu is shorter and shows only the status and everyday actions.
+- "Regeltext statt KI-Fassung" is now "Ohne KI-Glättung einfügen".
+- Setup is part of the settings window.
 
 ### Removed
 
 - The benchmark no longer includes the GPU language model as an AI cleanup candidate.
 - The benchmark no longer includes Whisper as a speech recognition candidate.
+
+### Fixed
+
+- If the dictionary, snippets or code apps file is a symbolic link, Zack now saves to the linked file and keeps the link.
+- Zack reads dictionary, snippets and code apps files saved in UTF-16 with a byte order mark, and no longer shows garbage entries for a file it cannot read as text.
 
 ## [0.4.0] - 2026-10-30
 

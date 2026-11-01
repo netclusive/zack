@@ -31,10 +31,8 @@ struct MenuContent: View {
         }
         UpdateAvailableRow(updater: updater)
         if let line = model.secureInputLine { Text(line) }
-        Text("Erkenner: Parakeet Ultra")
-        Text(model.microphoneMenu.statusLine)
         Picker(
-            "Mikrofon wählen",
+            model.microphoneMenu.statusLine,
             selection: Binding(get: { model.microphoneMenu.selectedID }, set: { model.setMicrophone($0) })
         ) {
             if let system = model.microphoneMenu.options.first {
@@ -46,65 +44,40 @@ struct MenuContent: View {
             }
         }
         Divider()
-        Toggle(
-            "KI-Glättung bei Korrekturen",
-            isOn: Binding(get: { model.aiCleanup && model.cleanerAvailable }, set: { model.setAICleanup($0) })
-        )
-        .disabled(!model.cleanerAvailable)
-        if let hint = model.cleanerHint { Text(hint) }
-        Picker("Taste", selection: Binding(get: { model.hotkey }, set: { model.setHotkey($0) })) {
-            ForEach(HotkeyKey.allCases, id: \.self) { key in
-                Text(key.title).tag(key)
+        Section("Letztes Diktat") {
+            Button(model.shortcutTaken.contains(.insertLast) ? "Einfügen (Kürzel belegt)" : "Einfügen") {
+                model.insertLast()
             }
-        }
-        Picker(
-            "Mikrofon bereithalten",
-            selection: Binding(get: { model.microphoneReadiness }, set: { model.setMicrophoneReadiness($0) })
-        ) {
-            ForEach(MicrophoneReadiness.allCases, id: \.self) { readiness in
-                Text(readiness.title).tag(readiness)
-            }
-        }
-        .accessibilityHint(
-            "Hält das Mikrofon nach einem Diktat offen, damit der Anfang nicht fehlt. Solange es offen ist, zeigt macOS den orangen Punkt."
-        )
-        Toggle(
-            "Beim Anmelden starten", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
-        Divider()
-        Button(
-            model.shortcutTaken.contains(.insertLast)
-                ? "Letztes Diktat einfügen (Kürzel belegt)" : "Letztes Diktat einfügen"
-        ) {
-            model.insertLast()
-        }
-        .keyboardShortcut("v", modifiers: [.control, .option])
-        .disabled(!model.hasLastText)
-        Button(
-            model.shortcutTaken.contains(.ruleText)
-                ? "Regeltext statt KI-Fassung (Kürzel belegt)" : "Regeltext statt KI-Fassung"
-        ) {
-            model.replaceWithRuleText()
-        }
-        .keyboardShortcut("o", modifiers: [.control, .option])
-        .disabled(!model.canReplaceWithRuleText)
-        Button("Letztes Diktat kopieren") { model.copyLastText() }
+            .keyboardShortcut("v", modifiers: [.control, .option])
             .disabled(!model.hasLastText)
-        if model.canRetry {
-            Button("Erneut versuchen") { model.retry() }
+            Button(
+                model.shortcutTaken.contains(.ruleText)
+                    ? "Ohne KI-Glättung einfügen (Kürzel belegt)" : "Ohne KI-Glättung einfügen"
+            ) {
+                model.replaceWithRuleText()
+            }
+            .keyboardShortcut("o", modifiers: [.control, .option])
+            .disabled(!model.canReplaceWithRuleText)
+            Button("Kopieren") { model.copyLastText() }
+                .disabled(!model.hasLastText)
+            if model.canRetry {
+                Button("Erneut versuchen") { model.retry() }
+            }
         }
-        Button("Wörterbuch bearbeiten …") { model.openVocabulary() }
-        Button("Textbausteine bearbeiten …") { model.openSnippets() }
+        Divider()
         if let app = model.codeModeApp {
             Toggle(
-                app.match == .prefix ? "Code-Modus in \(app.name) (über code-apps.txt)" : "Code-Modus in \(app.name)",
+                app.match == .prefix ? "Code-Modus in \(app.name) (über Code-Apps-Liste)" : "Code-Modus in \(app.name)",
                 isOn: Binding(get: { app.match != .none }, set: { _ in model.toggleCodeMode() })
             )
             .disabled(app.match == .prefix)
         }
-        Button("Code-Apps bearbeiten …") { model.openCodeApps() }
-        UpdateMenuSection(updater: updater)
+        Button("Wörterbuch …") { model.showSettings(.vocabulary) }
+        Button("Textbausteine …") { model.showSettings(.snippets) }
         Divider()
-        Button("Einrichtung prüfen …") { model.showSetup() }
+        UpdateMenuSection(updater: updater)
+        Button("Einstellungen …") { model.showSettings() }
+            .keyboardShortcut(",")
         Button("Über Zack") { model.showAbout() }
         #if DEBUG
             DebugMenu(model: model)

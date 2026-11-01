@@ -1,15 +1,12 @@
 import SwiftUI
 import ZackDesktop
 
-/// Setup window: opens at the first start and whenever something is missing.
+/// Setup pane of the settings window: opens at the first start and whenever something is missing.
 struct SetupView: View {
     let model: AppModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Zack einrichten")
-                .font(.title2.bold())
-                .accessibilityAddTraits(.isHeader)
             microphone
             SetupRow(
                 title: "Bedienungshilfen",
@@ -49,7 +46,6 @@ struct SetupView: View {
             }
         }
         .padding(24)
-        .frame(width: 540)
     }
 
     private var microphone: some View {

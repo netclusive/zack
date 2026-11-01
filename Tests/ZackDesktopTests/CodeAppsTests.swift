@@ -43,8 +43,30 @@ struct CodeAppsTests {
                 == "com.apple.Terminal\r\ncom.apple.TextEdit\n")
     }
 
+    /// Removal takes the line with its own ending only; the last line keeps having none.
+    @Test func toggleRemovesLosslesslyBeforeALastLineWithoutBreak() {
+        #expect(CodeApps.toggled("com.example.A", in: "com.example.A\ncom.example.B") == "com.example.B")
+    }
+
     @Test func toggleLeavesPrefixMatchesAlone() {
         #expect(CodeApps.toggled("com.jetbrains.goland", in: "com.jetbrains.*\n") == "com.jetbrains.*\n")
+    }
+
+    @Test func codeAppItemsMatchTheParser() {
+        let document = EntryDocument<CodeAppsFormat>(text: UserFiles.codeAppsTemplate)
+        #expect(document.unreadableCount == 0)
+        #expect(document.items.count == 7)
+        let apps = CodeApps(parsing: UserFiles.codeAppsTemplate)
+        for item in document.items {
+            switch item.entry {
+            case .app(let id): #expect(apps.match(id) == .exact)
+            case .prefix(let prefix): #expect(apps.match(prefix + "rider") == .prefix)
+            }
+        }
+    }
+
+    @Test func lonePrefixStarIsUnreadable() {
+        #expect(EntryDocument<CodeAppsFormat>(text: "*\ncom.example.Editor\n").unreadableCount == 1)
     }
 
     @Test func templateCoversEditorsAndTerminals() {

@@ -1,6 +1,13 @@
 import Foundation
 import ZackCore
 
+public enum UserFileKind: String, CaseIterable, Sendable { case vocabulary, snippets, codeApps }
+
+public enum UserFileError: Error, Equatable, Sendable {
+    case unreadable, changedOnDisk
+    case writeFailed(String)
+}
+
 /// Dictionary and snippets as plain text files, editable in any editor.
 public struct UserFiles: Sendable {
     public let directory: URL
@@ -16,9 +23,41 @@ public struct UserFiles: Sendable {
         return UserFiles(directory: support.appending(path: "Zack", directoryHint: .isDirectory))
     }
 
-    public var vocabularyURL: URL { directory.appending(path: "vocabulary.txt") }
-    public var snippetsURL: URL { directory.appending(path: "snippets.txt") }
-    public var codeAppsURL: URL { directory.appending(path: "code-apps.txt") }
+    public var vocabularyURL: URL { url(for: .vocabulary) }
+    public var snippetsURL: URL { url(for: .snippets) }
+    public var codeAppsURL: URL { url(for: .codeApps) }
+
+    public func url(for kind: UserFileKind) -> URL {
+        switch kind {
+        case .vocabulary: directory.appending(path: "vocabulary.txt")
+        case .snippets: directory.appending(path: "snippets.txt")
+        case .codeApps: directory.appending(path: "code-apps.txt")
+        }
+    }
+
+    /// Creates missing files first; an existing file that cannot be read as text throws `.unreadable`.
+    public func readForEditing(_ kind: UserFileKind) throws(UserFileError) -> String {
+        do {
+            try createMissing()
+        } catch {
+            throw .writeFailed(error.localizedDescription)
+        }
+        guard let text = Self.readText(url(for: kind)) else { throw .unreadable }
+        return text
+    }
+
+    /// Reads the file again; throws `.changedOnDisk` if it differs from `expected`, else writes `text` atomically as UTF-8.
+    public func write(_ text: String, to kind: UserFileKind, replacing expected: String) throws(UserFileError) {
+        let url = url(for: kind)
+        // A missing or unreadable file counts as changed and is never overwritten.
+        guard Self.readText(url) == expected else { throw .changedOnDisk }
+        do {
+            // An atomic write onto a symlink would replace the link; write to its target instead.
+            try Data(text.utf8).write(to: url.resolvingSymlinksInPath(), options: .atomic)
+        } catch {
+            throw .writeFailed(error.localizedDescription)
+        }
+    }
 
     /// Creates missing files with commented examples; existing files stay untouched.
     public func createMissing() throws {
@@ -55,16 +94,22 @@ public struct UserFiles: Sendable {
             current = Self.codeAppsTemplate
         }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try Data(CodeApps.toggled(bundleID, in: current).utf8).write(to: codeAppsURL, options: .atomic)
+        try Data(CodeApps.toggled(bundleID, in: current).utf8)
+            .write(to: codeAppsURL.resolvingSymlinksInPath(), options: .atomic)
     }
 
-    /// UTF-8 first; files saved by a Windows editor fall back to Windows-1252, then Latin-1, so umlauts survive.
+    /// UTF-16 with a byte order mark; else UTF-8 first, and files saved by a Windows editor fall back to
+    /// Windows-1252, then Latin-1, so umlauts survive. Text with NUL (binary data, UTF-16 without a byte order mark)
+    /// is unreadable.
     static func readText(_ url: URL) -> String? {
         guard let data = try? Data(contentsOf: url) else { return nil }
-        for encoding in [String.Encoding.utf8, .windowsCP1252, .isoLatin1] {
-            if let text = String(data: data, encoding: encoding) { return text }
-        }
-        return nil
+        let encodings: [String.Encoding] =
+            data.starts(with: [0xFF, 0xFE]) || data.starts(with: [0xFE, 0xFF])
+            ? [.utf16] : [.utf8, .windowsCP1252, .isoLatin1]
+        guard let text = encodings.lazy.compactMap({ String(data: data, encoding: $0) }).first,
+            !text.utf8.contains(0)
+        else { return nil }
+        return text
     }
 
     static let vocabularyTemplate = """

@@ -26,13 +26,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         let model = AppModel()
         self.model = model
-        updater = Updater(
+        let updater = Updater(
             configuration: UpdateConfiguration(bundle: .main), isDictating: { [model] in model.dictation != .idle })
+        self.updater = updater
+        model.updater = updater
         super.init()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         model.start()
         updater.start()
+    }
+
+    /// Quitting or logging out saves pending edits: the editors' close hooks run inside the close, before exit.
+    func applicationWillTerminate(_ notification: Notification) {
+        model.closeSettings()
     }
 }

@@ -6,6 +6,7 @@ import ZackApple
 import ZackCore
 import ZackDesktop
 import ZackParakeet
+import ZackUpdate
 import os
 
 /// Thread-safe flag the dictation actor reads without hopping to the main actor.
@@ -55,6 +56,15 @@ final class AppModel {
     private(set) var shortcutTaken: Set<Shortcut> = []
     /// Menu line while another app has Secure Input on, read when the menu opens.
     private(set) var secureInputLine: String?
+    /// The pane the settings window shows; kept while the app runs, so the next opening returns to it.
+    private(set) var settingsPane = SettingsPane.general
+
+    /// Set by `AppDelegate` right after creating both; the updates pane reads it.
+    @ObservationIgnored var updater: Updater?
+    /// Created in `start()`; nil without user files. The panes observe the editors themselves.
+    @ObservationIgnored private(set) var vocabularyEditor: FileEditor<VocabularyFormat>?
+    @ObservationIgnored private(set) var snippetsEditor: FileEditor<SnippetFormat>?
+    @ObservationIgnored private(set) var codeAppsEditor: FileEditor<CodeAppsFormat>?
 
     @ObservationIgnored private let settings = Settings()
     @ObservationIgnored private let signposts = Signposts()
@@ -151,6 +161,11 @@ final class AppModel {
         } catch {
             logger.error("user files: \(String(describing: type(of: error)), privacy: .public)")
         }
+        if let files {
+            vocabularyEditor = FileEditor(files: files, kind: .vocabulary)
+            snippetsEditor = FileEditor(files: files, kind: .snippets)
+            codeAppsEditor = FileEditor(files: files, kind: .codeApps)
+        }
         pill = PillPanelController(signposts: signposts) { [weak self] in self?.showSetup() }
         pill?.prepare()
         startHotkey()
@@ -179,7 +194,7 @@ final class AppModel {
         if status.opensSetup { showSetup() }
     }
 
-    /// Reads permissions, model and Apple Intelligence again; every second while the setup window is open.
+    /// Reads permissions, model and Apple Intelligence again; every second while the setup pane is shown.
     func refresh() {
         microphone = Permissions.microphone()
         let trusted = Permissions.accessibility()
@@ -278,14 +293,6 @@ final class AppModel {
         Task { await controller.retry() }
     }
 
-    func openVocabulary() {
-        if let url = files?.vocabularyURL { NSWorkspace.shared.open(url) }
-    }
-
-    func openSnippets() {
-        if let url = files?.snippetsURL { NSWorkspace.shared.open(url) }
-    }
-
     func toggleCodeMode() {
         guard let bundleID = codeModeApp?.bundleID else { return }
         do {
@@ -293,27 +300,76 @@ final class AppModel {
         } catch {
             logger.error("code apps: \(String(describing: type(of: error)), privacy: .public)")
         }
+        // An open code apps pane shows the change at once.
+        codeAppsEditor?.reload()
         refresh()
     }
 
-    func openCodeApps() {
-        if let url = files?.codeAppsURL { NSWorkspace.shared.open(url) }
+    /// Opens the file in the default text editor, for lines the editors cannot show.
+    func openInTextEditor(_ kind: UserFileKind) {
+        if let url = files?.url(for: kind) { NSWorkspace.shared.open(url) }
+    }
+
+    /// Reads the files again, so changes made elsewhere show when the settings window comes to the front.
+    func reloadEditors() {
+        vocabularyEditor?.reload()
+        snippetsEditor?.reload()
+        codeAppsEditor?.reload()
     }
 
     func statusClicked() {
         if status.opensSetup { showSetup() }
     }
 
+    /// Opens the settings in the setup pane: at launch, after a failed model load, from the pill and the status line.
     func showSetup() {
-        refresh()
-        windows.show(
-            id: "setup", title: "Zack einrichten", onClose: { [weak self] in self?.stopSetupPolling() },
-            content: { SetupView(model: self) })
-        startSetupPolling()
+        showSettings(.setup)
     }
 
-    /// Permissions change in System Settings without a notification, so the open setup window checks every
-    /// second. Closed, nothing polls (idle CPU stays at zero).
+    /// Opens the settings window in `pane`, or in the last chosen one; an open window comes to the front.
+    func showSettings(_ pane: SettingsPane? = nil) {
+        if let pane { settingsPane = pane }
+        refresh()
+        windows.show(
+            id: Self.settingsWindow, title: settingsPane.title, size: CGSize(width: 720, height: 480),
+            minSize: CGSize(width: 640, height: 420), onClose: { [weak self] in self?.stopSetupPolling() },
+            // Files and Apple Intelligence may have changed while another app was in front.
+            onBecomeKey: { [weak self] in
+                self?.reloadEditors()
+                self?.refresh()
+            },
+            content: { SettingsView(model: self, updater: updater) })
+        windows.setTitle(settingsPane.title, id: Self.settingsWindow)
+        updateSetupPolling()
+    }
+
+    /// Sidebar choice: the window title follows the pane, and the setup pane polls.
+    func selectSettingsPane(_ pane: SettingsPane) {
+        guard pane != settingsPane else { return }
+        settingsPane = pane
+        windows.setTitle(pane.title, id: Self.settingsWindow)
+        if pane == .setup { refresh() }
+        updateSetupPolling()
+    }
+
+    /// Closes the settings window if it is open; its panes save pending edits synchronously while it closes.
+    func closeSettings() {
+        windows.close(id: Self.settingsWindow)
+    }
+
+    private static let settingsWindow = "settings"
+
+    /// Polls exactly while the settings window is open on the setup pane.
+    private func updateSetupPolling() {
+        if windows.isOpen(id: Self.settingsWindow), settingsPane == .setup {
+            startSetupPolling()
+        } else {
+            stopSetupPolling()
+        }
+    }
+
+    /// Permissions change in System Settings without a notification, so the open setup pane checks every
+    /// second. Otherwise nothing polls (idle CPU stays at zero).
     private func startSetupPolling() {
         guard setupPolling == nil else { return }
         setupPolling = Task { [weak self] in
