@@ -42,10 +42,10 @@ func englishCorpusURL() -> URL {
 
 @Test func englishCorpusIsValid() throws {
     let corpus = try Corpus.decode(Data(contentsOf: englishCorpusURL()))
-    #expect(corpus.cases.count == 44)
-    #expect(Set(corpus.cases.map(\.id)).count == 44)
+    #expect(corpus.cases.count == 45)
+    #expect(Set(corpus.cases.map(\.id)).count == 45)
     let counts = Dictionary(grouping: corpus.cases, by: \.group).mapValues(\.count)
-    #expect(counts == ["prose": 8, "terms": 8, "correction": 8, "code": 8, "vocabulary": 8, "long": 4])
+    #expect(counts == ["prose": 8, "terms": 8, "correction": 9, "code": 8, "vocabulary": 8, "long": 4])
     let prefixes = ["prose": "p", "terms": "t", "correction": "c", "code": "k", "vocabulary": "v", "long": "l"]
     for testCase in corpus.cases {
         #expect(testCase.id.hasPrefix(prefixes[testCase.group] ?? "?"), "\(testCase.id)")

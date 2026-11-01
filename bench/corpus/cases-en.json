@@ -26,6 +26,7 @@
     {"id": "c06", "group": "correction", "mode": "prose", "spoken": "Call me in the morning, no, in the afternoon.", "expected": "Call me in the afternoon.", "terms": []},
     {"id": "c07", "group": "correction", "mode": "prose", "spoken": "The error only occurs in Chrome, make that Safari.", "expected": "The error only occurs in Safari.", "terms": ["Safari"]},
     {"id": "c08", "group": "correction", "mode": "prose", "spoken": "The budget comes from marketing, wait, from sales.", "expected": "The budget comes from sales.", "terms": []},
+    {"id": "c09", "group": "correction", "mode": "prose", "spoken": "Let's meet on Tuesday, no, Wednesday.", "expected": "Let's meet on Wednesday.", "terms": []},
     {"id": "k01", "group": "code", "mode": "code", "spoken": "camel case user id", "expected": "userId", "terms": ["userId"]},
     {"id": "k02", "group": "code", "mode": "code", "spoken": "Open deploy dot sh", "expected": "Open deploy.sh", "terms": ["deploy.sh"]},
     {"id": "k03", "group": "code", "mode": "code", "spoken": "Set snake case max retry count in the config file.", "expected": "Set max_retry_count in the config file.", "terms": ["max_retry_count"]},
