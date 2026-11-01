@@ -35,6 +35,10 @@ func codeModeKeepsProseWithSingleWordAfterCommand(input: String) {
     ("Open the file readme dot md and summarize it.", "Open the file readme.md and summarize it."),
     ("Set snake case max retry count in the config file.", "Set max_retry_count in the config file."),
     ("camel case user id", "userId"),
+    ("kebab case main nav was renamed", "main-nav was renamed"),
+    ("camel case fetch data it returns", "fetchData it returns"),
+    ("snake case user id but", "user_id but"),
+    ("camel case user name instead.", "userName instead"),
 ])
 func englishCodeModeRewritesIdentifiers(input: String, expected: String) {
     #expect(CodeModeRule().apply(input, context: RuleContext(mode: .code, language: .english)) == expected)

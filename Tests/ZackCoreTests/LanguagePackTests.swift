@@ -66,7 +66,8 @@ extension LanguagePackTests {
         #expect(
             pack.codeStopwords == [
                 "in", "the", "a", "an", "and", "or", "with", "from", "to", "on", "for", "of", "at", "by", "is", "are",
-                "will", "please", "then", "as", "fails",
+                "will", "please", "then", "as", "fails", "was", "it", "but", "not", "that", "this", "into", "has",
+                "instead",
             ])
         #expect(pack.codeDotWord == "dot")
         #expect(pack.snippetTrigger == "snippet")
