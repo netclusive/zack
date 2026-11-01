@@ -1,4 +1,4 @@
-/// A language Zack can dictate in. One language per user; it selects the speech model and the language pack.
+/// A language Zack can dictate in. One language per user; it selects the language pack.
 public enum DictationLanguage: String, CaseIterable, Sendable, Codable {
     case german = "de"
     case english = "en"

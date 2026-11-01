@@ -25,7 +25,7 @@ public enum SnippetFile {
     }
 }
 
-/// Replaces a dictation that consists only of "Baustein <Name>" with the stored text.
+/// Replaces a dictation of the language's snippet word ("Baustein", "snippet") and a name with the stored text.
 public struct SnippetRule: TextRule {
     private let texts: [String: String]
 
