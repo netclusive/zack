@@ -31,7 +31,7 @@ public struct LanguagePack: Sendable {
     /// The word that starts a snippet call.
     public let snippetTrigger: String
     public let taggerLanguage: NLLanguage
-    /// True if the language capitalizes no nouns, so any first word may be lowercased after a cursor.
+    /// Whether nouns may be lowercased after existing text; the cursor rule applies it.
     public let lowercasesNouns: Bool
     public let prompt: CleanerPromptText
 

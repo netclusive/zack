@@ -60,7 +60,6 @@ public struct CursorJoinRule: TextRule {
         guard let firstWord = text.split(separator: " ").first else { return false }
         let letters = firstWord.filter(\.isLetter)
         if letters.count > 1, letters.allSatisfy(\.isUppercase) { return false }  // acronyms such as API
-        if pack.lowercasesNouns { return true }
         let tagger = NLTagger(tagSchemes: [.lexicalClass])
         tagger.string = text
         tagger.setLanguage(pack.taggerLanguage, range: text.startIndex..<text.endIndex)
