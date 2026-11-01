@@ -26,12 +26,20 @@ public struct FillerRule: TextRule {
 
     public init() {}
 
+    /// A match whose letters are all uppercase (e.g. "ER") is an acronym, not a filler.
+    private static func isAcronym(_ matched: String) -> Bool {
+        let letters = matched.filter(\.isLetter)
+        return letters.count > 1 && letters.allSatisfy(\.isUppercase)
+    }
+
     public func apply(_ text: String, context: RuleContext) -> String {
+        let language = context.language
         let mutable = NSMutableString(string: text)
-        let matches = Self.patterns[context.language]!.matches(
+        let matches = Self.patterns[language]!.matches(
             in: text, range: NSRange(location: 0, length: mutable.length))
         for match in matches.reversed() {
             let matched = mutable.substring(with: match.range)
+            if language.pack.keepsAcronymFillers, Self.isAcronym(matched) { continue }
             mutable.replaceCharacters(in: match.range, with: " ")
             let next = match.range.location + 1
             guard matched.first(where: \.isLetter)?.isUppercase == true, next < mutable.length else { continue }
