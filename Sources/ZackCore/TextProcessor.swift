@@ -35,7 +35,7 @@ public struct TextProcessor: Sendable {
     }
 
     public func process(_ raw: String, context: RuleContext) async -> ProcessingResult {
-        if let snippet = snippetRule.match(raw) {
+        if let snippet = snippetRule.match(raw, language: context.language) {
             let final = cursorRule.apply(snippet, context: context)
             return ProcessingResult(
                 raw: raw, ruled: snippet, final: final, ruledFinal: final, body: snippet, usedCleaner: false,
@@ -43,7 +43,7 @@ public struct TextProcessor: Sendable {
                 cleanerDuration: nil)
         }
         let ruled = applyRules(raw, context: context)
-        guard let cleaner, SignalWords.contains(ruled) else {
+        guard let cleaner, SignalWords.contains(ruled, language: context.language) else {
             let final = cursorRule.apply(ruled, context: context)
             return ProcessingResult(
                 raw: raw, ruled: ruled, final: final, ruledFinal: final, body: ruled,
@@ -52,8 +52,9 @@ public struct TextProcessor: Sendable {
 
         let start = ContinuousClock.now
         let terms = vocabulary.terms
+        let language = context.language
         let cleaned = try? await Self.withTimeout(cleanerTimeout) {
-            try await cleaner.clean(ruled, mode: context.mode, vocabulary: terms)
+            try await cleaner.clean(ruled, mode: context.mode, vocabulary: terms, language: language)
         }
         let duration = ContinuousClock.now - start
         let accepted = cleaned.flatMap { Plausibility.accept(input: ruled, output: $0) ? $0 : nil }
@@ -67,8 +68,8 @@ public struct TextProcessor: Sendable {
 
     /// True if `process` would call the cleaner: no snippet, a cleaner is set and a signal word survives the rules.
     public func needsCleaner(_ raw: String, context: RuleContext) -> Bool {
-        guard cleaner != nil, snippetRule.match(raw) == nil else { return false }
-        return SignalWords.contains(applyRules(raw, context: context))
+        guard cleaner != nil, snippetRule.match(raw, language: context.language) == nil else { return false }
+        return SignalWords.contains(applyRules(raw, context: context), language: context.language)
     }
 
     private func applyRules(_ raw: String, context: RuleContext) -> String {

@@ -23,7 +23,7 @@ public struct CursorJoinRule: TextRule {
         var result = text
         if atSentenceStart {
             result = result.prefix(1).uppercased() + result.dropFirst()
-        } else if Self.isLowercasable(firstWordOf: result) {
+        } else if Self.isLowercasable(firstWordOf: result, language: context.language) {
             result = result.prefix(1).lowercased() + result.dropFirst()
         }
         if let last = before.last, !last.isWhitespace, !Self.isOpening(last, in: before) {
@@ -55,13 +55,15 @@ public struct CursorJoinRule: TextRule {
         }
     }
 
-    static func isLowercasable(firstWordOf text: String) -> Bool {
+    static func isLowercasable(firstWordOf text: String, language: DictationLanguage = .german) -> Bool {
+        let pack = language.pack
         guard let firstWord = text.split(separator: " ").first else { return false }
         let letters = firstWord.filter(\.isLetter)
         if letters.count > 1, letters.allSatisfy(\.isUppercase) { return false }  // acronyms such as API
+        if pack.lowercasesNouns { return true }
         let tagger = NLTagger(tagSchemes: [.lexicalClass])
         tagger.string = text
-        tagger.setLanguage(.german, range: text.startIndex..<text.endIndex)
+        tagger.setLanguage(pack.taggerLanguage, range: text.startIndex..<text.endIndex)
         guard let start = text.firstIndex(where: \.isLetter) else { return false }
         let (tag, _) = tagger.tag(at: start, unit: .word, scheme: .lexicalClass)
         return tag.map { lowercasable.contains($0) } ?? false

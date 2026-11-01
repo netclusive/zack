@@ -5,7 +5,8 @@ import ZackCore
 
 private struct FakeCleaner: Cleaner {
     let id: String
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String { text }
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    { text }
 }
 
 private let extras: [String: CleanerFactory] = [

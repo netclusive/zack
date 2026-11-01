@@ -2,10 +2,12 @@ public enum Metrics {
     /// Word error rate on compound-insensitive words (see `comparableWords`); filler words are ignored on both
     /// sides. The denominator is the reference length after hyphen splitting but before merging, so it does not
     /// depend on how the hypothesis spells a compound.
-    public static func wordErrorRate(reference: String, hypothesis: String) -> Double {
-        let refWords = TextTools.words(reference).filter { !TextTools.fillers.contains($0) }
-        let (ref, hyp) = comparableWords(
-            refWords, TextTools.words(hypothesis).filter { !TextTools.fillers.contains($0) })
+    public static func wordErrorRate(
+        reference: String, hypothesis: String, language: DictationLanguage = .german
+    ) -> Double {
+        let fillers = language.pack.fillers
+        let refWords = TextTools.words(reference).filter { !fillers.contains($0) }
+        let (ref, hyp) = comparableWords(refWords, TextTools.words(hypothesis).filter { !fillers.contains($0) })
         let denominator = refWords.flatMap(hyphenParts).count
         guard denominator > 0 else { return hyp.isEmpty ? 0 : 1 }
         return Double(editDistance(ref, hyp)) / Double(denominator)

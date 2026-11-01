@@ -141,14 +141,16 @@ struct StubCleaner: Cleaner {
     let id = "stub"
     let output: String
 
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String { output }
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    { output }
 }
 
 /// A cleaner that does not answer: `clean` sleeps 30 s and ends early only when cancelled.
 struct HangingCleaner: Cleaner {
     let id = "hanging"
 
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String {
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    {
         try await Task.sleep(for: .seconds(30))
         return text
     }
@@ -174,7 +176,8 @@ final class GatedCleaner: Cleaner {
         }?.resume()
     }
 
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String {
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    {
         await withCheckedContinuation { continuation in waiting.withLock { $0 = continuation } }
         return output
     }
@@ -205,12 +208,13 @@ final class RecordingCleaner: Cleaner {
     var discards: Int { state.withLock { $0.discards } }
     var cleans: Int { state.withLock { $0.cleans } }
 
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String {
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    {
         state.withLock { $0.cleans += 1 }
         return output
     }
 
-    func prewarm(mode: TextMode, vocabulary: [String]) {
+    func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {
         state.withLock { $0.prewarms.append(Prewarm(mode: mode, vocabulary: vocabulary)) }
     }
 

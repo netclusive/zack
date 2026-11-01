@@ -8,7 +8,8 @@ struct StubCleaner: Cleaner {
     let output: String
     var delay: Duration = .zero
 
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String {
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
+    {
         if delay > .zero { try await Task.sleep(for: delay) }
         return output
     }

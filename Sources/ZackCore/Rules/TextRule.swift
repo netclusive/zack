@@ -3,10 +3,14 @@ public struct RuleContext: Sendable, Equatable {
     public var mode: TextMode
     /// Text left of the cursor in the target field, if the app exposes it.
     public var textBeforeCursor: String?
+    public var language: DictationLanguage
 
-    public init(mode: TextMode = .prose, textBeforeCursor: String? = nil) {
+    public init(
+        mode: TextMode = .prose, textBeforeCursor: String? = nil, language: DictationLanguage = .german
+    ) {
         self.mode = mode
         self.textBeforeCursor = textBeforeCursor
+        self.language = language
     }
 }
 

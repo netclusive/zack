@@ -57,7 +57,9 @@ struct BenchRunner {
         } catch { throw BenchError.warmUpFailed(transcriber.id, "\(error)") }
         if let cleaner {
             do {
-                _ = try await cleaner.clean(warmUp.0.spoken, mode: warmUp.0.mode, vocabulary: vocabulary.terms)
+                _ = try await cleaner.clean(
+                    warmUp.0.spoken, mode: warmUp.0.mode, vocabulary: vocabulary.terms,
+                    language: .german)
             } catch { throw BenchError.warmUpFailed(cleaner.id, "\(error)") }
         }
 

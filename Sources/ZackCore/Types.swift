@@ -40,10 +40,11 @@ public protocol Transcriber: Sendable {
 public protocol Cleaner: Sendable {
     var id: String { get }
     func prepare() async throws
-    func clean(_ text: String, mode: TextMode, vocabulary: [String]) async throws -> String
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws
+        -> String
     /// Readies a session for a cleanup that may follow; may be called repeatedly. The next `clean` with the same
-    /// mode and vocabulary uses that session, once.
-    func prewarm(mode: TextMode, vocabulary: [String])
+    /// mode, vocabulary and language uses that session, once.
+    func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage)
     /// Drops a readied session that no cleanup took.
     func discardPrewarmed()
 }
@@ -54,6 +55,6 @@ extension Transcriber {
 
 extension Cleaner {
     public func prepare() async throws {}
-    public func prewarm(mode: TextMode, vocabulary: [String]) {}
+    public func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {}
     public func discardPrewarmed() {}
 }

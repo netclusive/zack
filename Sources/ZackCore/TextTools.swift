@@ -1,9 +1,6 @@
 import Foundation
 
 public enum TextTools {
-    /// Filler words removed from dictations and ignored by metrics. "um" is a German preposition, so it is excluded.
-    public static let fillers: Set<String> = ["äh", "ähm", "öh", "öhm", "hm", "hmm", "mhm", "uh"]
-
     private static let innerWordCharacters = CharacterSet(charactersIn: "._-/")
     private static let wordCharacters = CharacterSet.alphanumerics.union(innerWordCharacters)
 

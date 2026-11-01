@@ -650,7 +650,7 @@ public actor DictationController<C: Clock<Duration>> {
             prewarmedCleaner = cleaner
             let terms = processor.vocabulary.terms
             while !Task.isCancelled {
-                cleaner.prewarm(mode: mode, vocabulary: terms)
+                cleaner.prewarm(mode: mode, vocabulary: terms, language: .german)
                 do { try await clock.sleep(for: DictationLimits.prewarmInterval) } catch { return }
             }
         }
