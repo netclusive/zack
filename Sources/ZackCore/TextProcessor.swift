@@ -21,13 +21,14 @@ public struct TextProcessor: Sendable {
     public let cleanerTimeout: Duration
     private let snippetRule: SnippetRule
     private let rules: [any TextRule]
-    private let cursorRule = CursorJoinRule()
+    private let cursorRule: CursorJoinRule
 
     public init(
         vocabulary: Vocabulary = Vocabulary(), snippets: [Snippet] = [], cleaner: (any Cleaner)? = nil,
         cleanerTimeout: Duration = .seconds(2)
     ) {
         self.vocabulary = vocabulary
+        cursorRule = CursorJoinRule(keeping: vocabulary.terms)
         self.cleaner = cleaner
         self.cleanerTimeout = cleanerTimeout
         snippetRule = SnippetRule(snippets)

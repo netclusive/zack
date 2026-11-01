@@ -33,6 +33,12 @@ public struct LanguagePack: Sendable {
     public let taggerLanguage: NLLanguage
     /// Whether nouns may be lowercased after existing text; the cursor rule applies it.
     public let lowercasesNouns: Bool
+    /// Lowercase words that keep their capital letter after existing text (only with `lowercasesNouns`).
+    public let alwaysCapitalized: Set<String>
+    /// Characters that open a quotation, so no space follows them.
+    public let openingQuotes: Set<Character>
+    /// Whether an all-caps match of at least two letters is an acronym, not a filler.
+    public let keepsAcronymFillers: Bool
     public let prompt: CleanerPromptText
 
     static let german = LanguagePack(
@@ -52,6 +58,9 @@ public struct LanguagePack: Sendable {
         snippetTrigger: "baustein",
         taggerLanguage: .german,
         lowercasesNouns: false,
+        alwaysCapitalized: [],
+        openingQuotes: ["„", "‚"],
+        keepsAcronymFillers: false,
         prompt: CleanerPromptText(
             tag: "diktat",
             rules: [
@@ -79,6 +88,13 @@ public struct LanguagePack: Sendable {
         snippetTrigger: "snippet",
         taggerLanguage: .english,
         lowercasesNouns: true,
+        alwaysCapitalized: [
+            "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+            "january", "february", "march", "april", "may", "june", "july", "august", "september", "october",
+            "november", "december",
+        ],
+        openingQuotes: ["„", "‚", "\u{201C}", "\u{2018}"],
+        keepsAcronymFillers: true,
         prompt: CleanerPromptText(
             tag: "dictation",
             rules: [

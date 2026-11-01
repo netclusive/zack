@@ -11,7 +11,12 @@ public struct CursorJoinRule: TextRule {
 
     private static let properNames: Set<NLTag> = [.personalName, .placeName, .organizationName]
 
-    public init() {}
+    /// Vocabulary terms that keep their spelling when a dictation starts with them.
+    private let keptTerms: Set<String>
+
+    public init(keeping terms: [String] = []) {
+        keptTerms = Set(terms)
+    }
 
     public func apply(_ text: String, context: RuleContext) -> String {
         guard let before = context.textBeforeCursor, !text.isEmpty else { return text }
@@ -26,10 +31,10 @@ public struct CursorJoinRule: TextRule {
         var result = text
         if atSentenceStart {
             result = result.prefix(1).uppercased() + result.dropFirst()
-        } else if Self.isLowercasable(firstWordOf: result, language: context.language) {
+        } else if Self.isLowercasable(firstWordOf: result, language: context.language, keeping: keptTerms) {
             result = result.prefix(1).lowercased() + result.dropFirst()
         }
-        if let last = before.last, !last.isWhitespace, !Self.isOpening(last, in: before) {
+        if let last = before.last, !last.isWhitespace, !Self.isOpening(last, in: before, language: context.language) {
             result = " " + result
         }
         return result
@@ -49,22 +54,29 @@ public struct CursorJoinRule: TextRule {
     }
 
     /// Whether `last` opens a bracket or quote, so no space follows. Straight quotes alternate: odd count means open.
-    private static func isOpening(_ last: Character, in before: String) -> Bool {
+    private static func isOpening(_ last: Character, in before: String, language: DictationLanguage) -> Bool {
         switch last {
-        case "(", "[", "{", "„", "‚": true
+        case "(", "[", "{": true
+        case _ where language.pack.openingQuotes.contains(last): true
         case "\"": before.filter { $0 == last }.count % 2 == 1
         case "'": quoteApostropheCount(in: before) % 2 == 1
         default: false
         }
     }
 
-    static func isLowercasable(firstWordOf text: String, language: DictationLanguage = .german) -> Bool {
+    static func isLowercasable(firstWordOf text: String, language: DictationLanguage = .german, keeping terms: Set<String> = []
+    ) -> Bool {
         let pack = language.pack
         guard let firstWord = text.split(separator: " ").first else { return false }
         let letters = firstWord.filter(\.isLetter)
         if letters.count > 1, letters.allSatisfy(\.isUppercase) { return false }  // acronyms such as API
-        if pack.lowercasesNouns, firstWord == "I" || firstWord.hasPrefix("I'") || firstWord.hasPrefix("I\u{2019}") {
-            return false
+        if pack.lowercasesNouns {
+            // Compare the word without trailing punctuation and possessive ("I," or "Monday's").
+            let core = firstWord.prefix { $0 != "'" && $0 != "\u{2019}" }.trimmingCharacters(in: .punctuationCharacters)
+            if core == "I" || firstWord.hasPrefix("I'") || firstWord.hasPrefix("I\u{2019}") { return false }
+            // Inner capitals (SharePoint, APIs), weekdays, months and vocabulary terms stay capitalised.
+            if core.dropFirst().contains(where: \.isUppercase) { return false }
+            if pack.alwaysCapitalized.contains(core.lowercased()) || terms.contains(core) { return false }
         }
         let tagger = NLTagger(tagSchemes: [.lexicalClass, .nameType])
         tagger.string = text

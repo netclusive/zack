@@ -84,3 +84,39 @@ func englishCursorJoinLowercasesOnlyPlainWords(before: String, text: String, exp
     let context = RuleContext(textBeforeCursor: "und dann ")
     #expect(CursorJoinRule().apply("Server neu gestartet.", context: context) == "Server neu gestartet.")
 }
+
+@Test(arguments: [
+    "Monday works for me.", "October is busy.", "SharePoint has the file.", "APIs are slow.", "I, for one, agree.",
+])
+func englishCursorJoinKeepsCapitalisedWords(text: String) {
+    let context = RuleContext(textBeforeCursor: "and ", language: .english)
+    #expect(CursorJoinRule().apply(text, context: context) == text)
+}
+
+@Test func englishCursorJoinKeepsVocabularyTerms() async {
+    let processor = TextProcessor(vocabulary: Vocabulary(terms: ["Kibana"]))
+    let context = RuleContext(textBeforeCursor: "and ", language: .english)
+    #expect(await processor.process("Kibana shows errors.", context: context).final == "Kibana shows errors.")
+}
+
+@Test func englishCursorJoinStillLowercasesPlainNouns() {
+    let context = RuleContext(textBeforeCursor: "and ", language: .english)
+    #expect(CursorJoinRule().apply("Server restarted.", context: context) == "server restarted.")
+}
+
+@Test func germanCursorJoinKeepsNounsAfterConjunction() {
+    let context = RuleContext(textBeforeCursor: "und ")
+    #expect(CursorJoinRule().apply("Montag passt.", context: context) == "Montag passt.")
+}
+
+@Test func englishCurlyOpeningQuotesGetNoSpace() {
+    let english = RuleContext(textBeforeCursor: "She said \u{201C}", language: .english)
+    #expect(CursorJoinRule().apply("Hello there.", context: english) == "hello there.")
+    let single = RuleContext(textBeforeCursor: "She said \u{2018}", language: .english)
+    #expect(CursorJoinRule().apply("Hello there.", context: single) == "hello there.")
+}
+
+@Test func germanClosingCurlyQuoteKeepsItsSpace() {
+    let context = RuleContext(textBeforeCursor: "Er sagte \u{201C}")
+    #expect(CursorJoinRule().apply("und ging", context: context) == " und ging")
+}
