@@ -1,0 +1,882 @@
+[
+  {
+    "final" : "Ich habe die Unterlagen für das Projekt heute Morgen fertiggestellt.",
+    "id" : "p01",
+    "ruled" : "Ich habe die Unterlagen für das Projekt heute Morgen fertiggestellt.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "ich habe die Unterlagen für das Projekt heute Morgen fertiggestellt.",
+    "id" : "p01",
+    "ruled" : "Ich habe die Unterlagen für das Projekt heute Morgen fertiggestellt.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ich habe die Unterlagen für das Projekt heute Morgen fertiggestellt.",
+    "id" : "p01",
+    "ruled" : "Ich habe die Unterlagen für das Projekt heute Morgen fertiggestellt.",
+    "signal" : false
+  },
+  {
+    "final" : "Können wir das Gespräch auf Donnerstagnachmittag verschieben?",
+    "id" : "p02",
+    "ruled" : "Können wir das Gespräch auf Donnerstagnachmittag verschieben?",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "können wir das Gespräch auf Donnerstagnachmittag verschieben?",
+    "id" : "p02",
+    "ruled" : "Können wir das Gespräch auf Donnerstagnachmittag verschieben?",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Können wir das Gespräch auf Donnerstagnachmittag verschieben?",
+    "id" : "p02",
+    "ruled" : "Können wir das Gespräch auf Donnerstagnachmittag verschieben?",
+    "signal" : false
+  },
+  {
+    "final" : "Die Abrechnung für Oktober ist noch nicht vollständig.",
+    "id" : "p03",
+    "ruled" : "Die Abrechnung für Oktober ist noch nicht vollständig.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "die Abrechnung für Oktober ist noch nicht vollständig.",
+    "id" : "p03",
+    "ruled" : "Die Abrechnung für Oktober ist noch nicht vollständig.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Die Abrechnung für Oktober ist noch nicht vollständig.",
+    "id" : "p03",
+    "ruled" : "Die Abrechnung für Oktober ist noch nicht vollständig.",
+    "signal" : false
+  },
+  {
+    "final" : "Bitte schick mir die Präsentation bis morgen Mittag.",
+    "id" : "p04",
+    "ruled" : "Bitte schick mir die Präsentation bis morgen Mittag.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "bitte schick mir die Präsentation bis morgen Mittag.",
+    "id" : "p04",
+    "ruled" : "Bitte schick mir die Präsentation bis morgen Mittag.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Bitte schick mir die Präsentation bis morgen Mittag.",
+    "id" : "p04",
+    "ruled" : "Bitte schick mir die Präsentation bis morgen Mittag.",
+    "signal" : false
+  },
+  {
+    "final" : "Das Treffen mit Max Mustermann war sehr produktiv.",
+    "id" : "p05",
+    "ruled" : "Das Treffen mit Max Mustermann war sehr produktiv.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Treffen mit Max Mustermann war sehr produktiv.",
+    "id" : "p05",
+    "ruled" : "Das Treffen mit Max Mustermann war sehr produktiv.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Treffen mit Max Mustermann war sehr produktiv.",
+    "id" : "p05",
+    "ruled" : "Das Treffen mit Max Mustermann war sehr produktiv.",
+    "signal" : false
+  },
+  {
+    "final" : "Ich bin ab nächster Woche im Urlaub.",
+    "id" : "p06",
+    "ruled" : "Ich bin ab nächster Woche im Urlaub.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "ich bin ab nächster Woche im Urlaub.",
+    "id" : "p06",
+    "ruled" : "Ich bin ab nächster Woche im Urlaub.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ich bin ab nächster Woche im Urlaub.",
+    "id" : "p06",
+    "ruled" : "Ich bin ab nächster Woche im Urlaub.",
+    "signal" : false
+  },
+  {
+    "final" : "Wir sollten die Dokumentation vor dem Termin noch einmal durchgehen.",
+    "id" : "p07",
+    "ruled" : "Wir sollten die Dokumentation vor dem Termin noch einmal durchgehen.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "wir sollten die Dokumentation vor dem Termin noch einmal durchgehen.",
+    "id" : "p07",
+    "ruled" : "Wir sollten die Dokumentation vor dem Termin noch einmal durchgehen.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Wir sollten die Dokumentation vor dem Termin noch einmal durchgehen.",
+    "id" : "p07",
+    "ruled" : "Wir sollten die Dokumentation vor dem Termin noch einmal durchgehen.",
+    "signal" : false
+  },
+  {
+    "final" : "Vielen Dank für die schnelle Rückmeldung, das hilft uns sehr.",
+    "id" : "p08",
+    "ruled" : "Vielen Dank für die schnelle Rückmeldung, das hilft uns sehr.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "vielen Dank für die schnelle Rückmeldung, das hilft uns sehr.",
+    "id" : "p08",
+    "ruled" : "Vielen Dank für die schnelle Rückmeldung, das hilft uns sehr.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Vielen Dank für die schnelle Rückmeldung, das hilft uns sehr.",
+    "id" : "p08",
+    "ruled" : "Vielen Dank für die schnelle Rückmeldung, das hilft uns sehr.",
+    "signal" : false
+  },
+  {
+    "final" : "Ich habe den Hotfix gemergt und auf Staging deployt.",
+    "id" : "d01",
+    "ruled" : "Ich habe den Hotfix gemergt und auf Staging deployt.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "ich habe den Hotfix gemergt und auf Staging deployt.",
+    "id" : "d01",
+    "ruled" : "Ich habe den Hotfix gemergt und auf Staging deployt.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ich habe den Hotfix gemergt und auf Staging deployt.",
+    "id" : "d01",
+    "ruled" : "Ich habe den Hotfix gemergt und auf Staging deployt.",
+    "signal" : false
+  },
+  {
+    "final" : "Der Pull Request ist approved, kannst du ihn mergen?",
+    "id" : "d02",
+    "ruled" : "Der Pull Request ist approved, kannst du ihn mergen?",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Pull Request ist approved, kannst du ihn mergen?",
+    "id" : "d02",
+    "ruled" : "Der Pull Request ist approved, kannst du ihn mergen?",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Pull Request ist approved, kannst du ihn mergen?",
+    "id" : "d02",
+    "ruled" : "Der Pull Request ist approved, kannst du ihn mergen?",
+    "signal" : false
+  },
+  {
+    "final" : "Das Backend wirft einen Timeout beim Login.",
+    "id" : "d03",
+    "ruled" : "Das Backend wirft einen Timeout beim Login.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Backend wirft einen Timeout beim Login.",
+    "id" : "d03",
+    "ruled" : "Das Backend wirft einen Timeout beim Login.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Backend wirft einen Timeout beim Login.",
+    "id" : "d03",
+    "ruled" : "Das Backend wirft einen Timeout beim Login.",
+    "signal" : false
+  },
+  {
+    "final" : "Wir müssen das Feature noch refactoren, bevor wir releasen.",
+    "id" : "d04",
+    "ruled" : "Wir müssen das Feature noch refactoren, bevor wir releasen.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "wir müssen das Feature noch refactoren, bevor wir releasen.",
+    "id" : "d04",
+    "ruled" : "Wir müssen das Feature noch refactoren, bevor wir releasen.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Wir müssen das Feature noch refactoren, bevor wir releasen.",
+    "id" : "d04",
+    "ruled" : "Wir müssen das Feature noch refactoren, bevor wir releasen.",
+    "signal" : false
+  },
+  {
+    "final" : "Der Container ist gecrasht, ich habe ihn neu gestartet.",
+    "id" : "d05",
+    "ruled" : "Der Container ist gecrasht, ich habe ihn neu gestartet.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Container ist gecrasht, ich habe ihn neu gestartet.",
+    "id" : "d05",
+    "ruled" : "Der Container ist gecrasht, ich habe ihn neu gestartet.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Container ist gecrasht, ich habe ihn neu gestartet.",
+    "id" : "d05",
+    "ruled" : "Der Container ist gecrasht, ich habe ihn neu gestartet.",
+    "signal" : false
+  },
+  {
+    "final" : "Kannst du den Branch rebasen und danach pushen?",
+    "id" : "d06",
+    "ruled" : "Kannst du den Branch rebasen und danach pushen?",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "kannst du den Branch rebasen und danach pushen?",
+    "id" : "d06",
+    "ruled" : "Kannst du den Branch rebasen und danach pushen?",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Kannst du den Branch rebasen und danach pushen?",
+    "id" : "d06",
+    "ruled" : "Kannst du den Branch rebasen und danach pushen?",
+    "signal" : false
+  },
+  {
+    "final" : "Das Monitoring zeigt seit dem Update eine hohe CPU Last.",
+    "id" : "d07",
+    "ruled" : "Das Monitoring zeigt seit dem Update eine hohe CPU Last.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Monitoring zeigt seit dem Update eine hohe CPU Last.",
+    "id" : "d07",
+    "ruled" : "Das Monitoring zeigt seit dem Update eine hohe CPU Last.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Monitoring zeigt seit dem Update eine hohe CPU Last.",
+    "id" : "d07",
+    "ruled" : "Das Monitoring zeigt seit dem Update eine hohe CPU Last.",
+    "signal" : false
+  },
+  {
+    "final" : "Ich schedule das Meeting für nächste Woche.",
+    "id" : "d08",
+    "ruled" : "Ich schedule das Meeting für nächste Woche.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "ich schedule das Meeting für nächste Woche.",
+    "id" : "d08",
+    "ruled" : "Ich schedule das Meeting für nächste Woche.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ich schedule das Meeting für nächste Woche.",
+    "id" : "d08",
+    "ruled" : "Ich schedule das Meeting für nächste Woche.",
+    "signal" : false
+  },
+  {
+    "final" : "Das Treffen ist am Dienstag, nein, am Mittwoch.",
+    "id" : "c01",
+    "ruled" : "Das Treffen ist am Dienstag, nein, am Mittwoch.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Treffen ist am Dienstag, nein, am Mittwoch.",
+    "id" : "c01",
+    "ruled" : "Das Treffen ist am Dienstag, nein, am Mittwoch.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Treffen ist am Dienstag, nein, am Mittwoch.",
+    "id" : "c01",
+    "ruled" : "Das Treffen ist am Dienstag, nein, am Mittwoch.",
+    "signal" : true
+  },
+  {
+    "final" : "Schick das bitte an das Vertriebsteam, ich meine an das Supportteam.",
+    "id" : "c02",
+    "ruled" : "Schick das bitte an das Vertriebsteam, ich meine an das Supportteam.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "Schick das bitte an das Vertriebsteam, ich meine an das Supportteam.",
+    "id" : "c02",
+    "ruled" : "Schick das bitte an das Vertriebsteam, ich meine an das Supportteam.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Schick das bitte an das Vertriebsteam, ich meine an das Supportteam.",
+    "id" : "c02",
+    "ruled" : "Schick das bitte an das Vertriebsteam, ich meine an das Supportteam.",
+    "signal" : true
+  },
+  {
+    "final" : "Wir brauchen neue Switches, Korrektur, neue Router.",
+    "id" : "c03",
+    "ruled" : "Wir brauchen neue Switches, Korrektur, neue Router.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "wir brauchen neue Switches, Korrektur, neue Router.",
+    "id" : "c03",
+    "ruled" : "Wir brauchen neue Switches, Korrektur, neue Router.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Wir brauchen neue Switches, Korrektur, neue Router.",
+    "id" : "c03",
+    "ruled" : "Wir brauchen neue Switches, Korrektur, neue Router.",
+    "signal" : true
+  },
+  {
+    "final" : "Der Rollout ist für Freitag geplant, besser gesagt für Montag.",
+    "id" : "c04",
+    "ruled" : "Der Rollout ist für Freitag geplant, besser gesagt für Montag.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Rollout ist für Freitag geplant, besser gesagt für Montag.",
+    "id" : "c04",
+    "ruled" : "Der Rollout ist für Freitag geplant, besser gesagt für Montag.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Rollout ist für Freitag geplant, besser gesagt für Montag.",
+    "id" : "c04",
+    "ruled" : "Der Rollout ist für Freitag geplant, besser gesagt für Montag.",
+    "signal" : true
+  },
+  {
+    "final" : "Die Rechnung geht an die Buchhaltung, streich das, an den Einkauf.",
+    "id" : "c05",
+    "ruled" : "Die Rechnung geht an die Buchhaltung, streich das, an den Einkauf.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "die Rechnung geht an die Buchhaltung, streich das, an den Einkauf.",
+    "id" : "c05",
+    "ruled" : "Die Rechnung geht an die Buchhaltung, streich das, an den Einkauf.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Die Rechnung geht an die Buchhaltung, streich das, an den Einkauf.",
+    "id" : "c05",
+    "ruled" : "Die Rechnung geht an die Buchhaltung, streich das, an den Einkauf.",
+    "signal" : true
+  },
+  {
+    "final" : "Ruf mich am Vormittag, nein, am Nachmittag an.",
+    "id" : "c06",
+    "ruled" : "Ruf mich am Vormittag, nein, am Nachmittag an.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "Ruf mich am Vormittag, nein, am Nachmittag an.",
+    "id" : "c06",
+    "ruled" : "Ruf mich am Vormittag, nein, am Nachmittag an.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ruf mich am Vormittag, nein, am Nachmittag an.",
+    "id" : "c06",
+    "ruled" : "Ruf mich am Vormittag, nein, am Nachmittag an.",
+    "signal" : true
+  },
+  {
+    "final" : "Der Fehler tritt nur im Chrome auf, also nicht im Chrome, sondern im Safari.",
+    "id" : "c07",
+    "ruled" : "Der Fehler tritt nur im Chrome auf, also nicht im Chrome, sondern im Safari.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Fehler tritt nur im Chrome auf, also nicht im Chrome, sondern im Safari.",
+    "id" : "c07",
+    "ruled" : "Der Fehler tritt nur im Chrome auf, also nicht im Chrome, sondern im Safari.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Fehler tritt nur im Chrome auf, also nicht im Chrome, sondern im Safari.",
+    "id" : "c07",
+    "ruled" : "Der Fehler tritt nur im Chrome auf, also nicht im Chrome, sondern im Safari.",
+    "signal" : true
+  },
+  {
+    "final" : "Das Budget kommt aus dem Marketing, Moment, aus dem Vertrieb.",
+    "id" : "c08",
+    "ruled" : "Das Budget kommt aus dem Marketing, Moment, aus dem Vertrieb.",
+    "signal" : true
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Budget kommt aus dem Marketing, Moment, aus dem Vertrieb.",
+    "id" : "c08",
+    "ruled" : "Das Budget kommt aus dem Marketing, Moment, aus dem Vertrieb.",
+    "signal" : true
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Budget kommt aus dem Marketing, Moment, aus dem Vertrieb.",
+    "id" : "c08",
+    "ruled" : "Das Budget kommt aus dem Marketing, Moment, aus dem Vertrieb.",
+    "signal" : true
+  },
+  {
+    "final" : "userId",
+    "id" : "k01",
+    "ruled" : "userId",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "userId",
+    "id" : "k01",
+    "ruled" : "userId",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "UserId",
+    "id" : "k01",
+    "ruled" : "userId",
+    "signal" : false
+  },
+  {
+    "final" : "Öffne deploy.sh",
+    "id" : "k02",
+    "ruled" : "Öffne deploy.sh",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "Öffne deploy.sh",
+    "id" : "k02",
+    "ruled" : "Öffne deploy.sh",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Öffne deploy.sh",
+    "id" : "k02",
+    "ruled" : "Öffne deploy.sh",
+    "signal" : false
+  },
+  {
+    "final" : "Setz max_retry_count im Config File.",
+    "id" : "k03",
+    "ruled" : "Setz max_retry_count im Config File.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "Setz max_retry_count im Config File.",
+    "id" : "k03",
+    "ruled" : "Setz max_retry_count im Config File.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Setz max_retry_count im Config File.",
+    "id" : "k03",
+    "ruled" : "Setz max_retry_count im Config File.",
+    "signal" : false
+  },
+  {
+    "final" : "Prüf bitte die Funktion PaymentService in der Datei.",
+    "id" : "k04",
+    "ruled" : "Prüf bitte die Funktion PaymentService in der Datei.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "Prüf bitte die Funktion PaymentService in der Datei.",
+    "id" : "k04",
+    "ruled" : "Prüf bitte die Funktion PaymentService in der Datei.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Prüf bitte die Funktion PaymentService in der Datei.",
+    "id" : "k04",
+    "ruled" : "Prüf bitte die Funktion PaymentService in der Datei.",
+    "signal" : false
+  },
+  {
+    "final" : "Lies die Datei readme.md und fass sie zusammen.",
+    "id" : "k05",
+    "ruled" : "Lies die Datei readme.md und fass sie zusammen.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "Lies die Datei readme.md und fass sie zusammen.",
+    "id" : "k05",
+    "ruled" : "Lies die Datei readme.md und fass sie zusammen.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Lies die Datei readme.md und fass sie zusammen.",
+    "id" : "k05",
+    "ruled" : "Lies die Datei readme.md und fass sie zusammen.",
+    "signal" : false
+  },
+  {
+    "final" : "Der Test für user-profile schlägt fehl.",
+    "id" : "k06",
+    "ruled" : "Der Test für user-profile schlägt fehl.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Test für user-profile schlägt fehl.",
+    "id" : "k06",
+    "ruled" : "Der Test für user-profile schlägt fehl.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Test für user-profile schlägt fehl.",
+    "id" : "k06",
+    "ruled" : "Der Test für user-profile schlägt fehl.",
+    "signal" : false
+  },
+  {
+    "final" : "Erstell einen Branch mit dem Namen fix-login-timeout.",
+    "id" : "k07",
+    "ruled" : "Erstell einen Branch mit dem Namen fix-login-timeout.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "erstell einen Branch mit dem Namen fix-login-timeout.",
+    "id" : "k07",
+    "ruled" : "Erstell einen Branch mit dem Namen fix-login-timeout.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Erstell einen Branch mit dem Namen fix-login-timeout.",
+    "id" : "k07",
+    "ruled" : "Erstell einen Branch mit dem Namen fix-login-timeout.",
+    "signal" : false
+  },
+  {
+    "final" : "git status",
+    "id" : "k08",
+    "ruled" : "git status",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "git status",
+    "id" : "k08",
+    "ruled" : "git status",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Git status",
+    "id" : "k08",
+    "ruled" : "git status",
+    "signal" : false
+  },
+  {
+    "final" : "Die VM läuft auf dem VMware Cluster.",
+    "id" : "v01",
+    "ruled" : "Die VM läuft auf dem VMware Cluster.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "die VM läuft auf dem VMware Cluster.",
+    "id" : "v01",
+    "ruled" : "Die VM läuft auf dem VMware Cluster.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Die VM läuft auf dem VMware Cluster.",
+    "id" : "v01",
+    "ruled" : "Die VM läuft auf dem VMware Cluster.",
+    "signal" : false
+  },
+  {
+    "final" : "Das Repo liegt im GitHub.",
+    "id" : "v02",
+    "ruled" : "Das Repo liegt im GitHub.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Repo liegt im GitHub.",
+    "id" : "v02",
+    "ruled" : "Das Repo liegt im GitHub.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Repo liegt im GitHub.",
+    "id" : "v02",
+    "ruled" : "Das Repo liegt im GitHub.",
+    "signal" : false
+  },
+  {
+    "final" : "Bitte trag das in SharePoint ein.",
+    "id" : "v03",
+    "ruled" : "Bitte trag das in SharePoint ein.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "bitte trag das in SharePoint ein.",
+    "id" : "v03",
+    "ruled" : "Bitte trag das in SharePoint ein.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Bitte trag das in SharePoint ein.",
+    "id" : "v03",
+    "ruled" : "Bitte trag das in SharePoint ein.",
+    "signal" : false
+  },
+  {
+    "final" : "Ich schaue mir das im Kibana Dashboard an.",
+    "id" : "v04",
+    "ruled" : "Ich schaue mir das im Kibana Dashboard an.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "ich schaue mir das im Kibana Dashboard an.",
+    "id" : "v04",
+    "ruled" : "Ich schaue mir das im Kibana Dashboard an.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ich schaue mir das im Kibana Dashboard an.",
+    "id" : "v04",
+    "ruled" : "Ich schaue mir das im Kibana Dashboard an.",
+    "signal" : false
+  },
+  {
+    "final" : "Viele Grüße\nMax Mustermann",
+    "id" : "v05",
+    "ruled" : "Viele Grüße\nMax Mustermann",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "viele Grüße\nMax Mustermann",
+    "id" : "v05",
+    "ruled" : "Viele Grüße\nMax Mustermann",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Viele Grüße\nMax Mustermann",
+    "id" : "v05",
+    "ruled" : "Viele Grüße\nMax Mustermann",
+    "signal" : false
+  },
+  {
+    "final" : "Der Alarm in PagerDuty ist rot.",
+    "id" : "v06",
+    "ruled" : "Der Alarm in PagerDuty ist rot.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Alarm in PagerDuty ist rot.",
+    "id" : "v06",
+    "ruled" : "Der Alarm in PagerDuty ist rot.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Alarm in PagerDuty ist rot.",
+    "id" : "v06",
+    "ruled" : "Der Alarm in PagerDuty ist rot.",
+    "signal" : false
+  },
+  {
+    "final" : "Das Ticket hängt im Node-RED Flow.",
+    "id" : "v07",
+    "ruled" : "Das Ticket hängt im Node-RED Flow.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Ticket hängt im Node-RED Flow.",
+    "id" : "v07",
+    "ruled" : "Das Ticket hängt im Node-RED Flow.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Ticket hängt im Node-RED Flow.",
+    "id" : "v07",
+    "ruled" : "Das Ticket hängt im Node-RED Flow.",
+    "signal" : false
+  },
+  {
+    "final" : "Ich melde mich heute noch telefonisch bei Ihnen.",
+    "id" : "v08",
+    "ruled" : "Ich melde mich heute noch telefonisch bei Ihnen.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "ich melde mich heute noch telefonisch bei Ihnen.",
+    "id" : "v08",
+    "ruled" : "Ich melde mich heute noch telefonisch bei Ihnen.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Ich melde mich heute noch telefonisch bei Ihnen.",
+    "id" : "v08",
+    "ruled" : "Ich melde mich heute noch telefonisch bei Ihnen.",
+    "signal" : false
+  },
+  {
+    "final" : "Das Wartungsfenster für den VMware Cluster ist am Samstagmorgen geplant, bitte informiert alle betroffenen Kunden rechtzeitig vorab und legt dafür ein Ticket im GitHub an.",
+    "id" : "l01",
+    "ruled" : "Das Wartungsfenster für den VMware Cluster ist am Samstagmorgen geplant, bitte informiert alle betroffenen Kunden rechtzeitig vorab und legt dafür ein Ticket im GitHub an.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "das Wartungsfenster für den VMware Cluster ist am Samstagmorgen geplant, bitte informiert alle betroffenen Kunden rechtzeitig vorab und legt dafür ein Ticket im GitHub an.",
+    "id" : "l01",
+    "ruled" : "Das Wartungsfenster für den VMware Cluster ist am Samstagmorgen geplant, bitte informiert alle betroffenen Kunden rechtzeitig vorab und legt dafür ein Ticket im GitHub an.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Das Wartungsfenster für den VMware Cluster ist am Samstagmorgen geplant, bitte informiert alle betroffenen Kunden rechtzeitig vorab und legt dafür ein Ticket im GitHub an.",
+    "id" : "l01",
+    "ruled" : "Das Wartungsfenster für den VMware Cluster ist am Samstagmorgen geplant, bitte informiert alle betroffenen Kunden rechtzeitig vorab und legt dafür ein Ticket im GitHub an.",
+    "signal" : false
+  },
+  {
+    "final" : "Im Kibana Dashboard sieht man seit gestern Abend einen deutlichen Anstieg der Latenz, deshalb prüfe ich zuerst die Netzwerkverbindung und danach die Speicherauslastung auf dem Host.",
+    "id" : "l02",
+    "ruled" : "Im Kibana Dashboard sieht man seit gestern Abend einen deutlichen Anstieg der Latenz, deshalb prüfe ich zuerst die Netzwerkverbindung und danach die Speicherauslastung auf dem Host.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "im Kibana Dashboard sieht man seit gestern Abend einen deutlichen Anstieg der Latenz, deshalb prüfe ich zuerst die Netzwerkverbindung und danach die Speicherauslastung auf dem Host.",
+    "id" : "l02",
+    "ruled" : "Im Kibana Dashboard sieht man seit gestern Abend einen deutlichen Anstieg der Latenz, deshalb prüfe ich zuerst die Netzwerkverbindung und danach die Speicherauslastung auf dem Host.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Im Kibana Dashboard sieht man seit gestern Abend einen deutlichen Anstieg der Latenz, deshalb prüfe ich zuerst die Netzwerkverbindung und danach die Speicherauslastung auf dem Host.",
+    "id" : "l02",
+    "ruled" : "Im Kibana Dashboard sieht man seit gestern Abend einen deutlichen Anstieg der Latenz, deshalb prüfe ich zuerst die Netzwerkverbindung und danach die Speicherauslastung auf dem Host.",
+    "signal" : false
+  },
+  {
+    "final" : "Der Alarm in PagerDuty meldet seit früh einen Fehler beim Backup, ich habe den Server neu gestartet und alles im Ticket dokumentiert, die Ursache klären wir am Montag.",
+    "id" : "l03",
+    "ruled" : "Der Alarm in PagerDuty meldet seit früh einen Fehler beim Backup, ich habe den Server neu gestartet und alles im Ticket dokumentiert, die Ursache klären wir am Montag.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "der Alarm in PagerDuty meldet seit früh einen Fehler beim Backup, ich habe den Server neu gestartet und alles im Ticket dokumentiert, die Ursache klären wir am Montag.",
+    "id" : "l03",
+    "ruled" : "Der Alarm in PagerDuty meldet seit früh einen Fehler beim Backup, ich habe den Server neu gestartet und alles im Ticket dokumentiert, die Ursache klären wir am Montag.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Der Alarm in PagerDuty meldet seit früh einen Fehler beim Backup, ich habe den Server neu gestartet und alles im Ticket dokumentiert, die Ursache klären wir am Montag.",
+    "id" : "l03",
+    "ruled" : "Der Alarm in PagerDuty meldet seit früh einen Fehler beim Backup, ich habe den Server neu gestartet und alles im Ticket dokumentiert, die Ursache klären wir am Montag.",
+    "signal" : false
+  },
+  {
+    "final" : "Die neue Firewall wurde gestern Nachmittag geliefert, wir bauen sie nächste Woche ein und aktualisieren anschließend die Dokumentation, damit der Support alle Änderungen nachvollziehen kann.",
+    "id" : "l04",
+    "ruled" : "Die neue Firewall wurde gestern Nachmittag geliefert, wir bauen sie nächste Woche ein und aktualisieren anschließend die Dokumentation, damit der Support alle Änderungen nachvollziehen kann.",
+    "signal" : false
+  },
+  {
+    "context" : "und dann ",
+    "final" : "die neue Firewall wurde gestern Nachmittag geliefert, wir bauen sie nächste Woche ein und aktualisieren anschließend die Dokumentation, damit der Support alle Änderungen nachvollziehen kann.",
+    "id" : "l04",
+    "ruled" : "Die neue Firewall wurde gestern Nachmittag geliefert, wir bauen sie nächste Woche ein und aktualisieren anschließend die Dokumentation, damit der Support alle Änderungen nachvollziehen kann.",
+    "signal" : false
+  },
+  {
+    "context" : "Fertig. ",
+    "final" : "Die neue Firewall wurde gestern Nachmittag geliefert, wir bauen sie nächste Woche ein und aktualisieren anschließend die Dokumentation, damit der Support alle Änderungen nachvollziehen kann.",
+    "id" : "l04",
+    "ruled" : "Die neue Firewall wurde gestern Nachmittag geliefert, wir bauen sie nächste Woche ein und aktualisieren anschließend die Dokumentation, damit der Support alle Änderungen nachvollziehen kann.",
+    "signal" : false
+  }
+]
