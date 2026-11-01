@@ -5,7 +5,9 @@ import ZackDesktop
 /// Command line of `zack-bench`, shared with bench variants that add engines.
 public enum BenchCommand {
     static let spec = ArgumentSpec(
-        values: ["corpus", "audio-dir", "voice", "id", "transcriber", "cleaner", "repeat", "results", "device"],
+        values: [
+            "corpus", "audio-dir", "voice", "id", "transcriber", "cleaner", "repeat", "results", "device", "language",
+        ],
         flags: ["all"])
 
     /// Runs the command in `CommandLine.arguments` and exits. `name` appears in help and error texts;
@@ -19,12 +21,13 @@ public enum BenchCommand {
             exit(0)
         }
         let arguments: Arguments
+        let command: Invocation
         do {
             arguments = try Arguments(CommandLine.arguments, spec: spec)
+            command = try Invocation(arguments: arguments, registry: registry)
         } catch {
             fail("\(ErrorDescription.text(error)) (see `\(name) help`)", code: 2)
         }
-        let command = Invocation(arguments: arguments, registry: registry)
         let help = usage(name: name, registry: registry)
         do {
             switch arguments.command {
@@ -48,11 +51,11 @@ public enum BenchCommand {
         """
         \(name) <command> [options]
 
-          synth   [--audio-dir bench/corpus/audio-synth] [--voice Anna] [--id <case>]
-          record  [--audio-dir bench/corpus/audio] [--id <case>] [--all]
+          synth   [--language de|en] [--audio-dir bench/corpus/audio-synth] [--voice Anna] [--id <case>]
+          record  [--language de|en] [--audio-dir bench/corpus/audio] [--id <case>] [--all]
           mic-check [--repeat 5] [--device <Name>]
-          run     --transcriber <id> [--cleaner none] [--repeat 5] [--audio-dir bench/corpus/audio]
-                  [--results bench/results]
+          run     --transcriber <id> [--language de|en] [--cleaner none] [--repeat 5]
+                  [--audio-dir bench/corpus/audio] [--results bench/results]
           report  [--results bench/results] [--all]
 
         transcribers: \(Registry.transcriberIDs.joined(separator: ", "))
@@ -66,12 +69,49 @@ public enum BenchCommand {
     }
 }
 
+/// Per-language defaults of the file options; an explicit option always wins.
+struct BenchDefaults: Equatable {
+    let language: DictationLanguage
+    let corpus: String
+    let voice: String
+    let synthDirectory: String
+    let audioDirectory: String
+
+    init(arguments: Arguments) throws {
+        let code = arguments["language"] ?? DictationLanguage.german.rawValue
+        guard let language = DictationLanguage(rawValue: code) else {
+            throw ArgumentError.invalidValue(
+                option: "--language", value: code, allowed: DictationLanguage.allCases.map(\.rawValue))
+        }
+        self.language = language
+        switch language {
+        case .german:
+            corpus = "bench/corpus/cases.json"
+            voice = "Anna"
+            synthDirectory = "bench/corpus/audio-synth"
+            audioDirectory = "bench/corpus/audio"
+        case .english:
+            corpus = "bench/corpus/cases-en.json"
+            voice = "Samantha"
+            synthDirectory = "bench/corpus/audio-synth-en"
+            audioDirectory = "bench/corpus/audio-en"
+        }
+    }
+}
+
 /// One parsed command line.
 private struct Invocation {
     let arguments: Arguments
     let registry: Registry
+    let defaults: BenchDefaults
 
-    var corpusURL: URL { URL(fileURLWithPath: arguments["corpus"] ?? "bench/corpus/cases.json") }
+    init(arguments: Arguments, registry: Registry) throws {
+        self.arguments = arguments
+        self.registry = registry
+        defaults = try BenchDefaults(arguments: arguments)
+    }
+
+    var corpusURL: URL { URL(fileURLWithPath: arguments["corpus"] ?? defaults.corpus) }
 
     func loadCorpus() throws -> Corpus {
         try Corpus.decode(Data(contentsOf: corpusURL))
@@ -85,11 +125,11 @@ private struct Invocation {
     }
 
     func synth() throws {
-        let directory = URL(fileURLWithPath: arguments["audio-dir"] ?? "bench/corpus/audio-synth")
+        let directory = URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.synthDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         for testCase in try selectedCases(try loadCorpus()) {
             let output = directory.appendingPathComponent("\(testCase.id).wav")
-            try Synthesizer.synthesize(testCase.spoken, voice: arguments["voice"] ?? "Anna", to: output)
+            try Synthesizer.synthesize(testCase.spoken, voice: arguments["voice"] ?? defaults.voice, to: output)
             print("synth \(testCase.id)")
         }
     }
@@ -111,7 +151,7 @@ private struct Invocation {
 
     func record() async throws {
         try await ensureMicrophoneAccess()
-        let directory = URL(fileURLWithPath: arguments["audio-dir"] ?? "bench/corpus/audio")
+        let directory = URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.audioDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let capture = MicrophoneCapture()
         var device: String?
@@ -188,9 +228,10 @@ private struct Invocation {
         let transcriberID = try arguments.required("transcriber")
         let repeats = try arguments.positiveInteger("repeat", default: 5)
         let runner = BenchRunner(
-            corpus: try loadCorpus(), transcriber: try Registry.transcriber(transcriberID),
+            corpus: try loadCorpus(), transcriber: try Registry.transcriber(transcriberID, language: defaults.language),
             cleaner: try registry.cleaner(arguments["cleaner"] ?? "none"),
-            audioDirectory: URL(fileURLWithPath: arguments["audio-dir"] ?? "bench/corpus/audio"), repeats: repeats)
+            audioDirectory: URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.audioDirectory),
+            repeats: repeats, language: defaults.language)
         let result = try await runner.run()
         let directory = URL(fileURLWithPath: arguments["results"] ?? "bench/results")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

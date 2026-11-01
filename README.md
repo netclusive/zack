@@ -187,6 +187,11 @@ Common options: `--audio-dir <dir>` (default `bench/corpus/audio`, for `synth` `
 `--results <dir>` (default `bench/results`), `--corpus <file>` (default `bench/corpus/cases.json`) and
 `--id <case>` for `synth` and `record`. `zack-bench help` lists them.
 
+`--language de|en` (for `synth`, `record` and `run`, default `de`) picks the language; `en` switches the defaults to
+`bench/corpus/cases-en.json`, the voice `Samantha` and the audio folders `bench/corpus/audio-synth-en` (`synth`) and
+`bench/corpus/audio-en` (`record`, `run`), and `run` uses the English rules and an English speech locale. Explicit
+options win over these defaults.
+
 Recordings and results contain voice and text and are not tracked by Git.
 
 ## Model downloads

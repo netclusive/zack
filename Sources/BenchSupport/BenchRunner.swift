@@ -25,6 +25,7 @@ struct BenchRunner {
     let audioDirectory: URL
     /// Timed round-robin passes over all cases; timings and quality come from every pass (raw/final shown: pass 1).
     var repeats = 5
+    var language: DictationLanguage = .german
     var log: (String) -> Void = { print($0) }
 
     /// Timings and output of one case in one pass.
@@ -59,7 +60,7 @@ struct BenchRunner {
             do {
                 _ = try await cleaner.clean(
                     warmUp.0.spoken, mode: warmUp.0.mode, vocabulary: vocabulary.terms,
-                    language: .german)
+                    language: language)
             } catch { throw BenchError.warmUpFailed(cleaner.id, "\(error)") }
         }
 
@@ -126,7 +127,7 @@ struct BenchRunner {
         let raw = current.raw
         var processed: ProcessingResult?
         current.processMs = await clock.measure {
-            processed = await processor.process(raw, context: RuleContext(mode: mode))
+            processed = await processor.process(raw, context: RuleContext(mode: mode, language: language))
         }.milliseconds
         current.processed = processed
         return current
@@ -145,7 +146,7 @@ struct BenchRunner {
         let processed = pass.processed
         return CaseResult(
             id: testCase.id, group: testCase.group, raw: pass.raw, final: pass.final,
-            wer: Metrics.wordErrorRate(reference: testCase.spoken, hypothesis: pass.raw),
+            wer: Metrics.wordErrorRate(reference: testCase.spoken, hypothesis: pass.raw, language: language),
             termHitRate: Metrics.termHitRate(terms: testCase.terms, in: pass.final),
             matchesExpected: Metrics.matches(expected: testCase.expected, actual: pass.final),
             usedCleaner: processed?.usedCleaner ?? false,
@@ -154,7 +155,9 @@ struct BenchRunner {
             cleanerMs: processed?.cleanerDuration?.milliseconds ?? 0,
             transcribeMs: pass.transcribeMs, processMs: pass.processMs,
             transcribeSamplesMs: transcribeSamples, processSamplesMs: processSamples, audioSeconds: audioSeconds,
-            werPasses: passes.map { Metrics.wordErrorRate(reference: testCase.spoken, hypothesis: $0.raw) },
+            werPasses: passes.map {
+                Metrics.wordErrorRate(reference: testCase.spoken, hypothesis: $0.raw, language: language)
+            },
             termHitPasses: passes.compactMap { Metrics.termHitRate(terms: testCase.terms, in: $0.final) },
             matchPasses: passes.map { Metrics.matches(expected: testCase.expected, actual: $0.final) },
             cleanerAttemptedPasses: passes.map { $0.processed?.cleanerDuration != nil },

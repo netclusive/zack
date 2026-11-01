@@ -104,6 +104,28 @@ func signalWordsNeedSomethingToCorrect(text: String, expected: Bool) {
     }
 }
 
+@Test func englishSignalWordsMatchCorrectionsOnly() async throws {
+    let corpus = try Corpus.decode(Data(contentsOf: englishCorpusURL()))
+    let processor = TextProcessor(vocabulary: corpus.parsedVocabulary, snippets: corpus.parsedSnippets)
+    for testCase in corpus.cases {
+        let ruled = await processor.process(
+            testCase.spoken, context: RuleContext(mode: testCase.mode, language: .english)
+        ).ruled
+        #expect(SignalWords.contains(ruled, language: .english) == (testCase.group == "correction"), "\(testCase.id)")
+    }
+}
+
+@Test func englishPlausibilityAcceptsCorrections() async throws {
+    let corpus = try Corpus.decode(Data(contentsOf: englishCorpusURL()))
+    let processor = TextProcessor(vocabulary: corpus.parsedVocabulary, snippets: corpus.parsedSnippets)
+    for testCase in corpus.cases where testCase.group == "correction" {
+        let ruled = await processor.process(
+            testCase.spoken, context: RuleContext(mode: testCase.mode, language: .english)
+        ).ruled
+        #expect(Plausibility.accept(input: ruled, output: testCase.expected), "\(testCase.id)")
+    }
+}
+
 @Test func promptNamesDictationDelimiters() {
     let prompt = CleanerPrompt.instructions(mode: .prose, vocabulary: [])
     #expect(prompt.contains("<diktat>"))
