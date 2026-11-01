@@ -9,17 +9,21 @@ public enum TextTools {
         wordsWithCommas(text).map(\.word)
     }
 
-    /// The words of `words(_:)`, each flagged when a comma lies between it and the previous word.
+    /// The words of `words(_:)`, each flagged when a comma lies between it and the previous word, or the previous
+    /// word ends with a period. A period inside a word ("readme.md") does not count.
     public static func wordsWithCommas(_ text: String) -> [(word: String, afterComma: Bool)] {
         var result: [(word: String, afterComma: Bool)] = []
         var token = String.UnicodeScalarView()
         var sawComma = false
         func flush() {
+            let endsWithPeriod = token.last == "."
             let word = String(token).trimmingCharacters(in: innerWordCharacters)
             token = String.UnicodeScalarView()
-            guard !word.isEmpty else { return }
-            result.append((word, sawComma))
-            sawComma = false
+            if !word.isEmpty {
+                result.append((word, sawComma))
+                sawComma = false
+            }
+            if endsWithPeriod { sawComma = true }
         }
         for scalar in text.lowercased().unicodeScalars {
             if wordCharacters.contains(scalar) {

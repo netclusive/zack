@@ -24,7 +24,7 @@ public struct LanguagePack: Sendable {
     public let negations: [String]
     /// Explicit correction markers; they count anywhere.
     public let explicitSignals: [String]
-    /// Signal phrases (also listed above) that count only directly after a comma.
+    /// Signal phrases (also listed above) that count only directly after a comma or a period.
     public let commaBoundSignals: Set<String>
     /// Words that end a spoken identifier in code mode.
     public let codeStopwords: Set<String>

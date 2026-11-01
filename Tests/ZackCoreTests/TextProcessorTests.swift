@@ -166,6 +166,15 @@ struct StubCleaner: Cleaner {
     #expect(result.final == "Let's meet on Wednesday.")
 }
 
+/// Parakeet often writes the pause before "no" as a sentence end; a period counts like a comma.
+@Test(arguments: ["Let's meet on Tuesday. No, Wednesday.", "Let's meet on Tuesday. Um, no, Wednesday."])
+func englishCorrectionAfterPeriodGoesThroughTheCleaner(text: String) async {
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Let's meet on Wednesday."))
+    let result = await processor.process(text, context: RuleContext(language: .english))
+    #expect(result.usedCleaner)
+    #expect(result.final == "Let's meet on Wednesday.")
+}
+
 @Test(arguments: [
     "Let's meet on Tuesday, um, no, Wednesday.",
     "Send it to sales, um, I mean support.",
