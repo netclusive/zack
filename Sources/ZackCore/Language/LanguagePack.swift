@@ -24,6 +24,8 @@ public struct LanguagePack: Sendable {
     public let negations: [String]
     /// Explicit correction markers; they count anywhere.
     public let explicitSignals: [String]
+    /// Signal phrases (also listed above) that count only directly after a comma.
+    public let commaBoundSignals: Set<String>
     /// Words that end a spoken identifier in code mode.
     public let codeStopwords: Set<String>
     /// The spoken word for a dot in file names.
@@ -50,6 +52,7 @@ public struct LanguagePack: Sendable {
         explicitSignals: [
             "korrektur", "streich das", "besser gesagt", "oder besser", "oder lieber", "vielmehr",
         ],
+        commaBoundSignals: [],
         codeStopwords: [
             "in", "im", "der", "die", "das", "den", "dem", "und", "oder", "mit", "von", "zu", "zum", "zur", "auf",
             "für", "ist", "sind", "wird", "bitte", "dann", "aus", "an", "als", "ein", "eine", "schlägt",
@@ -80,6 +83,8 @@ public struct LanguagePack: Sendable {
         ambiguousSignals: ["i mean", "i meant", "sorry", "wait"],
         negations: ["no", "nope"],
         explicitSignals: ["correction", "scratch that", "or rather", "make that", "let me rephrase"],
+        // Without a comma these are ordinary speech ("no problem", "make that change").
+        commaBoundSignals: ["no", "nope", "wait", "sorry", "i mean", "i meant", "make that"],
         codeStopwords: [
             "in", "the", "a", "an", "and", "or", "with", "from", "to", "on", "for", "of", "at", "by", "is", "are",
             "will", "please", "then", "as", "fails",

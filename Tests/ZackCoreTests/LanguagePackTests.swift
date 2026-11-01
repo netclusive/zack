@@ -60,6 +60,7 @@ extension LanguagePackTests {
         #expect(pack.fillers == ["um", "uh", "er", "erm", "hm", "hmm", "mhm"])
         #expect(pack.ambiguousSignals == ["i mean", "i meant", "sorry", "wait"])
         #expect(pack.negations == ["no", "nope"])
+        #expect(pack.commaBoundSignals == ["no", "nope", "wait", "sorry", "i mean", "i meant", "make that"])
         #expect(
             pack.explicitSignals == ["correction", "scratch that", "or rather", "make that", "let me rephrase"])
         #expect(

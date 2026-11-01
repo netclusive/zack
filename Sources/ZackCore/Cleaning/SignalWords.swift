@@ -5,19 +5,21 @@ public enum SignalWords {
 
     public static func contains(_ text: String, language: DictationLanguage = .german) -> Bool {
         let pack = language.pack
-        let words = TextTools.words(text)
-        return occurs(pack.explicitSignals, in: words, from: 0)
-            || occurs(pack.ambiguousSignals, in: words, from: minWordsBefore)
-            || occurs(pack.negations, in: words, from: 1)
-    }
-
-    private static func occurs(_ candidates: [String], in words: [String], from start: Int) -> Bool {
-        candidates.contains { phrase in
-            let parts = phrase.split(separator: " ").map(String.init)
-            guard words.count >= parts.count, start <= words.count - parts.count else { return false }
-            return (start...(words.count - parts.count)).contains {
-                words[$0..<($0 + parts.count)].elementsEqual(parts)
+        let tokens = TextTools.wordsWithCommas(text)
+        let words = tokens.map(\.word)
+        let commaBound = pack.commaBoundSignals
+        func occurs(_ candidates: [String], from start: Int) -> Bool {
+            candidates.contains { phrase in
+                let parts = phrase.split(separator: " ").map(String.init)
+                guard words.count >= parts.count, start <= words.count - parts.count else { return false }
+                let needsComma = commaBound.contains(phrase)
+                return (start...(words.count - parts.count)).contains {
+                    words[$0..<($0 + parts.count)].elementsEqual(parts) && (!needsComma || tokens[$0].afterComma)
+                }
             }
         }
+        return occurs(pack.explicitSignals, from: 0)
+            || occurs(pack.ambiguousSignals, from: minWordsBefore)
+            || occurs(pack.negations, from: 1)
     }
 }
