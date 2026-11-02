@@ -39,7 +39,7 @@ With a release:
   self-correction such as "Montag, nein, Dienstag" or "Tuesday, no, Wednesday", Apple's on-device model smooths
   the sentence.
 - Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
-  the menu shows "Secure Input Active"; dictation works, only cancelling with another key does not.
+  the menu shows "Secure Input Active"; dictation works, only canceling with another key does not.
 
 ### Settings and permissions
 
@@ -47,7 +47,7 @@ With a release:
   readiness, launch at login, AI cleanup), Dictionary, Snippets, Code Apps, Updates and Setup. If a
   permission or the speech model is missing, Zack opens it in Setup.
 - Permissions: Microphone, and Accessibility for inserting with Cmd+V, for reading the text before the cursor and
-  for cancelling with another key. The key itself works without Accessibility; the text then stays on the
+  for canceling with another key. The key itself works without Accessibility; the text then stays on the
   clipboard.
 - Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Setup" moves a copy from
   zack-bench (`~/Library/Application Support/FluidAudio/Models`) or downloads it on click (about 600 MB from
