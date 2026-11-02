@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A settings window (⌘,) collects all options: general, dictionary, snippets, code apps, updates and setup.
 - Edit the dictionary, snippets and code apps right in Zack. The text files stay valid and editable, and comments in them are kept.
 - Dictate in English: choose German or English in the settings; text rules, AI cleanup of self-corrections, code mode and snippets follow the language.
+- Zack's menus, settings and messages are available in English. The interface follows the macOS language; other languages get English.
 
 ### Changed
 
