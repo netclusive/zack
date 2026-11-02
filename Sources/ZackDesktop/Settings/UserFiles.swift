@@ -190,7 +190,7 @@ public struct UserFiles: Sendable {
         # Code mode for Zack
         # One bundle ID per line: Zack dictates in code mode in these apps.
         # A * at the end matches all IDs with this beginning. Lines starting with # are ignored.
-        # The menu item "Code-Modus in <App>" switches the last active app on or off.
+        # The menu item "Code Mode in <App>" switches the last active app on or off.
         # Terminal
         com.apple.Terminal
         # iTerm2

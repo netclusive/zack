@@ -106,6 +106,8 @@ struct UserFilesEditingTests {
         #expect(!snippets.contains("Baustein"))
         #expect(try String(contentsOf: english.vocabularyURL, encoding: .utf8).contains("wrong => right"))
         let apps = try String(contentsOf: english.codeAppsURL, encoding: .utf8)
+        #expect(apps.contains("\"Code Mode in <App>\""))
+        #expect(!apps.contains("Code-Modus"))
         let germanIDs = CodeApps(parsing: UserFiles.codeAppsTemplate)
         #expect(germanIDs == CodeApps(parsing: apps))
         #expect(EntryDocument<SnippetFormat>(text: snippets).items.isEmpty)
