@@ -2,6 +2,7 @@ import Testing
 
 @testable import ZackDesktop
 
+@Suite(.germanUI)
 struct AppStatusTests {
     func evaluate(
         model: ModelStatus = .ready, loaded: Bool = true, microphone: PermissionState = .granted,

@@ -25,9 +25,13 @@ fi
 echo "==> test"
 swift test
 scripts/release.sh --self-test
+scripts/check-strings.sh --self-test
 
 echo "==> build"
 swift build -c release
 
 echo "==> app"
 scripts/build-app.sh Release
+
+echo "==> strings"
+scripts/check-strings.sh .build/xcode-app Release

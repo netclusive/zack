@@ -55,7 +55,7 @@ private struct CodeAppsList: View {
             EditorFooter(
                 onAdd: addApps, onRemove: removeSelected, canRemove: selectedItem(in: document) != nil,
                 unreadableCount: document.unreadableCount, notice: editor.notice ?? shownHints(for: document),
-                openFile: openFile, addLabel: "App hinzufügen …")
+                openFile: openFile, addLabel: String(localized: "App hinzufügen …"))
         }
         .padding(20)
         .onChange(of: editor.document) {
@@ -83,7 +83,7 @@ private struct CodeAppsList: View {
                 }
             }
         case .prefix(let prefix):
-            Text(verbatim: "Alle Apps mit ‚\(prefix)‘")
+            Text("Alle Apps mit ‚\(prefix)‘")
         }
     }
 

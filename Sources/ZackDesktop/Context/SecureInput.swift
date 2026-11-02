@@ -26,7 +26,7 @@ public enum SecureInput {
 public enum SecureInputLine {
     public static func text(enabled: Bool, holder: String?) -> String? {
         guard enabled else { return nil }
-        guard let holder else { return "Secure Input aktiv" }
-        return "Secure Input aktiv · \(holder)"
+        guard let holder else { return UIText.localized("Secure Input aktiv") }
+        return UIText.localized("Secure Input aktiv · \(holder)")
     }
 }

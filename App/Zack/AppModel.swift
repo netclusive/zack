@@ -148,7 +148,7 @@ final class AppModel {
     /// Status line and menu bar label; `AppStatus` has no case for a failed load, so its title is set here.
     var statusTitle: String {
         status == .modelMissing && modelLoadFailed
-            ? "Modell konnte nicht geladen werden" : status.title(hotkey: hotkey)
+            ? String(localized: "Modell konnte nicht geladen werden") : status.title(hotkey: hotkey)
     }
 
     var cleanerAvailable: Bool { cleanerAvailability == .available }
@@ -157,9 +157,9 @@ final class AppModel {
     var cleanerHint: String? {
         switch cleanerAvailability {
         case .available: nil
-        case .notEnabled: "Apple Intelligence ist ausgeschaltet (Systemeinstellungen)."
-        case .deviceNotEligible: "Apple Intelligence ist auf diesem Mac nicht verfügbar."
-        case .notReady: "Das Apple-Modell wird noch geladen."
+        case .notEnabled: String(localized: "Apple Intelligence ist ausgeschaltet (Systemeinstellungen).")
+        case .deviceNotEligible: String(localized: "Apple Intelligence ist auf diesem Mac nicht verfügbar.")
+        case .notReady: String(localized: "Das Apple-Modell wird noch geladen.")
         }
     }
 
@@ -400,7 +400,7 @@ final class AppModel {
     }
 
     func showAbout() {
-        windows.show(id: "about", title: "Über Zack") { AboutView() }
+        windows.show(id: "about", title: String(localized: "Über Zack")) { AboutView() }
     }
 
     // MARK: Setup
@@ -424,7 +424,7 @@ final class AppModel {
             setupError = nil
         } catch {
             logger.error("model adopt: \(String(describing: type(of: error)), privacy: .public)")
-            setupError = "Übernehmen fehlgeschlagen. Bitte erneut versuchen oder das Modell laden."
+            setupError = String(localized: "Übernehmen fehlgeschlagen. Bitte erneut versuchen oder das Modell laden.")
         }
         refresh()
     }
@@ -449,7 +449,7 @@ final class AppModel {
                 }
             } catch {
                 logger.error("model download: \(String(describing: type(of: error)), privacy: .public)")
-                setupError = "Laden fehlgeschlagen. Bitte Netzwerk prüfen und erneut versuchen."
+                setupError = String(localized: "Laden fehlgeschlagen. Bitte Netzwerk prüfen und erneut versuchen.")
             }
             downloadProgress = nil
             refresh()

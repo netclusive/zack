@@ -17,9 +17,9 @@ public enum MicrophoneReadiness: String, CaseIterable, Sendable {
 
     public var title: String {
         switch self {
-        case .off: "Aus"
-        case .afterDictation: "2 Minuten nach einem Diktat"
-        case .always: "Immer"
+        case .off: UIText.localized("Aus")
+        case .afterDictation: UIText.localized("2 Minuten nach einem Diktat")
+        case .always: UIText.localized("Immer")
         }
     }
 }

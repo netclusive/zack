@@ -12,13 +12,13 @@ struct EditorFooter: View {
     let notice: String?
     let openFile: () -> Void
     /// Help text and accessibility label of "+".
-    var addLabel = "Eintrag hinzufügen"
+    var addLabel = String(localized: "Eintrag hinzufügen")
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             HStack(spacing: 2) {
                 iconButton("lucide-plus", label: addLabel, action: onAdd)
-                iconButton("lucide-minus", label: "Eintrag entfernen", action: onRemove)
+                iconButton("lucide-minus", label: String(localized: "Eintrag entfernen"), action: onRemove)
                     .disabled(!canRemove)
             }
             VStack(alignment: .leading, spacing: 4) {

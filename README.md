@@ -1,7 +1,8 @@
 # Zack
 
-Local push-to-talk dictation for macOS. Everything runs on the Mac, no cloud. The interface is German; dictation
-works in German or English, one language per user ("Settings › Allgemein › Sprache").
+Local push-to-talk dictation for macOS. Everything runs on the Mac, no cloud. Dictation works in German or
+English, one language per user ("Settings › General › Dictation language"). The interface is in German or English
+and follows the macOS language; other languages get English.
 
 Zack.app is a menu bar app: hold fn (or the right Option key), speak, release, and the text is inserted into the
 active window. `zack-bench` compares recognition and cleanup engines on a test corpus.
@@ -17,38 +18,38 @@ With a release:
 1. Download the latest `Zack-<version>.zip` from the releases page.
 2. Open the ZIP and move `Zack.app` to the Applications folder, then start it.
 3. Allow Microphone and Accessibility when asked.
-4. "Settings › Einrichtung" offers the speech model for download (about 600 MB, see below).
+4. "Settings › Setup" offers the speech model for download (about 600 MB, see below).
 
 ## Using Zack
 
 ### Dictation
 
-- Hold the key ("Settings › Allgemein › Taste"), speak, release: Zack recognises the speech, applies its text rules
+- Hold the key ("Settings › General › Dictation key"), speak, release: Zack recognizes the speech, applies its text rules
   (dictionary, snippets) and inserts the result at the cursor. A short tap is ignored, and pressing another key
   while holding cancels, so shortcuts such as fn + arrow keep working.
-- Language ("Settings › Allgemein › Sprache"): Deutsch or English. On first start Zack follows the macOS language;
+- Language ("Settings › General › Dictation language"): Deutsch or English. On first start Zack follows the macOS language;
   an existing installation stays German. The text rules, AI cleanup, code mode and snippets follow the language,
   and a change applies from the next dictation.
-- Esc while the pill shows "Erkenne …" or "KI glättet …" cancels: nothing is inserted, and the result is kept as
+- Esc while the pill shows "Recognizing…" or "Cleaning Up…" cancels: nothing is inserted, and the result is kept as
   the last dictation.
-- Menu section "Letztes Diktat": "Einfügen" (⌃⌥V) inserts the last dictation again at the cursor, "Ohne
-  KI-Glättung einfügen" (⌃⌥O) replaces an AI-cleaned dictation with the rule text, "Kopieren" copies it. "Erneut
-  versuchen" appears after a failed recognition. A shortcut another app already holds is marked "(Kürzel belegt)".
-- AI cleanup ("Settings › Allgemein › KI-Glättung bei Selbstkorrekturen"): if a dictation contains a
+- Menu section "Last Dictation": "Insert" (⌃⌥V) inserts the last dictation again at the cursor, "Insert Without
+  AI Cleanup" (⌃⌥O) replaces an AI-cleaned dictation with the rule text, "Copy" copies it. "Try Again" appears
+  after a failed recognition. A shortcut another app already holds is marked "(Shortcut in Use)".
+- AI cleanup ("Settings › General › AI cleanup of self-corrections"): if a dictation contains a
   self-correction such as "Montag, nein, Dienstag" or "Tuesday, no, Wednesday", Apple's on-device model smooths
   the sentence.
 - Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
-  the menu shows "Secure Input aktiv"; dictation works, only cancelling with another key does not.
+  the menu shows "Secure Input Active"; dictation works, only canceling with another key does not.
 
 ### Settings and permissions
 
-- The settings window ("Einstellungen …" in the menu, ⌘,) has the panes Allgemein (language, key, microphone
-  readiness, launch at login, AI cleanup), Wörterbuch, Textbausteine, Code-Apps, Updates and Einrichtung. If a
-  permission or the speech model is missing, Zack opens it in Einrichtung.
+- The settings window ("Settings…" in the menu, ⌘,) has the panes General (language, key, microphone
+  readiness, launch at login, AI cleanup), Dictionary, Snippets, Code Apps, Updates and Setup. If a
+  permission or the speech model is missing, Zack opens it in Setup.
 - Permissions: Microphone, and Accessibility for inserting with Cmd+V, for reading the text before the cursor and
-  for cancelling with another key. The key itself works without Accessibility; the text then stays on the
+  for canceling with another key. The key itself works without Accessibility; the text then stays on the
   clipboard.
-- Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Einrichtung" moves a copy from
+- Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Setup" moves a copy from
   zack-bench (`~/Library/Application Support/FluidAudio/Models`) or downloads it on click (about 600 MB from
   Hugging Face, USA; only the IP address is transmitted). The app never downloads on its own.
 
@@ -56,7 +57,7 @@ With a release:
 
 `vocabulary.txt`, `snippets.txt` and `code-apps.txt` live in `~/Library/Application Support/Zack` and are created
 with examples in the dictation language; existing files stay as they are when the language changes. Lines
-starting with `#` are ignored. Edit them in "Settings › Wörterbuch / Textbausteine / Code-Apps" or in any text
+starting with `#` are ignored. Edit them in "Settings › Dictionary / Snippets / Code Apps" or in any text
 editor: Zack changes only the lines you edit, keeps comments and lines it cannot read, and reloads a file changed
 elsewhere.
 
@@ -67,12 +68,12 @@ elsewhere.
   break, and spaces at the start and end of a field are dropped.
 - `code-apps.txt`: the apps for code mode (bundle IDs, or prefixes ending in `*`). In these apps spoken file names
   ("readme punkt md", English "readme dot md") and case commands become code, and short commands get no trailing
-  period. The menu switches the current app on or off, "Settings › Code-Apps" adds apps; the file is read again
+  period. The menu switches the current app on or off, "Settings › Code Apps" adds apps; the file is read again
   for every dictation.
 
 ### Context
 
-Zack reads the text before the cursor (needs Accessibility) to add a space and adapt capitalisation: at most the
+Zack reads the text before the cursor (needs Accessibility) to add a space and adapt capitalization: at most the
 500 characters before the cursor, or the field text up to 100,000 characters if the app offers nothing narrower,
 and keeps only the current line of it. It stays in memory only, is never logged and is dropped when the dictation
 ends. Where an app does not expose it, Zack falls back to its last own dictation until the next key press, the
@@ -80,11 +81,11 @@ next click or an app switch.
 
 ### Microphone
 
-- Readiness ("Settings › Allgemein › Mikrofon bereithalten"): by default the microphone stays open for two minutes
-  after a dictation, so the first words are not cut off; "Immer" keeps it open, "Aus" closes it after each
+- Readiness ("Settings › General › Keep microphone ready"): by default the microphone stays open for two minutes
+  after a dictation, so the first words are not cut off; "Always" keeps it open, "Off" closes it after each
   dictation. While it is open, only the last half second is kept in memory, continuously overwritten, never
-  recognised or stored, and macOS shows the orange microphone indicator.
-- Choice (menu "Mikrofon: <device>"): "Wie macOS" follows the system input; picking a device applies to Zack only
+  recognized or stored, and macOS shows the orange microphone indicator.
+- Choice (menu "Microphone: <device>"): "Same as macOS" follows the system input; picking a device applies to Zack only
   and leaves the macOS default untouched. If the chosen device is not connected, Zack uses the macOS default and
   switches back as soon as the device returns.
 
@@ -98,12 +99,12 @@ the model download you start and, in official builds, for the update check you a
 
 Official builds update themselves through [Sparkle](https://sparkle-project.org). On the second launch Zack asks
 whether it may check for updates; the prompt has a checkbox for automatic installing. After you agree, it checks
-once a day. The switches are in "Settings › Updates", "Nach Updates suchen …" is in the menu:
+once a day. The switches are in "Settings › Updates", "Check for Updates…" is in the menu:
 
-- "Nach Updates suchen …" (menu) and "Jetzt suchen" (settings) check right away.
-- "Automatisch nach Updates suchen" turns the daily check on or off.
-- "Updates automatisch installieren" downloads in the background and installs when Zack quits.
-- "Update auf <version> …" appears when an update waits (with automatic installing off); a click shows the update
+- "Check for Updates…" (menu) and "Check Now" (settings) check right away.
+- "Automatically check for updates" turns the daily check on or off.
+- "Automatically install updates" downloads in the background and installs when Zack quits.
+- "Update to <version>…" appears when an update waits (with automatic installing off); a click shows the update
   and its changes.
 
 Privacy: the update check runs only after your consent, once a day, and can be turned off in the settings. Feed and
@@ -121,7 +122,7 @@ Requirements:
 - a German system voice, preferably Anna: the tests synthesize their speech sample with it
 
 Builds you make yourself get no updates: feed URL and public key are empty in `App/Zack.xcconfig`, and only
-`scripts/release.sh` sets them. "Settings › Updates" then shows "Updates gibt es nur in offiziellen Builds."
+`scripts/release.sh` sets them. "Settings › Updates" then shows "Updates are only available in official builds."
 
 Build and install:
 
@@ -203,7 +204,7 @@ Recordings and results contain voice and text and are not tracked by Git.
 ## Model downloads
 
 In `zack-bench`, the first run of an engine downloads its model and needs network access; the app downloads only
-on click in "Settings › Einrichtung". Later runs work offline.
+on click in "Settings › Setup". Later runs work offline.
 
 | Engine | Source | Stored in | Size |
 |---|---|---|---|

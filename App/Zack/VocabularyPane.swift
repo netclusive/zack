@@ -386,7 +386,7 @@ private struct VocabularyTable: View {
     // MARK: Fields
 
     private static func label(_ field: EntryField) -> String {
-        field == .spelling ? "Schreibweise" : "Erkannt als (optional)"
+        field == .spelling ? String(localized: "Schreibweise") : String(localized: "Erkannt als (optional)")
     }
 
     private static func value(_ field: EntryField, of entry: VocabularyEntry) -> String {
