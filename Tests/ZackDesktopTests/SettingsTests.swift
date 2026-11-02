@@ -4,7 +4,7 @@ import ZackCore
 
 @testable import ZackDesktop
 
-@Suite(.serialized)
+@Suite(.serialized, .germanUI)
 struct SettingsTests {
     /// One fixed suite name: every suite name leaves a plist in ~/Library/Preferences, so a fresh name per test
     /// would add a file per run. Serialized tests share it one at a time and clear it afterwards.

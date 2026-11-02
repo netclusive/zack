@@ -2,6 +2,7 @@ import Testing
 
 @testable import ZackDesktop
 
+@Suite(.germanUI)
 struct MicrophoneMenuTests {
     let jabra = InputDevice(id: 42, uid: "usb-jabra-1", name: "Jabra Engage 75")
     let display = InputDevice(id: 7, uid: "usb-display", name: "Studio Display-Mikrofon")

@@ -27,11 +27,11 @@ public enum AppStatus: Equatable, Sendable {
 
     public func title(hotkey: HotkeyKey) -> String {
         switch self {
-        case .ready: "Bereit · \(hotkey.title) halten"
-        case .recording: "Nimmt auf"
-        case .loading: "Modell wird geladen …"
-        case .modelMissing: "Modell fehlt"
-        case .permissionMissing: "Berechtigung fehlt"
+        case .ready: UIText.localized("Bereit · \(hotkey.title) halten")
+        case .recording: UIText.localized("Nimmt auf")
+        case .loading: UIText.localized("Modell wird geladen …")
+        case .modelMissing: UIText.localized("Modell fehlt")
+        case .permissionMissing: UIText.localized("Berechtigung fehlt")
         }
     }
 

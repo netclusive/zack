@@ -42,54 +42,65 @@ public struct PillContent: Equatable, Sendable {
             if elapsed >= DictationLimits.hint {
                 let remaining = max(0, Int((DictationLimits.maximum - elapsed).components.seconds))
                 self.init(
-                    .mic, "\(time) · noch \(remaining) s", "Nimmt auf, noch \(remaining) Sekunden", style: .working,
-                    level: level)
+                    .mic, UIText.localized("\(time) · noch \(remaining) s"),
+                    UIText.localized("Nimmt auf, noch \(remaining) Sekunden"), style: .working, level: level)
             } else {
-                self.init(.mic, time, "Nimmt auf, \(time)", style: .working, level: level)
+                self.init(.mic, time, UIText.localized("Nimmt auf, \(time)"), style: .working, level: level)
             }
         case .recognizing:
-            self.init(.loader, "Erkenne …", "Erkenne", style: .working)
+            self.init(.loader, UIText.localized("Erkenne …"), UIText.localized("Erkenne"), style: .working)
         case .cleaning:
-            self.init(.sparkles, "KI glättet …", "KI glättet", style: .working)
+            self.init(.sparkles, UIText.localized("KI glättet …"), UIText.localized("KI glättet"), style: .working)
         case .inserted(.pasted):
-            self.init(.check, "Eingefügt", "Eingefügt", style: .success)
+            self.init(.check, UIText.localized("Eingefügt"), UIText.localized("Eingefügt"), style: .success)
         case .inserted(.clipboardOnly):
-            self.init(.clipboard, "In Zwischenablage", "In Zwischenablage")
+            self.init(.clipboard, UIText.localized("In Zwischenablage"), UIText.localized("In Zwischenablage"))
         case .ruleText(.pasted):
-            self.init(.check, "Regeltext eingefügt", "Regeltext eingefügt", style: .success)
+            self.init(
+                .check, UIText.localized("Regeltext eingefügt"), UIText.localized("Regeltext eingefügt"),
+                style: .success)
         case .ruleText(.clipboardOnly):
-            self.init(.clipboard, "Regeltext in Zwischenablage", "Regeltext in Zwischenablage")
+            self.init(
+                .clipboard, UIText.localized("Regeltext in Zwischenablage"),
+                UIText.localized("Regeltext in Zwischenablage"))
         case .failed(let failure):
             switch failure {
             case .nothingHeard:
-                self.init(.micOff, "Nichts gehört", "Nichts gehört")
+                self.init(.micOff, UIText.localized("Nichts gehört"), UIText.localized("Nichts gehört"))
             case .modelMissing:
-                self.init(.alert, "Modell fehlt · Einrichtung öffnen", "Modell fehlt, Einrichtung öffnen", setup: true)
+                self.init(
+                    .alert, UIText.localized("Modell fehlt · Einrichtung öffnen"),
+                    UIText.localized("Modell fehlt, Einrichtung öffnen"), setup: true)
             case .microphoneDenied:
                 self.init(
-                    .micOff, "Kein Mikrofonzugriff · Einrichtung öffnen", "Kein Mikrofonzugriff, Einrichtung öffnen",
-                    setup: true)
+                    .micOff, UIText.localized("Kein Mikrofonzugriff · Einrichtung öffnen"),
+                    UIText.localized("Kein Mikrofonzugriff, Einrichtung öffnen"), setup: true)
             case .microphoneUnavailable:
-                self.init(.micOff, "Mikrofon nicht verfügbar", "Mikrofon nicht verfügbar")
+                self.init(
+                    .micOff, UIText.localized("Mikrofon nicht verfügbar"), UIText.localized("Mikrofon nicht verfügbar"))
             case .microphoneDisconnected:
-                self.init(.micOff, "Mikrofon getrennt", "Mikrofon getrennt")
+                self.init(.micOff, UIText.localized("Mikrofon getrennt"), UIText.localized("Mikrofon getrennt"))
             case .recognitionFailed:
                 self.init(
-                    .alert, "Erkennung fehlgeschlagen · Menü: Erneut versuchen",
-                    "Erkennung fehlgeschlagen, im Menü erneut versuchen")
+                    .alert, UIText.localized("Erkennung fehlgeschlagen · Menü: Erneut versuchen"),
+                    UIText.localized("Erkennung fehlgeschlagen, im Menü erneut versuchen"))
             case .passwordField:
-                self.init(.lock, "Passwortfeld · kein Diktat", "Passwortfeld · kein Diktat")
+                self.init(
+                    .lock, UIText.localized("Passwortfeld · kein Diktat"),
+                    UIText.localized("Passwortfeld · kein Diktat"))
             }
         case .notice(let notice):
             switch notice {
             case .passwordFieldNotInserted:
-                self.init(.lock, "Passwortfeld · nicht eingefügt", "Passwortfeld · nicht eingefügt")
+                self.init(
+                    .lock, UIText.localized("Passwortfeld · nicht eingefügt"),
+                    UIText.localized("Passwortfeld · nicht eingefügt"))
             case .cancelled:
-                self.init(.x, "Abgebrochen", "Abgebrochen")
+                self.init(.x, UIText.localized("Abgebrochen"), UIText.localized("Abgebrochen"))
             case .noLastDictation:
-                self.init(.alert, "Noch kein Diktat", "Noch kein Diktat")
+                self.init(.alert, UIText.localized("Noch kein Diktat"), UIText.localized("Noch kein Diktat"))
             case .noCleanedVersion:
-                self.init(.alert, "Keine KI-Fassung", "Keine KI-Fassung")
+                self.init(.alert, UIText.localized("Keine KI-Fassung"), UIText.localized("Keine KI-Fassung"))
             }
         }
     }

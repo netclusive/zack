@@ -14,7 +14,7 @@ public enum HotkeyKey: String, CaseIterable, Sendable {
     public var title: String {
         switch self {
         case .fn: "fn"
-        case .rightOption: "rechte ⌥"
+        case .rightOption: UIText.localized("rechte ⌥")
         }
     }
 }

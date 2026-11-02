@@ -2,6 +2,7 @@ import Testing
 
 @testable import ZackDesktop
 
+@Suite(.germanUI)
 struct SettingsPaneTests {
     @Test func paneTitlesAndIconsMatchTheSpec() {
         #expect(

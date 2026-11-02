@@ -4,6 +4,7 @@ import ZackCore
 
 @testable import ZackDesktop
 
+@Suite(.germanUI)
 struct UserFilesEditingTests {
     let files = UserFiles(
         directory: FileManager.default.temporaryDirectory.appending(path: "zack-edit-\(UUID().uuidString)"))

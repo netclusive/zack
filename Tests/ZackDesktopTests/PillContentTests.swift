@@ -3,6 +3,7 @@ import Testing
 
 @testable import ZackDesktop
 
+@Suite(.germanUI)
 struct PillContentTests {
     @Test func hiddenBeforeTheThreshold() {
         #expect(PillContent(.idle) == nil)

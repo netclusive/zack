@@ -4,7 +4,9 @@ import Testing
 /// Consistency checks for the package string catalogs.
 struct StringCatalogTests {
     /// Catalog paths relative to the repository root.
-    static let catalogs = ["Sources/ZackUpdate/Localizable.xcstrings"]
+    static let catalogs = [
+        "Sources/ZackUpdate/Localizable.xcstrings", "Sources/ZackDesktop/Localizable.xcstrings",
+    ]
 
     struct Catalog: Decodable {
         let sourceLanguage: String

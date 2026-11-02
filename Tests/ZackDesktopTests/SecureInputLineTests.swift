@@ -2,6 +2,7 @@ import Testing
 
 @testable import ZackDesktop
 
+@Suite(.germanUI)
 struct SecureInputLineTests {
     @Test func offShowsNothing() {
         #expect(SecureInputLine.text(enabled: false, holder: nil) == nil)

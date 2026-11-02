@@ -17,7 +17,7 @@ public struct ModelSetup: Sendable {
 
     public static let variant = ParakeetTranscriber.Variant.ultra
     /// Shown before the download (603 MB on disk, measured 2026-10-28).
-    public static let downloadSize = "etwa 600 MB"
+    public static var downloadSize: String { UIText.localized("etwa 600 MB") }
 
     public let modelsDirectory: URL
     public let legacyDirectory: URL

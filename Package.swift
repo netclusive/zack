@@ -27,7 +27,9 @@ let package = Package(
             dependencies: ["ZackCore", .product(name: "FluidAudio", package: "FluidAudio")]),
         // Apple Speech and Foundation Models: system frameworks only.
         .target(name: "ZackApple", dependencies: ["ZackCore"]),
-        .target(name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet"]),
+        .target(
+            name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet"],
+            resources: [.process("Localizable.xcstrings")]),
         .target(
             name: "ZackUpdate",
             dependencies: [.product(name: "Sparkle", package: "Sparkle")],

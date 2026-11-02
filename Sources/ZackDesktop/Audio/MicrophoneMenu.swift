@@ -25,27 +25,33 @@ public struct MicrophoneMenu: Equatable, Sendable {
 
     public init(saved: SavedMicrophone?, devices: [InputDevice], defaultID: AudioObjectID?, selectionFailed: Bool) {
         let defaultName =
-            defaultID.flatMap { id in devices.first { $0.id == id } }.map { Self.name($0.name) } ?? "keins"
-        var options = [Option(id: Self.systemID, title: "Wie macOS (aktuell \(defaultName))", connected: true)]
+            defaultID.flatMap { id in devices.first { $0.id == id } }.map { Self.name($0.name) }
+            ?? UIText.localized("keins")
+        var options = [
+            Option(id: Self.systemID, title: UIText.localized("Wie macOS (aktuell \(defaultName))"), connected: true)
+        ]
         options += devices.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }.map {
             Option(id: $0.uid, title: Self.name($0.name), connected: true)
         }
         switch MicrophoneChoice.resolve(saved, in: devices) {
         case .system:
             // Following macOS never shows a fallback marker, even if setting the device failed.
-            statusLine = "Mikrofon: \(defaultName)"
+            statusLine = UIText.localized("Mikrofon: \(defaultName)")
             selectedID = Self.systemID
         case .chosen(let device):
             statusLine =
                 selectionFailed
-                ? "Mikrofon: \(defaultName) · \(Self.name(device.name)) nicht verfügbar"
-                : "Mikrofon: \(Self.name(device.name))"
+                ? UIText.localized("Mikrofon: \(defaultName) · \(Self.name(device.name)) nicht verfügbar")
+                : UIText.localized("Mikrofon: \(Self.name(device.name))")
             selectedID = device.uid
         case .fallback:
             // `.fallback` only arises with a saved choice.
             let saved = saved!
-            statusLine = "Mikrofon: \(defaultName) · \(Self.name(saved.name)) nicht verbunden"
-            options.append(Option(id: saved.uid, title: "\(Self.name(saved.name)) (nicht verbunden)", connected: false))
+            statusLine = UIText.localized("Mikrofon: \(defaultName) · \(Self.name(saved.name)) nicht verbunden")
+            options.append(
+                Option(
+                    id: saved.uid, title: UIText.localized("\(Self.name(saved.name)) (nicht verbunden)"),
+                    connected: false))
             selectedID = saved.uid
         }
         self.options = options
@@ -61,6 +67,6 @@ public struct MicrophoneMenu: Equatable, Sendable {
     }
 
     private static func name(_ name: String) -> String {
-        name.isEmpty ? "Mikrofon ohne Namen" : name
+        name.isEmpty ? UIText.localized("Mikrofon ohne Namen") : name
     }
 }
