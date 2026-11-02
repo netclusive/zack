@@ -1151,7 +1151,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Available for AI cleanup of corrections."
+            "value" : "Available for AI cleanup of self-corrections."
           }
         }
       }
