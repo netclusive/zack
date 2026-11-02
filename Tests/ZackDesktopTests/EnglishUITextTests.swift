@@ -112,6 +112,14 @@ struct EnglishUITextTests {
 
     @Test func editorTexts() {
         #expect(EntryProblem.empty.message == "Must not be empty.")
+        #expect(EntryProblem.arrow.message == "The sequence => isn’t allowed here.")
+        #expect(EntryProblem.leadingHash.message == "Must not start with #.")
+        #expect(EntryProblem.lineBreak.message == "Only one line is allowed.")
+        #expect(EditorText.duplicateSnippet == "Only the first snippet with this name is inserted.")
+        #expect(EditorText.duplicateSpelling == "This spelling is already in the dictionary.")
+        #expect(EditorText.unreadableFile == "Zack can’t read the file.")
+        #expect(EditorText.noBundleID == "This app has no bundle ID.")
+        #expect(EditorText.coveredByPrefix("Xcode") == "Xcode is already covered by a prefix entry.")
         #expect(EditorText.writeFailed("Disk full") == "Zack couldn’t save the file: Disk full")
         #expect(EditorText.alreadyListed("Xcode") == "Xcode is already in the list.")
     }
