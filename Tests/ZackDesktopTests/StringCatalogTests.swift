@@ -9,6 +9,20 @@ struct StringCatalogTests {
         "App/Zack/Localizable.xcstrings",
     ]
 
+    /// Entries that are deliberately not translated (`shouldTranslate: false`), per catalog.
+    static let untranslatedKeys: [String: Set<String>] = [
+        "Sources/ZackUpdate/Localizable.xcstrings": [],
+        "Sources/ZackDesktop/Localizable.xcstrings": [],
+        "App/Zack/Localizable.xcstrings": ["", "Zack %@", "Zack, %@"],
+    ]
+
+    /// Translated entries whose English text deliberately equals the German one, per catalog.
+    static let identicalKeys: [String: Set<String>] = [
+        "Sources/ZackUpdate/Localizable.xcstrings": [],
+        "Sources/ZackDesktop/Localizable.xcstrings": ["Updates"],
+        "App/Zack/Localizable.xcstrings": ["Name", "Text"],
+    ]
+
     /// Keyed by Info.plist keys, not by German text, so it is checked on its own.
     static let infoPlistCatalog = "App/Zack/InfoPlist.xcstrings"
     static let microphoneKey = "NSMicrophoneUsageDescription"
@@ -116,6 +130,10 @@ struct StringCatalogTests {
             }
             let germanUnits = Self.units(of: german)
             let englishUnits = Self.units(of: english)
+            #expect(
+                (german.stringUnit == nil) == (english.stringUnit == nil)
+                    && Set(germanUnits.keys) == Set(englishUnits.keys),
+                "\(key): German and English differ in form or plural variants")
             for (variant, unit) in germanUnits {
                 guard let counterpart = englishUnits[variant] else { continue }
                 #expect(
@@ -123,6 +141,26 @@ struct StringCatalogTests {
                     "\(key): placeholders differ in \(variant.isEmpty ? "value" : variant)")
             }
         }
+    }
+
+    @Test(arguments: catalogs)
+    func untranslatedEntriesAreListed(path: String) throws {
+        let strings = try Self.load(path).strings
+        let marked = Set(strings.filter { $0.value.shouldTranslate == false }.keys)
+        #expect(marked == Self.untranslatedKeys[path], "\(path): shouldTranslate:false entries differ from the list")
+    }
+
+    @Test(arguments: catalogs)
+    func englishDiffersFromGermanUnlessListed(path: String) throws {
+        let allowed = Self.identicalKeys[path] ?? []
+        var identical: Set<String> = []
+        for (key, entry) in try Self.load(path).strings where entry.shouldTranslate != false {
+            guard let german = entry.localizations?["de"]?.stringUnit,
+                let english = entry.localizations?["en"]?.stringUnit
+            else { continue }
+            if german.value == english.value { identical.insert(key) }
+        }
+        #expect(identical == allowed, "\(path): English equals German for entries not on the list")
     }
 
     @Test func infoPlistCatalogMatchesInfoPlist() throws {
