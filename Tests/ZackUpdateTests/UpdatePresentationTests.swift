@@ -2,6 +2,7 @@ import Testing
 
 @testable import ZackUpdate
 
+@Suite(.germanUI)
 struct UpdatePresentationTests {
     @Test func sparkleShowsTheUpdateOnlyRightAfterLaunch() {
         #expect(UpdatePresentation.sparkleShowsScheduledUpdate(immediateFocus: true, dictating: false))
@@ -16,6 +17,15 @@ struct UpdatePresentationTests {
     @Test func menuTitles() {
         #expect(UpdateMenuState.unavailable.title == "Updates nur in offiziellen Builds")
         #expect(UpdateMenuState.available(version: "1.0.1").title == "Update auf 1.0.1 …")
+        #expect(UpdateMenuState.idle.title == nil)
+    }
+}
+
+@Suite(.englishUI)
+struct UpdatePresentationEnglishTests {
+    @Test func menuTitles() {
+        #expect(UpdateMenuState.unavailable.title == "Updates Only in Official Builds")
+        #expect(UpdateMenuState.available(version: "1.0.1").title == "Update to 1.0.1…")
         #expect(UpdateMenuState.idle.title == nil)
     }
 }

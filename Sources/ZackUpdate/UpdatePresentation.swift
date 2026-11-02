@@ -7,9 +7,9 @@ public enum UpdateMenuState: Equatable, Sendable {
     /// Disabled or highlighted menu line; nil when the regular check entry applies.
     public var title: String? {
         switch self {
-        case .unavailable: "Updates nur in offiziellen Builds"
+        case .unavailable: UIText.localized("Updates nur in offiziellen Builds")
         case .idle: nil
-        case .available(let version): "Update auf \(version) …"
+        case .available(let version): UIText.localized("Update auf \(version) …")
         }
     }
 }

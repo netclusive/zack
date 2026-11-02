@@ -1,0 +1,38 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "Update auf %@ …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update auf %@ …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update to %@…"
+          }
+        }
+      }
+    },
+    "Updates nur in offiziellen Builds" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates nur in offiziellen Builds"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates Only in Official Builds"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

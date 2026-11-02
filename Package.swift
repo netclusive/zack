@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "zack",
+    defaultLocalization: "de",
     platforms: [.macOS(.v26)],
     products: [
         .library(name: "ZackCore", targets: ["ZackCore"]),
@@ -27,7 +28,10 @@ let package = Package(
         // Apple Speech and Foundation Models: system frameworks only.
         .target(name: "ZackApple", dependencies: ["ZackCore"]),
         .target(name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet"]),
-        .target(name: "ZackUpdate", dependencies: [.product(name: "Sparkle", package: "Sparkle")]),
+        .target(
+            name: "ZackUpdate",
+            dependencies: [.product(name: "Sparkle", package: "Sparkle")],
+            resources: [.process("Localizable.xcstrings")]),
         .target(
             name: "BenchSupport", dependencies: ["ZackCore", "ZackParakeet", "ZackApple", "ZackDesktop"]),
         .executableTarget(name: "zack-bench", dependencies: ["BenchSupport"]),
