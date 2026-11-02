@@ -15,20 +15,22 @@ struct AboutView: View {
     /// Everything compiled into the app binary (FluidAudio's ThirdPartyLicenses, checked 2026-10-28) plus the embedded
     /// Sparkle framework (its LICENSE covers bsdiff, sais-lite, ed25519 and SUSignatureVerifier too). Parts of
     /// FluidAudio that it downloads at run time for speech output (Kokoro, Spanish and French lexicons) are not
-    /// in the app and never fetched by Zack.
-    static let components = [
-        Component(name: "FluidAudio", license: "Apache-2.0", file: "FluidAudio-LICENSE"),
-        Component(name: "fastcluster (in FluidAudio)", license: "BSD-2-Clause", file: "fastcluster-LICENSE"),
-        Component(name: "VBx (in FluidAudio)", license: "Apache-2.0", file: "vbx-LICENSE"),
-        Component(
-            name: "Japanische Textaufbereitung (in FluidAudio)", license: "Apache-2.0, MIT, BSD",
-            file: "JapaneseG2P-LICENSE"),
-        Component(
-            name: "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)",
-            license: "Apache-2.0, MIT", file: "NemoTextProcessing-LICENSE"),
-        Component(name: "Sparkle", license: "MIT, BSD, zlib", file: "Sparkle-LICENSE"),
-        Component(name: "Lucide Icons", license: "ISC, MIT", file: "Lucide-LICENSE"),
-    ]
+    /// in the app and never fetched by Zack. Computed, so the names follow the interface language.
+    static var components: [Component] {
+        [
+            Component(name: "FluidAudio", license: "Apache-2.0", file: "FluidAudio-LICENSE"),
+            Component(name: "fastcluster (in FluidAudio)", license: "BSD-2-Clause", file: "fastcluster-LICENSE"),
+            Component(name: "VBx (in FluidAudio)", license: "Apache-2.0", file: "vbx-LICENSE"),
+            Component(
+                name: String(localized: "Japanische Textaufbereitung (in FluidAudio)"),
+                license: "Apache-2.0, MIT, BSD", file: "JapaneseG2P-LICENSE"),
+            Component(
+                name: String(localized: "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)"),
+                license: "Apache-2.0, MIT", file: "NemoTextProcessing-LICENSE"),
+            Component(name: "Sparkle", license: "MIT, BSD, zlib", file: "Sparkle-LICENSE"),
+            Component(name: "Lucide Icons", license: "ISC, MIT", file: "Lucide-LICENSE"),
+        ]
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

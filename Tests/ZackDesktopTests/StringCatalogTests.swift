@@ -1,12 +1,17 @@
 import Foundation
 import Testing
 
-/// Consistency checks for the package string catalogs.
+/// Consistency checks for the string catalogs of the packages and the app.
 struct StringCatalogTests {
     /// Catalog paths relative to the repository root.
     static let catalogs = [
         "Sources/ZackUpdate/Localizable.xcstrings", "Sources/ZackDesktop/Localizable.xcstrings",
+        "App/Zack/Localizable.xcstrings",
     ]
+
+    /// Keyed by Info.plist keys, not by German text, so it is checked on its own.
+    static let infoPlistCatalog = "App/Zack/InfoPlist.xcstrings"
+    static let microphoneKey = "NSMicrophoneUsageDescription"
 
     struct Catalog: Decodable {
         let sourceLanguage: String
@@ -44,6 +49,12 @@ struct StringCatalogTests {
     static func load(_ path: String) throws -> Catalog {
         let data = try Data(contentsOf: repoRoot.appendingPathComponent(path))
         return try JSONDecoder().decode(Catalog.self, from: data)
+    }
+
+    static func infoPlistValue(_ key: String) throws -> String? {
+        let data = try Data(contentsOf: repoRoot.appendingPathComponent("App/Support/Info.plist"))
+        let plist = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        return plist?[key] as? String
     }
 
     /// Translatable entries with their units by language; plural entries yield one unit per variant name.
@@ -112,5 +123,25 @@ struct StringCatalogTests {
                     "\(key): placeholders differ in \(variant.isEmpty ? "value" : variant)")
             }
         }
+    }
+
+    @Test func infoPlistCatalogMatchesInfoPlist() throws {
+        let catalog = try Self.load(Self.infoPlistCatalog)
+        #expect(catalog.sourceLanguage == "de")
+        #expect(Array(catalog.strings.keys) == [Self.microphoneKey])
+        let localizations = catalog.strings[Self.microphoneKey]?.localizations
+        let german = try #require(localizations?["de"]?.stringUnit)
+        let english = try #require(localizations?["en"]?.stringUnit)
+        let infoPlistText = try Self.infoPlistValue(Self.microphoneKey)
+        #expect(german.state == "translated")
+        #expect(german.value == infoPlistText)
+        #expect(english.state == "translated")
+        #expect(english.value == "Zack uses the microphone for dictation. Audio stays on this Mac.")
+    }
+
+    /// Languages without a localization of their own fall back to English.
+    @Test func developmentRegionIsEnglish() throws {
+        let region = try Self.infoPlistValue("CFBundleDevelopmentRegion")
+        #expect(region == "en")
     }
 }

@@ -9,8 +9,9 @@ struct SetupView: View {
         VStack(alignment: .leading, spacing: 18) {
             microphone
             SetupRow(
-                title: "Bedienungshilfen",
-                detail: "Für das Einfügen mit Cmd+V und den Abbruch mit anderen Tasten, etwa fn + Pfeil.",
+                title: String(localized: "Bedienungshilfen"),
+                detail: String(
+                    localized: "Für das Einfügen mit Cmd+V und den Abbruch mit anderen Tasten, etwa fn + Pfeil."),
                 done: model.accessibility
             ) {
                 Button("Systemeinstellungen öffnen") { model.openSettings(.accessibility) }
@@ -19,7 +20,8 @@ struct SetupView: View {
             }
             if Permissions.needsInputMonitoring {
                 SetupRow(
-                    title: "Eingabeüberwachung", detail: "Damit Zack die Taste auch in anderen Apps erkennt.",
+                    title: String(localized: "Eingabeüberwachung"),
+                    detail: String(localized: "Damit Zack die Taste auch in anderen Apps erkennt."),
                     done: model.inputMonitoring
                 ) {
                     Button("Systemeinstellungen öffnen") { model.openSettings(.inputMonitoring) }
@@ -28,7 +30,7 @@ struct SetupView: View {
             recognitionModel
             SetupRow(
                 title: "Apple Intelligence",
-                detail: model.cleanerHint ?? "Verfügbar für die KI-Glättung bei Korrekturen.",
+                detail: model.cleanerHint ?? String(localized: "Verfügbar für die KI-Glättung bei Korrekturen."),
                 done: model.cleanerAvailable
             ) {
                 EmptyView()
@@ -49,7 +51,7 @@ struct SetupView: View {
     }
 
     private var microphone: some View {
-        SetupRow(title: "Mikrofon", detail: microphoneDetail, done: model.microphone == .granted) {
+        SetupRow(title: String(localized: "Mikrofon"), detail: microphoneDetail, done: model.microphone == .granted) {
             switch model.microphone {
             case .granted: EmptyView()
             case .notDetermined: Button("Erlauben") { model.requestMicrophone() }
@@ -63,16 +65,16 @@ struct SetupView: View {
 
     private var microphoneDetail: String {
         switch model.microphone {
-        case .granted: "Erlaubt. Audio bleibt auf diesem Mac."
-        case .notDetermined: "Zack fragt einmal nach dem Zugriff."
-        case .denied: "Abgelehnt. In den Systemeinstellungen erlauben."
+        case .granted: String(localized: "Erlaubt. Audio bleibt auf diesem Mac.")
+        case .notDetermined: String(localized: "Zack fragt einmal nach dem Zugriff.")
+        case .denied: String(localized: "Abgelehnt. In den Systemeinstellungen erlauben.")
         }
     }
 
     private var recognitionModel: some View {
         VStack(alignment: .leading, spacing: 6) {
             SetupRow(
-                title: "Spracherkennung Parakeet Ultra", detail: modelDetail,
+                title: String(localized: "Spracherkennung Parakeet Ultra"), detail: modelDetail,
                 done: model.modelStatus == .ready && !model.modelLoadFailed
             ) {
                 switch model.modelStatus {
@@ -106,10 +108,12 @@ struct SetupView: View {
         switch model.modelStatus {
         case .ready:
             model.modelLoaded
-                ? "Bereit."
-                : model.modelLoadFailed ? "Modell konnte nicht geladen werden." : "Vorhanden, wird geladen …"
-        case .adoptable: "Eine Kopie aus dem Messstand liegt vor und wird verschoben, ohne Download."
-        case .missing: "Noch nicht vorhanden."
+                ? String(localized: "Bereit.")
+                : model.modelLoadFailed
+                    ? String(localized: "Modell konnte nicht geladen werden.")
+                    : String(localized: "Vorhanden, wird geladen …")
+        case .adoptable: String(localized: "Eine Kopie aus dem Messstand liegt vor und wird verschoben, ohne Download.")
+        case .missing: String(localized: "Noch nicht vorhanden.")
         }
     }
 }

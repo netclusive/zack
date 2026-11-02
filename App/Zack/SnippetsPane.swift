@@ -117,7 +117,7 @@ private struct SnippetsEditor: View {
                     .tag(RowID.line(item.line))
             }
             if let draft, draft.anchor == nil {
-                Text(draft.name.isEmpty ? "Name" : draft.name)
+                Text(draft.name.isEmpty ? String(localized: "Name") : draft.name)
                     .foregroundStyle(draft.name.isEmpty ? .secondary : .primary)
                     .tag(RowID.new)
             }
@@ -159,7 +159,7 @@ private struct SnippetsEditor: View {
     private func notes(duplicates: Set<Int>) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             if let name = draft?.name.trimmingCharacters(in: .whitespaces), !name.isEmpty {
-                Text(verbatim: "‚\(language.pack.snippetTrigger.capitalized) \(name)‘ diktieren fügt den Text ein.")
+                Text("‚\(language.pack.snippetTrigger.capitalized) \(name)‘ diktieren fügt den Text ein.")
                     .foregroundStyle(.secondary)
             }
             if let line = draft?.anchor?.line, duplicates.contains(line) {
@@ -203,7 +203,7 @@ private struct SnippetsEditor: View {
     }
 
     private var removalTitle: String {
-        "Baustein ‚\(pendingRemoval?.entry.name ?? "")‘ löschen?"
+        String(localized: "Baustein ‚\(pendingRemoval?.entry.name ?? "")‘ löschen?")
     }
 
     private var removalPresented: Binding<Bool> {
@@ -319,7 +319,7 @@ private struct SnippetsEditor: View {
     // MARK: Fields
 
     private static func label(_ field: EntryField) -> String {
-        field == .name ? "Name" : "Text"
+        field == .name ? String(localized: "Name") : String(localized: "Text")
     }
 
     private static func isBlank(_ text: String) -> Bool {

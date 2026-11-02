@@ -1,0 +1,1407 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "" : {
+      "shouldTranslate" : false
+    },
+    "Abbrechen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "Abgelehnt. In den Systemeinstellungen erlauben." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abgelehnt. In den Systemeinstellungen erlauben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denied. Allow it in System Settings."
+          }
+        }
+      }
+    },
+    "Alle Apps mit ‚%@‘" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Apps mit ‚%@‘"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All apps starting with “%@”"
+          }
+        }
+      }
+    },
+    "App hinzufügen …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App hinzufügen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add app…"
+          }
+        }
+      }
+    },
+    "Apple Intelligence ist auf diesem Mac nicht verfügbar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence ist auf diesem Mac nicht verfügbar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence isn’t available on this Mac."
+          }
+        }
+      }
+    },
+    "Apple Intelligence ist ausgeschaltet (Systemeinstellungen)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence ist ausgeschaltet (Systemeinstellungen)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is turned off (System Settings)."
+          }
+        }
+      }
+    },
+    "Automatisch nach Updates suchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch nach Updates suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatically check for updates"
+          }
+        }
+      }
+    },
+    "Baustein ‚%@‘ löschen?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baustein ‚%@‘ löschen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete snippet “%@”?"
+          }
+        }
+      }
+    },
+    "Bedienungshilfen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedienungshilfen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        }
+      }
+    },
+    "Bedienungshilfen-Einstellungen öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedienungshilfen-Einstellungen öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Accessibility settings"
+          }
+        }
+      }
+    },
+    "Beim Anmelden starten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Anmelden starten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open at login"
+          }
+        }
+      }
+    },
+    "Bereit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready."
+          }
+        }
+      }
+    },
+    "Code-Apps" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code-Apps"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code Apps"
+          }
+        }
+      }
+    },
+    "Code-Modus in %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code-Modus in %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code Mode in %@"
+          }
+        }
+      }
+    },
+    "Code-Modus in %@ (über Code-Apps-Liste)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code-Modus in %@ (über Code-Apps-Liste)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code Mode in %@ (via Code Apps List)"
+          }
+        }
+      }
+    },
+    "Damit Zack die Taste auch in anderen Apps erkennt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Damit Zack die Taste auch in anderen Apps erkennt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So Zack detects the key in other apps too."
+          }
+        }
+      }
+    },
+    "Das Apple-Modell wird noch geladen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Apple-Modell wird noch geladen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple’s model is still loading."
+          }
+        }
+      }
+    },
+    "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checks run only with your consent, once a day. The feed and downloads come from GitHub (GitHub Inc., USA); each request sends the IP address and the user agent “Zack/<Version> Sparkle/<Version>”."
+          }
+        }
+      }
+    },
+    "Eine Kopie aus dem Messstand liegt vor und wird verschoben, ohne Download." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Kopie aus dem Messstand liegt vor und wird verschoben, ohne Download."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A copy from the benchmark setup was found and will be moved without a download."
+          }
+        }
+      }
+    },
+    "Einfügen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert"
+          }
+        }
+      }
+    },
+    "Einfügen (Kürzel belegt)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfügen (Kürzel belegt)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert (Shortcut in Use)"
+          }
+        }
+      }
+    },
+    "Eingabeüberwachung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eingabeüberwachung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Input Monitoring"
+          }
+        }
+      }
+    },
+    "Einstellungen …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings…"
+          }
+        }
+      }
+    },
+    "Eintrag entfernen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag entfernen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove entry"
+          }
+        }
+      }
+    },
+    "Eintrag hinzufügen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add entry"
+          }
+        }
+      }
+    },
+    "Enthält ein Diktat eine Selbstkorrektur wie ‚Montag, nein, Dienstag‘, glättet Apples Modell den Satz auf diesem Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enthält ein Diktat eine Selbstkorrektur wie ‚Montag, nein, Dienstag‘, glättet Apples Modell den Satz auf diesem Mac."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For a self-correction such as “Monday, no, Tuesday” in a dictation, Apple’s model cleans up the sentence on this Mac."
+          }
+        }
+      }
+    },
+    "Erkannt als (optional)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erkannt als (optional)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognized as (optional)"
+          }
+        }
+      }
+    },
+    "Erlauben" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlauben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow"
+          }
+        }
+      }
+    },
+    "Erlaubt. Audio bleibt auf diesem Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaubt. Audio bleibt auf diesem Mac."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allowed. Audio stays on this Mac."
+          }
+        }
+      }
+    },
+    "Erneut prüfen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut prüfen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Again"
+          }
+        }
+      }
+    },
+    "Erneut versuchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
+          }
+        }
+      }
+    },
+    "Für das Einfügen mit Cmd+V und den Abbruch mit anderen Tasten, etwa fn + Pfeil." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für das Einfügen mit Cmd+V und den Abbruch mit anderen Tasten, etwa fn + Pfeil."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For inserting with Cmd+V and canceling with other keys, such as fn + arrow."
+          }
+        }
+      }
+    },
+    "Größe %@. Quelle: Hugging Face (USA); übertragen wird nur die IP-Adresse. Lizenz: CC BY 4.0." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größe %@. Quelle: Hugging Face (USA); übertragen wird nur die IP-Adresse. Lizenz: CC BY 4.0."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size: %@. Source: Hugging Face (USA); only the IP address is sent. License: CC BY 4.0."
+          }
+        }
+      }
+    },
+    "Hält das Mikrofon nach einem Diktat offen, damit der Anfang nicht fehlt. Solange es offen ist, zeigt macOS den orangen Punkt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hält das Mikrofon nach einem Diktat offen, damit der Anfang nicht fehlt. Solange es offen ist, zeigt macOS den orangen Punkt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keeps the microphone open after a dictation so the start isn’t cut off. While it’s open, macOS shows the orange dot."
+          }
+        }
+      }
+    },
+    "In Texteditor öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Texteditor öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in Text Editor"
+          }
+        }
+      }
+    },
+    "In diesen Apps diktiert Zack im Code-Modus: Dateinamen und Schreibweisen werden zu Code, kurze Befehle bekommen keinen Punkt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In diesen Apps diktiert Zack im Code-Modus: Dateinamen und Schreibweisen werden zu Code, kurze Befehle bekommen keinen Punkt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In these apps, Zack dictates in code mode: file names and case commands become code, and short commands get no period."
+          }
+        }
+      }
+    },
+    "Japanische Textaufbereitung (in FluidAudio)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japanische Textaufbereitung (in FluidAudio)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japanese text processing (in FluidAudio)"
+          }
+        }
+      }
+    },
+    "Jetzt suchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Now"
+          }
+        }
+      }
+    },
+    "KI-Glättung bei Selbstkorrekturen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI-Glättung bei Selbstkorrekturen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI cleanup of self-corrections"
+          }
+        }
+      }
+    },
+    "Kopieren" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        }
+      }
+    },
+    "Laden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download"
+          }
+        }
+      }
+    },
+    "Laden fehlgeschlagen. Bitte Netzwerk prüfen und erneut versuchen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laden fehlgeschlagen. Bitte Netzwerk prüfen und erneut versuchen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download failed. Check the network and try again."
+          }
+        }
+      }
+    },
+    "Letztes Diktat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letztes Diktat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last Dictation"
+          }
+        }
+      }
+    },
+    "Lizenz: CC BY 4.0" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenz: CC BY 4.0"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "License: CC BY 4.0"
+          }
+        }
+      }
+    },
+    "Lizenztext %@ für %@ öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenztext %@ für %@ öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open %@ license text for %@"
+          }
+        }
+      }
+    },
+    "Lokales Diktat für macOS. Erkennung und Glättung laufen auf diesem Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokales Diktat für macOS. Erkennung und Glättung laufen auf diesem Mac."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local dictation for macOS. Recognition and cleanup run on this Mac."
+          }
+        }
+      }
+    },
+    "Löschen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "Mikrofon" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone"
+          }
+        }
+      }
+    },
+    "Mikrofon bereithalten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon bereithalten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep microphone ready"
+          }
+        }
+      }
+    },
+    "Mikrofon-Einstellungen öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon-Einstellungen öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Microphone settings"
+          }
+        }
+      }
+    },
+    "Modell konnte nicht geladen werden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell konnte nicht geladen werden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model Failed to Load"
+          }
+        }
+      }
+    },
+    "Modell konnte nicht geladen werden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell konnte nicht geladen werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model couldn’t be loaded."
+          }
+        }
+      }
+    },
+    "Modell wird geladen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell wird geladen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading model"
+          }
+        }
+      }
+    },
+    "Nach Updates suchen …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach Updates suchen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check for Updates…"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NemoTextProcessing with NeMo Text Processing, rustfst, flate2 (in FluidAudio)"
+          }
+        }
+      }
+    },
+    "Noch nicht vorhanden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch nicht vorhanden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not installed yet."
+          }
+        }
+      }
+    },
+    "Ohne KI-Glättung einfügen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne KI-Glättung einfügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert Without AI Cleanup"
+          }
+        }
+      }
+    },
+    "Ohne KI-Glättung einfügen (Kürzel belegt)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne KI-Glättung einfügen (Kürzel belegt)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insert Without AI Cleanup (Shortcut in Use)"
+          }
+        }
+      }
+    },
+    "Schreibweise" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schreibweise"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelling"
+          }
+        }
+      }
+    },
+    "Sprache" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation language"
+          }
+        }
+      }
+    },
+    "Spracherkennung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spracherkennung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech recognition"
+          }
+        }
+      }
+    },
+    "Spracherkennung Parakeet Ultra" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spracherkennung Parakeet Ultra"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet Ultra speech recognition"
+          }
+        }
+      }
+    },
+    "Suchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        }
+      }
+    },
+    "Systemeinstellungen öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemeinstellungen öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open System Settings"
+          }
+        }
+      }
+    },
+    "Taste" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taste"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation key"
+          }
+        }
+      }
+    },
+    "Text" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text"
+          }
+        }
+      }
+    },
+    "Textbausteine" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Textbausteine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippets"
+          }
+        }
+      }
+    },
+    "Textbausteine …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Textbausteine …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippets…"
+          }
+        }
+      }
+    },
+    "Updates automatisch installieren" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates automatisch installieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatically install updates"
+          }
+        }
+      }
+    },
+    "Updates gibt es nur in offiziellen Builds." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates gibt es nur in offiziellen Builds."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates are only available in official builds."
+          }
+        }
+      }
+    },
+    "Verfügbar für die KI-Glättung bei Korrekturen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verfügbar für die KI-Glättung bei Korrekturen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available for AI cleanup of corrections."
+          }
+        }
+      }
+    },
+    "Vorhanden, wird geladen …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorhanden, wird geladen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installed, loading…"
+          }
+        }
+      }
+    },
+    "Weitere Komponenten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Komponenten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other components"
+          }
+        }
+      }
+    },
+    "Wörterbuch …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wörterbuch …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictionary…"
+          }
+        }
+      }
+    },
+    "Zack %@" : {
+      "shouldTranslate" : false
+    },
+    "Zack beenden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack beenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit Zack"
+          }
+        }
+      }
+    },
+    "Zack fragt einmal nach dem Zugriff." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack fragt einmal nach dem Zugriff."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack asks for access once."
+          }
+        }
+      }
+    },
+    "Zack schreibt diese Begriffe genau so und gibt sie der Erkennung als Hinweis. Optional: wie die Erkennung sie falsch hört." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack schreibt diese Begriffe genau so und gibt sie der Erkennung als Hinweis. Optional: wie die Erkennung sie falsch hört."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack writes these terms exactly as given and passes them to recognition as hints. Optional: how recognition mishears them."
+          }
+        }
+      }
+    },
+    "Zack, %@" : {
+      "shouldTranslate" : false
+    },
+    "Zack-Logo" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack-Logo"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack logo"
+          }
+        }
+      }
+    },
+    "erledigt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "erledigt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "done"
+          }
+        }
+      }
+    },
+    "nicht installiert" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nicht installiert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not installed"
+          }
+        }
+      }
+    },
+    "offen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "offen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not done"
+          }
+        }
+      }
+    },
+    "Über Zack" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über Zack"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About Zack"
+          }
+        }
+      }
+    },
+    "Übernehmen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übernehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Copy"
+          }
+        }
+      }
+    },
+    "Übernehmen fehlgeschlagen. Bitte erneut versuchen oder das Modell laden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übernehmen fehlgeschlagen. Bitte erneut versuchen oder das Modell laden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t use the copy. Try again or download the model."
+          }
+        }
+      }
+    },
+    "‚%@ %@‘ diktieren fügt den Text ein." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "‚%@ %@‘ diktieren fügt den Text ein."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictating “%@ %@” inserts the text."
+          }
+        }
+      }
+    },
+    "„Parakeet Ultra“ von Moondream (moondream/parakeet-ultra), aufbauend auf „Parakeet TDT 0.6B v3“ von NVIDIA (nvidia/parakeet-tdt-0.6b-v3), für Core ML umgewandelt von FluidInference (FluidInference/parakeet-ultra-coreml). Zack nutzt die Gewichte unverändert." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Parakeet Ultra“ von Moondream (moondream/parakeet-ultra), aufbauend auf „Parakeet TDT 0.6B v3“ von NVIDIA (nvidia/parakeet-tdt-0.6b-v3), für Core ML umgewandelt von FluidInference (FluidInference/parakeet-ultra-coreml). Zack nutzt die Gewichte unverändert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Parakeet Ultra” by Moondream (moondream/parakeet-ultra), based on “Parakeet TDT 0.6B v3” by NVIDIA (nvidia/parakeet-tdt-0.6b-v3), converted for Core ML by FluidInference (FluidInference/parakeet-ultra-coreml). Zack uses the weights unchanged."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,0 +1,22 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "NSMicrophoneUsageDescription" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack nutzt das Mikrofon für Diktate. Audio bleibt auf diesem Mac."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zack uses the microphone for dictation. Audio stays on this Mac."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
