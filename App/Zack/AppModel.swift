@@ -87,7 +87,7 @@ final class AppModel {
     @ObservationIgnored private let focus = AXFocusSource()
     @ObservationIgnored private let memory = CursorMemory()
     @ObservationIgnored private var lastActive: (name: String, bundleID: String)?
-    @ObservationIgnored private var activationObservation: AppActivationObserver?
+    @ObservationIgnored private var activationObservation: (any NSObjectProtocol)?
     @ObservationIgnored private var actions: AsyncStream<(HotkeyAction, FrontApp?)>.Continuation?
     @ObservationIgnored private var pill: PillPanelController?
     @ObservationIgnored private var inputObservation: AudioPropertyObservation?
@@ -567,9 +567,15 @@ final class AppModel {
     /// Remembers the last active app other than Zack for the code mode menu entry; a switch ends the cursor memory.
     private func observeActivation() {
         if let front = NSWorkspace.shared.frontmostApplication { noteActive(front) }
-        activationObservation = AppActivationObserver { [weak self] app in
-            guard let self, self.noteActive(app) else { return }
-            self.memory.forget()
+        activationObservation = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            // Delivered on the main queue (`queue: .main`).
+            MainActor.assumeIsolated {
+                guard let self, let app, self.noteActive(app) else { return }
+                self.memory.forget()
+            }
         }
     }
 
