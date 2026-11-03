@@ -121,6 +121,9 @@ Requirements:
 - gitleaks (`brew install gitleaks`): `./build.sh` starts with a secret scan and stops without it
 - a German system voice, preferably Anna: the tests synthesize their speech sample with it
 
+Tested with Xcode 27.2 (swift-format 6.4.4), XcodeGen 2.46.0 and gitleaks 8.30.1; other versions may lint, format
+or scan differently.
+
 Builds you make yourself get no updates: feed URL and public key are empty in `App/Zack.xcconfig`, and only
 `scripts/release.sh` sets them. "Settings › Updates" then shows "Updates are only available in official builds."
 
