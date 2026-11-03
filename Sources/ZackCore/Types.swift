@@ -19,7 +19,6 @@ public enum TextMode: String, Sendable, Codable {
 public enum ZackError: Error, Equatable, Sendable {
     case unsupportedSampleRate(Double)
     case engineUnavailable(String)
-    case unknownEngine(String)
     case audioFormat
     case timeout
     /// Model files are not on disk and the caller does not allow a download.

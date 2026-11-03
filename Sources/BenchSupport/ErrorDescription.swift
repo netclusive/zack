@@ -15,7 +15,6 @@ public enum ErrorDescription {
             switch error {
             case .unsupportedSampleRate(let rate): return "unsupported sample rate \(Int(rate)) Hz"
             case .engineUnavailable(let engine): return "engine unavailable: \(engine)"
-            case .unknownEngine(let engine): return "unknown engine \(engine)"
             case .audioFormat: return "audio format conversion failed"
             case .timeout: return "timeout"
             case .modelMissing(let engine): return "model missing: \(engine)"
