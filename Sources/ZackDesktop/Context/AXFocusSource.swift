@@ -3,14 +3,16 @@ import ApplicationServices
 import Dispatch
 import Foundation
 
-/// Lines for the debug window; contains no field content except the last 40 characters before the cursor.
-public struct FocusDiagnostics: Sendable {
-    public var lines: [String]
+#if DEBUG
+    /// Lines for the debug window; contains no field content except the last 40 characters before the cursor.
+    public struct FocusDiagnostics: Sendable {
+        public var lines: [String]
 
-    public init(lines: [String]) {
-        self.lines = lines
+        public init(lines: [String]) {
+            self.lines = lines
+        }
     }
-}
+#endif
 
 /// Reads the focused field through Accessibility. Every call runs on one private serial queue, never on the main
 /// thread, and every element gets a messaging timeout so a hanging app cannot block a dictation.
@@ -75,24 +77,27 @@ public final class AXFocusSource: FocusSource {
         _ = AXUIElementSetAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, value)
     }
 
-    /// Reads the focus once and reports what worked, for hand checks. Only the last 40 characters of text appear.
-    public func diagnose() async -> FocusDiagnostics {
-        let front = await Self.frontmost()
-        return await withCheckedContinuation { continuation in
-            queue.async { continuation.resume(returning: Self.diagnoseNow(front: front)) }
+    #if DEBUG
+        /// Reads the focus once and reports what worked, for hand checks in the debug menu. Only the last 40
+        /// characters of text appear.
+        public func diagnose() async -> FocusDiagnostics {
+            let front = await Self.frontmost()
+            return await withCheckedContinuation { continuation in
+                queue.async { continuation.resume(returning: Self.diagnoseNow(front: front)) }
+            }
         }
-    }
 
-    private struct Frontmost: Sendable {
-        let pid: pid_t?
-        let bundleID: String?
-    }
+        private struct Frontmost: Sendable {
+            let pid: pid_t?
+            let bundleID: String?
+        }
 
-    @MainActor
-    private static func frontmost() -> Frontmost {
-        let app = NSWorkspace.shared.frontmostApplication
-        return Frontmost(pid: app?.processIdentifier, bundleID: app?.bundleIdentifier)
-    }
+        @MainActor
+        private static func frontmost() -> Frontmost {
+            let app = NSWorkspace.shared.frontmostApplication
+            return Frontmost(pid: app?.processIdentifier, bundleID: app?.bundleIdentifier)
+        }
+    #endif
 
     // MARK: - Queue-only helpers
 
@@ -216,151 +221,154 @@ public final class AXFocusSource: FocusSource {
         return String(decoding: Array(units[from..<to]), as: UTF16.self)
     }
 
-    /// One attribute read that keeps the raw `AXError` instead of swallowing it.
-    private static func probe(_ element: AXUIElement, _ name: String) -> (element: AXUIElement?, status: String) {
-        var value: CFTypeRef?
-        let error = AXUIElementCopyAttributeValue(element, name as CFString, &value)
-        guard error == .success else { return (nil, "Fehler \(error.rawValue)") }
-        guard let found = axElement(value) else { return (nil, "Fehler Typ") }
-        return (found, "ok")
-    }
-
-    private static func milliseconds(since start: UInt64) -> UInt64 {
-        (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
-    }
-
-    /// Weg A: the same three steps as `current()`, with each error recorded.
-    private static func probeSystemWide() -> String {
-        let start = DispatchTime.now().uptimeNanoseconds
-        let system = AXUIElementCreateSystemWide()
-        AXUIElementSetMessagingTimeout(system, timeout)
-        var appStatus = "nicht geprüft"
-        var elementStatus = "nicht geprüft"
-        var pidStatus = "nicht geprüft"
-        let app = probe(system, kAXFocusedApplicationAttribute)
-        appStatus = app.status
-        if let appElement = app.element {
-            AXUIElementSetMessagingTimeout(appElement, timeout)
-            let focused = probe(appElement, kAXFocusedUIElementAttribute)
-            elementStatus = focused.status
-            if let focusedElement = focused.element {
-                AXUIElementSetMessagingTimeout(focusedElement, timeout)
-                var pid: pid_t = 0
-                let error = AXUIElementGetPid(focusedElement, &pid)
-                pidStatus = error == .success ? "ok" : "Fehler \(error.rawValue)"
-            }
+    #if DEBUG
+        /// One attribute read that keeps the raw `AXError` instead of swallowing it.
+        private static func probe(_ element: AXUIElement, _ name: String) -> (element: AXUIElement?, status: String) {
+            var value: CFTypeRef?
+            let error = AXUIElementCopyAttributeValue(element, name as CFString, &value)
+            guard error == .success else { return (nil, "Fehler \(error.rawValue)") }
+            guard let found = axElement(value) else { return (nil, "Fehler Typ") }
+            return (found, "ok")
         }
-        return "Weg A systemweit: App \(appStatus), Element \(elementStatus), PID \(pidStatus) "
-            + "(\(milliseconds(since: start)) ms)"
-    }
 
-    /// Weg B: per-app element from the NSWorkspace pid, like `ScreenLocator`. No timeout is set on this element,
-    /// but the process-wide timeout set by Weg A may still apply.
-    private static func probeWorkspace(_ front: Frontmost) -> String {
-        let start = DispatchTime.now().uptimeNanoseconds
-        let head = "Weg B über NSWorkspace (PID \(front.pid.map { String($0) } ?? "–"), \(front.bundleID ?? "–")): "
-        guard let pid = front.pid else {
-            return head + "Fenster nicht geprüft, Element nicht geprüft (\(milliseconds(since: start)) ms)"
+        private static func milliseconds(since start: UInt64) -> UInt64 {
+            (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
         }
-        let app = AXUIElementCreateApplication(pid)
-        let window = probe(app, kAXFocusedWindowAttribute)
-        let element = probe(app, kAXFocusedUIElementAttribute)
-        return head + "Fenster \(window.status), Element \(element.status) (\(milliseconds(since: start)) ms)"
-    }
 
-    /// Weg C: the focused element straight from the system-wide element.
-    private static func probeSystemDirect() -> String {
-        let start = DispatchTime.now().uptimeNanoseconds
-        let element = probe(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute)
-        return "Weg C systemweit direkt: Element \(element.status) (\(milliseconds(since: start)) ms)"
-    }
-
-    private static func diagnoseNow(front: Frontmost) -> FocusDiagnostics {
-        let zackFront = front.bundleID != nil && front.bundleID == Bundle.main.bundleIdentifier
-        let header = [
-            probeSystemWide(),
-            probeWorkspace(front),
-            probeSystemDirect(),
-            "Zack im Vordergrund laut NSWorkspace: " + (zackFront ? "ja" : "nein"),
-        ]
-        return FocusDiagnostics(lines: header + diagnoseFocus().lines)
-    }
-
-    private static func diagnoseFocus() -> FocusDiagnostics {
-        let begin = DispatchTime.now().uptimeNanoseconds
-        var durations: [String] = []
-        func measured<T>(_ label: String, _ body: () -> T) -> T {
+        /// Weg A: the same three steps as `current()`, with each error recorded.
+        private static func probeSystemWide() -> String {
             let start = DispatchTime.now().uptimeNanoseconds
-            let result = body()
-            durations.append("\(label) \((DispatchTime.now().uptimeNanoseconds - start) / 1_000_000) ms")
-            return result
+            let system = AXUIElementCreateSystemWide()
+            AXUIElementSetMessagingTimeout(system, timeout)
+            var appStatus = "nicht geprüft"
+            var elementStatus = "nicht geprüft"
+            var pidStatus = "nicht geprüft"
+            let app = probe(system, kAXFocusedApplicationAttribute)
+            appStatus = app.status
+            if let appElement = app.element {
+                AXUIElementSetMessagingTimeout(appElement, timeout)
+                let focused = probe(appElement, kAXFocusedUIElementAttribute)
+                elementStatus = focused.status
+                if let focusedElement = focused.element {
+                    AXUIElementSetMessagingTimeout(focusedElement, timeout)
+                    var pid: pid_t = 0
+                    let error = AXUIElementGetPid(focusedElement, &pid)
+                    pidStatus = error == .success ? "ok" : "Fehler \(error.rawValue)"
+                }
+            }
+            return "Weg A systemweit: App \(appStatus), Element \(elementStatus), PID \(pidStatus) "
+                + "(\(milliseconds(since: start)) ms)"
         }
-        func yesNo(_ value: Bool) -> String { value ? "ja" : "nein" }
-        func total() -> String { "Gesamt: \((DispatchTime.now().uptimeNanoseconds - begin) / 1_000_000) ms" }
 
-        guard AXIsProcessTrusted() else {
-            return FocusDiagnostics(lines: ["Bedienungshilfen: nicht erlaubt"])
+        /// Weg B: per-app element from the NSWorkspace pid, like `ScreenLocator`. No timeout is set on this element,
+        /// but the process-wide timeout set by Weg A may still apply.
+        private static func probeWorkspace(_ front: Frontmost) -> String {
+            let start = DispatchTime.now().uptimeNanoseconds
+            let head = "Weg B über NSWorkspace (PID \(front.pid.map { String($0) } ?? "–"), \(front.bundleID ?? "–")): "
+            guard let pid = front.pid else {
+                return head + "Fenster nicht geprüft, Element nicht geprüft (\(milliseconds(since: start)) ms)"
+            }
+            let app = AXUIElementCreateApplication(pid)
+            let window = probe(app, kAXFocusedWindowAttribute)
+            let element = probe(app, kAXFocusedUIElementAttribute)
+            return head + "Fenster \(window.status), Element \(element.status) (\(milliseconds(since: start)) ms)"
         }
-        guard let focus = measured("Fokus", { current() }) else {
-            return FocusDiagnostics(lines: ["Kein fokussiertes Element gefunden", total()])
+
+        /// Weg C: the focused element straight from the system-wide element.
+        private static func probeSystemDirect() -> String {
+            let start = DispatchTime.now().uptimeNanoseconds
+            let element = probe(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute)
+            return "Weg C systemweit direkt: Element \(element.status) (\(milliseconds(since: start)) ms)"
         }
-        let element = focus.element
-        let role = measured("Rolle") { attribute(element, kAXRoleAttribute) as? String }
-        var lines = ["Rolle: \(role ?? "–")"]
-        let subroleRead = measured("Subrolle") { readSubrole(of: element) }
-        let sub: String?
-        switch subroleRead {
-        case .value(let value): sub = value
-        case .failed(let error):
-            lines.append("Subrolle: Fehler \(error.rawValue)")
-            lines.append(total())
-            return FocusDiagnostics(lines: lines)
+
+        private static func diagnoseNow(front: Frontmost) -> FocusDiagnostics {
+            let zackFront = front.bundleID != nil && front.bundleID == Bundle.main.bundleIdentifier
+            let header = [
+                probeSystemWide(),
+                probeWorkspace(front),
+                probeSystemDirect(),
+                "Zack im Vordergrund laut NSWorkspace: " + (zackFront ? "ja" : "nein"),
+            ]
+            return FocusDiagnostics(lines: header + diagnoseFocus().lines)
         }
-        let secure = sub == kAXSecureTextFieldSubrole as String
-        lines.append("Subrolle: \(sub ?? "–")")
-        lines.append("Passwortfeld: \(yesNo(secure))")
-        if secure {
-            lines.append("Passwortfeld, nichts weiter gelesen")
+
+        private static func diagnoseFocus() -> FocusDiagnostics {
+            let begin = DispatchTime.now().uptimeNanoseconds
+            var durations: [String] = []
+            func measured<T>(_ label: String, _ body: () -> T) -> T {
+                let start = DispatchTime.now().uptimeNanoseconds
+                let result = body()
+                durations.append("\(label) \((DispatchTime.now().uptimeNanoseconds - start) / 1_000_000) ms")
+                return result
+            }
+            func yesNo(_ value: Bool) -> String { value ? "ja" : "nein" }
+            func total() -> String { "Gesamt: \((DispatchTime.now().uptimeNanoseconds - begin) / 1_000_000) ms" }
+
+            guard AXIsProcessTrusted() else {
+                return FocusDiagnostics(lines: ["Bedienungshilfen: nicht erlaubt"])
+            }
+            guard let focus = measured("Fokus", { current() }) else {
+                return FocusDiagnostics(lines: ["Kein fokussiertes Element gefunden", total()])
+            }
+            let element = focus.element
+            let role = measured("Rolle") { attribute(element, kAXRoleAttribute) as? String }
+            var lines = ["Rolle: \(role ?? "–")"]
+            let subroleRead = measured("Subrolle") { readSubrole(of: element) }
+            let sub: String?
+            switch subroleRead {
+            case .value(let value): sub = value
+            case .failed(let error):
+                lines.append("Subrolle: Fehler \(error.rawValue)")
+                lines.append(total())
+                return FocusDiagnostics(lines: lines)
+            }
+            let secure = sub == kAXSecureTextFieldSubrole as String
+            lines.append("Subrolle: \(sub ?? "–")")
+            lines.append("Passwortfeld: \(yesNo(secure))")
+            if secure {
+                lines.append("Passwortfeld, nichts weiter gelesen")
+                lines.append("Dauer je Abfrage: " + durations.joined(separator: ", "))
+                lines.append(total())
+                return FocusDiagnostics(lines: lines)
+            }
+
+            let selection = measured("Auswahl") { selection(of: element) }
+            lines.append("Auswahl: " + (selection.map { "\($0.location), \($0.length)" } ?? "–"))
+
+            var viaRange = "nicht geprüft"
+            var viaValue = "nicht geprüft"
+            var before: String?
+            if let selection {
+                let range = ContextResolver.readRange(before: selection.location)
+                let direct = measured("AXStringForRange") { stringForRange(range, of: element) }
+                viaRange = yesNo(direct != nil)
+                before = direct
+                if direct == nil {
+                    let fallback = measured("AXValue") { valueSlice(range, of: element) }
+                    viaValue = yesNo(fallback != nil)
+                    before = fallback
+                }
+            }
+            lines.append("AXStringForRange: \(viaRange)")
+            lines.append("Rückfall AXValue: \(viaValue)")
+
+            let settable = measured("Setzbar") { () -> Bool in
+                var flag = DarwinBoolean(false)
+                let result = AXUIElementIsAttributeSettable(element, kAXSelectedTextRangeAttribute as CFString, &flag)
+                return result == .success && flag.boolValue
+            }
+            lines.append("Auswahl setzbar: \(yesNo(settable))")
+
+            let again = measured("Fokus erneut") { current() }
+            lines.append(
+                "Element zweimal gelesen gleich: \(yesNo(again.map { CFEqual($0.element, element) } ?? false))")
+
+            let tail = before.map { String(ContextResolver.trim($0).suffix(40)) }
+            let shown = tail?.replacingOccurrences(of: "\n", with: "⏎").replacingOccurrences(of: "\r", with: "⏎")
+            lines.append("Text vor dem Cursor (letzte 40): " + (shown.map { "„\($0)“" } ?? "–"))
             lines.append("Dauer je Abfrage: " + durations.joined(separator: ", "))
             lines.append(total())
             return FocusDiagnostics(lines: lines)
         }
-
-        let selection = measured("Auswahl") { selection(of: element) }
-        lines.append("Auswahl: " + (selection.map { "\($0.location), \($0.length)" } ?? "–"))
-
-        var viaRange = "nicht geprüft"
-        var viaValue = "nicht geprüft"
-        var before: String?
-        if let selection {
-            let range = ContextResolver.readRange(before: selection.location)
-            let direct = measured("AXStringForRange") { stringForRange(range, of: element) }
-            viaRange = yesNo(direct != nil)
-            before = direct
-            if direct == nil {
-                let fallback = measured("AXValue") { valueSlice(range, of: element) }
-                viaValue = yesNo(fallback != nil)
-                before = fallback
-            }
-        }
-        lines.append("AXStringForRange: \(viaRange)")
-        lines.append("Rückfall AXValue: \(viaValue)")
-
-        let settable = measured("Setzbar") { () -> Bool in
-            var flag = DarwinBoolean(false)
-            let result = AXUIElementIsAttributeSettable(element, kAXSelectedTextRangeAttribute as CFString, &flag)
-            return result == .success && flag.boolValue
-        }
-        lines.append("Auswahl setzbar: \(yesNo(settable))")
-
-        let again = measured("Fokus erneut") { current() }
-        lines.append("Element zweimal gelesen gleich: \(yesNo(again.map { CFEqual($0.element, element) } ?? false))")
-
-        let tail = before.map { String(ContextResolver.trim($0).suffix(40)) }
-        let shown = tail?.replacingOccurrences(of: "\n", with: "⏎").replacingOccurrences(of: "\r", with: "⏎")
-        lines.append("Text vor dem Cursor (letzte 40): " + (shown.map { "„\($0)“" } ?? "–"))
-        lines.append("Dauer je Abfrage: " + durations.joined(separator: ", "))
-        lines.append(total())
-        return FocusDiagnostics(lines: lines)
-    }
+    #endif
 }
