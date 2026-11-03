@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Zack is open source under the Apache License 2.0.
 - The menu is shorter and shows only the status and everyday actions.
-- "Regeltext statt KI-Fassung" is now "Ohne KI-Glättung einfügen".
+- The menu item that inserts the rule-based text instead of the AI version has a clearer name: "Insert Without AI Cleanup".
 - Setup is part of the settings window.
 
 ### Removed
@@ -47,14 +47,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Consecutive dictations no longer run together: Zack adds a space and adapts capitalisation to the text before the cursor.
-- `scripts/latency.sh --record` without a duration records for 30 minutes instead of stopping with an error; a missing value for `--last` or `--input` is reported clearly.
+- The latency measurement records for 30 minutes when no duration is given, instead of stopping with an error, and reports missing option values clearly.
 
 ## [0.3.0] - 2026-10-29
 
 ### Added
 
 - Choose the microphone for Zack in the menu; the macOS default input stays unchanged. If it is not connected, Zack uses the macOS default until it is back.
-- `zack-bench mic-check --device` measures a chosen microphone without changing the macOS default input.
+- The benchmark's microphone check can measure a chosen microphone without changing the macOS default input.
 - App icon: a wave-shaped Z, also shown in the About window.
 
 ### Changed
@@ -78,11 +78,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional start at login.
 - About window with the model attribution and licenses.
 - Keep the microphone ready between dictations (off, for two minutes after a dictation, or always), so the first words are not cut off while it wakes up.
-- `zack-bench mic-check` measures how quickly the microphone delivers sound after the start.
+- The benchmark measures how quickly the microphone delivers sound after the start.
 
 ### Changed
 
-- zack-bench stores newly downloaded Parakeet models with the other Zack models; earlier downloads keep working.
+- The benchmark stores newly downloaded Parakeet models with the other Zack models; earlier downloads keep working.
 - Dictations too long for the on-device model skip the AI cleanup and keep the rule-based text.
 
 ### Fixed
