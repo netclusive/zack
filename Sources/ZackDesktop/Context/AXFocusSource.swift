@@ -231,13 +231,13 @@ public final class AXFocusSource: FocusSource {
             return (found, "ok")
         }
 
-        private static func milliseconds(since start: UInt64) -> UInt64 {
-            (DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+        private static func milliseconds(since start: ContinuousClock.Instant) -> Int {
+            Int((ContinuousClock.now - start) / .milliseconds(1))
         }
 
         /// Weg A: the same three steps as `current()`, with each error recorded.
         private static func probeSystemWide() -> String {
-            let start = DispatchTime.now().uptimeNanoseconds
+            let start = ContinuousClock.now
             let system = AXUIElementCreateSystemWide()
             AXUIElementSetMessagingTimeout(system, timeout)
             var appStatus = "nicht geprüft"
@@ -263,7 +263,7 @@ public final class AXFocusSource: FocusSource {
         /// Weg B: per-app element from the NSWorkspace pid, like `ScreenLocator`. No timeout is set on this element,
         /// but the process-wide timeout set by Weg A may still apply.
         private static func probeWorkspace(_ front: Frontmost) -> String {
-            let start = DispatchTime.now().uptimeNanoseconds
+            let start = ContinuousClock.now
             let head = "Weg B über NSWorkspace (PID \(front.pid.map { String($0) } ?? "–"), \(front.bundleID ?? "–")): "
             guard let pid = front.pid else {
                 return head + "Fenster nicht geprüft, Element nicht geprüft (\(milliseconds(since: start)) ms)"
@@ -276,7 +276,7 @@ public final class AXFocusSource: FocusSource {
 
         /// Weg C: the focused element straight from the system-wide element.
         private static func probeSystemDirect() -> String {
-            let start = DispatchTime.now().uptimeNanoseconds
+            let start = ContinuousClock.now
             let element = probe(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute)
             return "Weg C systemweit direkt: Element \(element.status) (\(milliseconds(since: start)) ms)"
         }
@@ -293,16 +293,16 @@ public final class AXFocusSource: FocusSource {
         }
 
         private static func diagnoseFocus() -> FocusDiagnostics {
-            let begin = DispatchTime.now().uptimeNanoseconds
+            let begin = ContinuousClock.now
             var durations: [String] = []
             func measured<T>(_ label: String, _ body: () -> T) -> T {
-                let start = DispatchTime.now().uptimeNanoseconds
+                let start = ContinuousClock.now
                 let result = body()
-                durations.append("\(label) \((DispatchTime.now().uptimeNanoseconds - start) / 1_000_000) ms")
+                durations.append("\(label) \(milliseconds(since: start)) ms")
                 return result
             }
             func yesNo(_ value: Bool) -> String { value ? "ja" : "nein" }
-            func total() -> String { "Gesamt: \((DispatchTime.now().uptimeNanoseconds - begin) / 1_000_000) ms" }
+            func total() -> String { "Gesamt: \(milliseconds(since: begin)) ms" }
 
             guard AXIsProcessTrusted() else {
                 return FocusDiagnostics(lines: ["Bedienungshilfen: nicht erlaubt"])
