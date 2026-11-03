@@ -6,7 +6,8 @@ public struct FillerRule: TextRule {
         uniqueKeysWithValues: DictationLanguage.allCases.map { ($0, makePattern(for: $0)) })
 
     private static func makePattern(for language: DictationLanguage) -> NSRegularExpression {
-        let alternatives = language.pack.fillers.sorted { $0.count > $1.count }.joined(separator: "|")
+        let alternatives = language.pack.fillers.sorted { $0.count > $1.count }
+            .map(NSRegularExpression.escapedPattern(for:)).joined(separator: "|")
         // Letters, digits and hyphens around a filler mean it is part of a longer word such as "uh-oh".
         let filler = #"(?<![\p{L}\p{N}-])(?:"# + alternatives + #")(?![\p{L}\p{N}-])"#
         let terminator = #"[.!?…]+"#
