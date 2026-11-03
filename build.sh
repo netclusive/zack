@@ -9,6 +9,16 @@ trap 'rm -rf "$TMP"' EXIT
 git archive HEAD | tar -x -C "$TMP"
 ( cd "$TMP" && gitleaks dir . --redact --no-banner )
 
+echo "==> tool versions"
+# The versions the README names as tested; another version only warns.
+warn_untested() {
+    if [[ "$3" != "$2" ]]; then echo "warning: $1 ${3:-not found}, tested with $2" >&2; fi
+}
+warn_untested gitleaks 8.30.1 "$(gitleaks version 2> /dev/null || true)"
+warn_untested swift-format 6.4.4 "$(xcrun swift-format --version 2> /dev/null || true)"
+warn_untested XcodeGen 2.46.0 "$(xcodegen --version 2> /dev/null | sed -n 's/^Version: //p' || true)"
+warn_untested ShellCheck 0.11.0 "$(shellcheck --version 2> /dev/null | sed -n 's/^version: //p' || true)"
+
 echo "==> lint"
 xcrun swift-format lint --strict --recursive Package.swift Sources Tests App/Zack
 for script in build.sh scripts/*.sh; do bash -n "$script"; done
