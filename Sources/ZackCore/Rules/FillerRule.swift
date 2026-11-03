@@ -27,6 +27,7 @@ public struct FillerRule: TextRule {
         // "Er sagte: hm." -> "Er sagte."
         let afterColon = #"[:;][ \t]*"# + run + #"(?=[.!?…])"#
         let inline = #"(?:,[ \t]*)?"# + filler + #",?[ \t]*"#
+        // Built from the compiled-in language packs only: a broken pattern crashes the tests, never a user.
         return try! NSRegularExpression(
             pattern: [line, sentence, afterColon, inline].joined(separator: "|"),
             options: [.caseInsensitive, .anchorsMatchLines])

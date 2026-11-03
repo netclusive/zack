@@ -91,6 +91,7 @@ public struct CodeModeRule: TextRule {
 
     private static func makeFileNamePattern(for language: DictationLanguage) -> NSRegularExpression {
         let dotWord = NSRegularExpression.escapedPattern(for: language.pack.codeDotWord)
+        // Built from the compiled-in language packs only: a broken pattern crashes the tests, never a user.
         return try! NSRegularExpression(
             pattern: #"(?<![\p{L}\p{N}])([\p{L}\p{N}_-]+)[ \t]+"# + dotWord + #"[ \t]+("#
                 + extensions.joined(separator: "|") + #")(?![\p{L}\p{N}])"#,
