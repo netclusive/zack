@@ -132,9 +132,10 @@ public final class Updater {
 /// Gentle reminders, as Sparkle requires for an app without a Dock icon: Sparkle shows a scheduled update only in
 /// immediate focus (Zack launched recently or the system was idle for some time) and never during a dictation, so its
 /// window cannot take the paste target; otherwise the menu offers the update.
-/// `@preconcurrency` is sound: SPUStandardUserDriver is NS_SWIFT_UI_ACTOR, so calls arrive on main; off main they trap.
+/// An isolated conformance (SE-0470): SPUStandardUserDriver is NS_SWIFT_UI_ACTOR and messages the delegate through
+/// Objective-C on main, and Swift hands it over only on the main actor.
 @MainActor
-private final class UserDriverDelegate: NSObject, @preconcurrency SPUStandardUserDriverDelegate {
+private final class UserDriverDelegate: NSObject, @MainActor SPUStandardUserDriverDelegate {
     weak var updater: Updater?
 
     nonisolated var supportsGentleScheduledUpdateReminders: Bool { true }
