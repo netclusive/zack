@@ -4,6 +4,16 @@ import ZackCore
 
 @testable import ZackDesktop
 
+extension DictationState {
+    /// The states a pill appears for; `PillContent` decides this in the app.
+    var showsPill: Bool {
+        switch self {
+        case .idle, .listening: false
+        default: true
+        }
+    }
+}
+
 /// Only the engines are replaced: the real `Inserter` works on a fake
 /// clipboard and fake keystrokes, the real `MicrophoneCapture` on a fake audio source.
 

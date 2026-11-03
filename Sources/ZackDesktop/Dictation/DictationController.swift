@@ -39,13 +39,6 @@ public enum DictationState: Equatable, Sendable {
     case failed(DictationFailure)
     case notice(DictationNotice)
 
-    public var showsPill: Bool {
-        switch self {
-        case .idle, .listening: false
-        default: true
-        }
-    }
-
     public var isCapturing: Bool {
         switch self {
         case .listening, .recording: true
