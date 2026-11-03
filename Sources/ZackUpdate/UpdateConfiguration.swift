@@ -6,7 +6,8 @@ public struct UpdateConfiguration: Equatable, Sendable {
     public let publicKey: String
 
     public init?(feedURL: String?, publicKey: String?) {
-        guard let feed = feedURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+        // Sparkle trims the key but not the feed URL, so whitespace around the feed counts as malformed.
+        guard let feed = feedURL, feed.trimmingCharacters(in: .whitespacesAndNewlines) == feed,
             let key = publicKey?.trimmingCharacters(in: .whitespacesAndNewlines),
             let url = URL(string: feed), let scheme = url.scheme?.lowercased(),
             let host = url.host(), !host.isEmpty,

@@ -39,7 +39,14 @@ struct UpdateConfigurationTests {
         #expect(UpdateConfiguration(feedURL: "https://", publicKey: key) == nil)
     }
 
-    @Test func surroundingWhitespaceIsIgnored() {
-        #expect(UpdateConfiguration(feedURL: " https://example.com/appcast.xml\n", publicKey: " \(key) ") != nil)
+    /// Sparkle trims the key itself, so whitespace around it is harmless.
+    @Test func whitespaceAroundTheKeyIsIgnored() {
+        #expect(UpdateConfiguration(feedURL: "https://example.com/appcast.xml", publicKey: " \(key)\n") != nil)
+    }
+
+    /// Sparkle does not trim the feed URL and would request a broken one.
+    @Test func whitespaceAroundTheFeedURLDisablesUpdates() {
+        #expect(UpdateConfiguration(feedURL: " https://example.com/appcast.xml", publicKey: key) == nil)
+        #expect(UpdateConfiguration(feedURL: "https://example.com/appcast.xml\n", publicKey: key) == nil)
     }
 }
