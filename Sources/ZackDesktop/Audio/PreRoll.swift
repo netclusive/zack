@@ -6,8 +6,7 @@ struct PreRoll: Sendable {
     private(set) var samples: [Float] = []
 
     init(duration: Duration, sampleRate: Double = 16_000) {
-        let seconds = Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1e18
-        capacity = max(0, Int((seconds * sampleRate).rounded()))
+        capacity = max(0, Int((duration / .seconds(1) * sampleRate).rounded()))
         self.sampleRate = sampleRate
     }
 
