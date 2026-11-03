@@ -104,7 +104,7 @@ final class AppModel {
         let settings = settings
         // Resolved before the example files exist, so an existing vocabulary file still means German.
         let hasExistingFiles = (try? UserFiles.standard()).map {
-            FileManager.default.fileExists(atPath: $0.vocabularyURL.path)
+            FileManager.default.fileExists(atPath: $0.vocabularyURL.path(percentEncoded: false))
         }
         dictationLanguage = settings.resolveDictationLanguage(hasExistingFiles: hasExistingFiles ?? false)
         // Without them there is no vocabulary, no snippets and no editors; the lookup above fails the same way.

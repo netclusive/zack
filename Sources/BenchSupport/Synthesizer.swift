@@ -5,9 +5,12 @@ enum Synthesizer {
     static func synthesize(_ text: String, voice: String, to output: URL) throws {
         let aiff = FileManager.default.temporaryDirectory.appending(path: "zack-\(UUID().uuidString).aiff")
         defer { try? FileManager.default.removeItem(at: aiff) }
-        try run("/usr/bin/say", ["-v", voice, "-o", aiff.path, "--", text], voice: voice)
+        let aiffPath = aiff.path(percentEncoded: false)
+        try run("/usr/bin/say", ["-v", voice, "-o", aiffPath, "--", text], voice: voice)
         try run(
-            "/usr/bin/afconvert", ["-f", "WAVE", "-d", "LEI16@16000", "-c", "1", aiff.path, output.path], voice: voice)
+            "/usr/bin/afconvert",
+            ["-f", "WAVE", "-d", "LEI16@16000", "-c", "1", aiffPath, output.path(percentEncoded: false)],
+            voice: voice)
     }
 
     private static func run(_ executable: String, _ arguments: [String], voice: String) throws {

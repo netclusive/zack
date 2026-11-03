@@ -69,7 +69,8 @@ public struct UserFiles: Sendable {
     public func createMissing() throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let language = language()
-        for kind in UserFileKind.allCases where !FileManager.default.fileExists(atPath: url(for: kind).path) {
+        for kind in UserFileKind.allCases
+        where !FileManager.default.fileExists(atPath: url(for: kind).path(percentEncoded: false)) {
             try Data(Self.template(for: kind, language: language).utf8)
                 .write(to: url(for: kind), options: .withoutOverwriting)
         }
@@ -90,7 +91,7 @@ public struct UserFiles: Sendable {
     /// Switches code mode for one app in `code-apps.txt` (a missing file starts from the template, an unreadable one throws).
     public func toggleCodeMode(for bundleID: String) throws {
         let current: String
-        if FileManager.default.fileExists(atPath: codeAppsURL.path) {
+        if FileManager.default.fileExists(atPath: codeAppsURL.path(percentEncoded: false)) {
             // An existing but unreadable file must never be replaced by the template.
             guard let text = Self.readText(codeAppsURL) else { throw CocoaError(.fileReadUnknown) }
             current = text

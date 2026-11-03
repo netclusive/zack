@@ -153,7 +153,9 @@ private struct Invocation {
         var device: String?
         for testCase in try selectedCases(try loadCorpus()) {
             let output = directory.appending(path: "\(testCase.id).wav")
-            if FileManager.default.fileExists(atPath: output.path), !arguments.isSet("all"), arguments["id"] == nil {
+            if FileManager.default.fileExists(atPath: output.path(percentEncoded: false)), !arguments.isSet("all"),
+                arguments["id"] == nil
+            {
                 continue
             }
             while true {
@@ -242,7 +244,7 @@ private struct Invocation {
         try encoder.encode(result).write(to: file)
         print("\n" + BenchReport.markdown([RunSummary(result)]))
         print("\n" + BenchReport.footnote)
-        print("\ngespeichert: \(file.path)")
+        print("\ngespeichert: \(file.path(percentEncoded: false))")
     }
 
     func report() throws {
