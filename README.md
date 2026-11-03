@@ -134,6 +134,9 @@ Build and install:
 generates `App/Zack.xcodeproj` with XcodeGen (not tracked) and builds the release app; `scripts/build-app.sh Debug`
 builds a debug app with a "Debug" menu of test tools (paste test, context reading).
 
+Logic belongs in the package targets, where `swift test` covers it; `App/Zack` keeps only the SwiftUI views and the
+wiring, and has no test target of its own.
+
 Latency: `scripts/latency.sh --record 30m` records the app's signposts while you dictate and then reports p50 and
 p95 (stop early with Ctrl-C). The system log keeps them for a few minutes only, so `--last` suits short checks.
 
