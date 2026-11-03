@@ -5,6 +5,16 @@ import ZackCore
 
 @testable import ZackDesktop
 
+/// Restart of a single-device fake: stop and start, without a device check (`EngineAudioInput` has its own).
+extension AudioInput {
+    func restart(
+        onChunk: @escaping @Sendable ([Float]) -> Void, onEvent: @escaping @Sendable (AudioInputEvent) -> Void
+    ) throws {
+        stop()
+        try start(onChunk: onChunk, onEvent: onEvent)
+    }
+}
+
 /// Audio source driven by the test instead of a microphone.
 final class FakeAudioInput: AudioInput, Sendable {
     private struct State {

@@ -47,13 +47,3 @@ public protocol Cleaner: Sendable {
     /// Drops a readied session that no cleanup took.
     func discardPrewarmed()
 }
-
-extension Transcriber {
-    public func prepare() async throws {}
-}
-
-extension Cleaner {
-    public func prepare() async throws {}
-    public func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {}
-    public func discardPrewarmed() {}
-}

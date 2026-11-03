@@ -15,6 +15,13 @@ struct StubCleaner: Cleaner {
     }
 }
 
+/// No-op defaults for the cleaner fakes; the production cleaners implement these themselves.
+extension Cleaner {
+    func prepare() async throws {}
+    func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {}
+    func discardPrewarmed() {}
+}
+
 @Test func withoutSignalWordCleanerIsSkipped() async {
     let processor = TextProcessor(cleaner: StubCleaner(output: "falsch"))
     let result = await processor.process("Äh, alles läuft.", context: RuleContext())

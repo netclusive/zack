@@ -4,6 +4,11 @@ import ZackCore
 
 @testable import BenchSupport
 
+/// No-op default for the transcriber fakes; the production transcribers implement it themselves.
+extension Transcriber {
+    func prepare() async throws {}
+}
+
 /// Returns `text(call, sampleCount)` and records the sample count of every clip it gets, in call order.
 private actor FakeTranscriber: Transcriber {
     nonisolated let id = "fake"

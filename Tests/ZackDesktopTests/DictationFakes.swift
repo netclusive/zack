@@ -5,6 +5,17 @@ import ZackCore
 
 @testable import ZackDesktop
 
+/// No-op defaults for the engine fakes; the production engines implement these themselves.
+extension Transcriber {
+    func prepare() async throws {}
+}
+
+extension Cleaner {
+    func prepare() async throws {}
+    func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {}
+    func discardPrewarmed() {}
+}
+
 /// `Clock` whose time moves only through `advance`; sleepers wake when their deadline passes.
 final class TestClock: Clock, Sendable {
     struct Instant: InstantProtocol {
