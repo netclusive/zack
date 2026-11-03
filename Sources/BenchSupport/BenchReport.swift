@@ -89,9 +89,6 @@ public struct CaseResult: Codable, Sendable {
         return Set(finalPasses).count > 1
     }
 
-    /// Pass 1 total; quality fields belong to this pass.
-    public var totalMs: Double { transcribeMs + processMs }
-
     /// Every transcription timing; old runs have only the one of pass 1.
     public var transcribeSamples: [Double] { transcribeSamplesMs ?? [transcribeMs] }
 
