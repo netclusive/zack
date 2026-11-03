@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 # Compares the interface strings the compiler extracted (*.stringsdata) with the String Catalogs; one line per problem.
-# Usage: scripts/check-strings.sh <derived-data> <configuration> [--inventory <file>]
+# Usage: scripts/check-strings.sh <derived-data> <configuration>
 #        scripts/check-strings.sh --self-test
 #   <derived-data>  Xcode derived data folder, e.g. .build/xcode-app (read from Build/Intermediates.noindex)
 #   <configuration> build configuration whose extraction is read, e.g. Release
-#   --inventory     JSON object {"<area>": [keys]}; every key must be extracted and have a German value equal to the key
 #   --self-test     runs the check against a throwaway repo and derived data
 # Exit 0 with "strings: <n> keys from <m> files match the catalogs", otherwise exit 1.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# check <repo root> <derived-data> <configuration> [inventory file]
+# check <repo root> <derived-data> <configuration>
 check() {
     /usr/bin/python3 -I - "$@" <<'PY'
 import json
@@ -19,7 +18,6 @@ import sys
 
 root = os.path.realpath(sys.argv[1])
 derived, configuration = sys.argv[2], sys.argv[3]
-inventory_file = sys.argv[5] if len(sys.argv) > 5 else None
 
 AREAS = ["App/Zack", "Sources/ZackDesktop", "Sources/ZackUpdate"]
 problems = []
@@ -57,14 +55,6 @@ def localization_ok(localization):
     if isinstance(plural, dict):
         return all(unit_ok(plural.get(form, {}).get("stringUnit")) for form in ("one", "other"))
     return False
-
-
-def german_value(entry):
-    german = entry.get("localizations", {}).get("de", {})
-    if "stringUnit" in german:
-        return german["stringUnit"].get("value")
-    other = german.get("variations", {}).get("plural", {}).get("other", {})
-    return other.get("stringUnit", {}).get("value")
 
 
 catalogs = {}
@@ -121,18 +111,6 @@ for path in sorted(found):
 
 if files_used == 0:
     problems.append("no string data; build the app first")
-
-if inventory_file:
-    inventory = load(inventory_file)
-    for area in AREAS:
-        for key in inventory.get(area, []):
-            if key not in extracted[area]:
-                problems.append("%s: %s (in the inventory, not extracted)" % (area, key))
-            entry = (catalogs[area] or {}).get(key)
-            if entry is None:
-                problems.append("%s: %s (in the inventory, not in the catalog)" % (area, key))
-            elif entry.get("shouldTranslate") is not False and german_value(entry) != key:
-                problems.append("%s: %s (German value differs from the key)" % (area, key))
 
 if problems:
     for problem in sorted(set(problems)):
@@ -242,18 +220,11 @@ self_test() {
     data "$inter/P.build/Release/e.stringsdata" "$root/.build/xcode-packages/pkg/E.swift" Localizable Foreign
     expect "no data" 1 "no string data; build the app first" -- Release
 
-    reset
-    data "$inter/Z.build/Release/a.stringsdata" "$root/Sources/ZackDesktop/A.swift" Localizable Hello 'Lines %lld'
-    printf '{"Sources/ZackDesktop":["Hello","Lines %%lld"]}\n' > "$dir/inventory.json"
-    expect "inventory complete" 0 "strings: 2 keys from 1 files" -- Release --inventory "$dir/inventory.json"
-    printf '{"Sources/ZackDesktop":["Hello","Gone"]}\n' > "$dir/inventory.json"
-    expect "inventory not extracted" 1 "Sources/ZackDesktop: Gone" -- Release --inventory "$dir/inventory.json"
-
     echo "check-strings self-test passed"
 }
 
 usage() {
-    echo "usage: $0 <derived-data> <configuration> [--inventory <file>] | --self-test" >&2
+    echo "usage: $0 <derived-data> <configuration> | --self-test" >&2
     exit 2
 }
 
@@ -264,8 +235,7 @@ case "${1-}" in
         ;;
     "") usage ;;
     *)
-        if (($# != 2 && $# != 4)); then usage; fi
-        if (($# == 4)) && [[ "$3" != --inventory ]]; then usage; fi
+        if (($# != 2)); then usage; fi
         check "$PWD" "$@"
         ;;
 esac
