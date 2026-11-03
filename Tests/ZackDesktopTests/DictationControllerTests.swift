@@ -56,8 +56,7 @@ struct DictationControllerTests {
         language: @escaping @Sendable () -> DictationLanguage = { .german }
     ) -> DictationController<TestClock> {
         let inserter = Inserter(
-            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { accessibility },
-            frontmostBundleID: { nil }, sleep: { _ in })
+            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { accessibility }, sleep: { _ in })
         return DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor(vocabulary: Vocabulary(terms: ["GitHub"]), cleaner: cleaner) },
@@ -459,8 +458,7 @@ struct DictationControllerTests {
         let cleaner = RecordingCleaner()
         let gate = ProcessorGate()
         let inserter = Inserter(
-            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, frontmostBundleID: { nil },
-            sleep: { _ in })
+            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, sleep: { _ in })
         let controller = DictationController(
             capture: capture, transcriber: FakeTranscriber("Hallo Welt."), inserter: inserter, clock: clock,
             makeProcessor: {

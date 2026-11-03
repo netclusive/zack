@@ -13,12 +13,12 @@ struct InserterTests {
     }
 
     func makeInserter(
-        accessibility: Bool = true, timing: InsertTiming = InsertTiming(),
+        accessibility: Bool = true, restoreDelay: Duration = Inserter.measuredRestoreDelay,
         sleep: @escaping @Sendable (Duration) async -> Void = { _ in }
     ) -> Inserter {
         Inserter(
             clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { accessibility },
-            frontmostBundleID: { "com.example.editor" }, timing: timing, sleep: sleep)
+            restoreDelay: restoreDelay, sleep: sleep)
     }
 
     @Test func pastesAndRestoresThePreviousClipboard() async {
@@ -75,14 +75,12 @@ struct InserterTests {
         #expect(clipboard.contents == FakeClipboard.text("neu kopiert"))
     }
 
-    @Test func restoreWaitsThePerAppDelay() async {
+    @Test func restoreWaitsTheRestoreDelay() async {
         let waited = WaitLog()
-        let timing = InsertTiming(overrides: ["com.example.editor": .milliseconds(600)])
-        let inserter = makeInserter(timing: timing, sleep: { await waited.append($0) })
+        let inserter = makeInserter(restoreDelay: .milliseconds(600), sleep: { await waited.append($0) })
         _ = await inserter.insert("Hallo")
         await inserter.waitForRestore()
         #expect(await waited.values == [.milliseconds(600)])
-        #expect(InsertTiming().restoreDelay(for: "com.example.other") == .milliseconds(250))
     }
 
     @Test func quickSecondDictationRestoresTheOriginalClipboard() async {

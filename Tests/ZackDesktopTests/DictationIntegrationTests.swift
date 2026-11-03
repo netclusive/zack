@@ -18,8 +18,7 @@ struct DictationIntegrationTests {
         let clipboard = FakeClipboard()
         let keystrokes = FakeKeystrokes(clipboard: clipboard)
         let inserter = Inserter(
-            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, frontmostBundleID: { nil },
-            sleep: { _ in })
+            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, sleep: { _ in })
         let clock = TestClock()
         let controller = DictationController(
             capture: MicrophoneCapture(input: input),

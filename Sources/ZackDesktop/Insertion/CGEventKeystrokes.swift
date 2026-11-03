@@ -1,4 +1,3 @@
-import AppKit
 import CoreGraphics
 
 /// Posts Cmd+V as HID events; needs Accessibility.
@@ -21,10 +20,5 @@ public final class CGEventKeystrokes: KeystrokePoster {
             event.setIntegerValueField(.eventSourceUserData, value: HotkeyEventMapper.ownEventMarker)
             event.post(tap: .cghidEventTap)
         }
-    }
-
-    /// Bundle ID of the frontmost app, for the per-app restore delay; never logged.
-    public static func frontmostBundleID() -> String? {
-        NSWorkspace.shared.frontmostApplication?.bundleIdentifier
     }
 }

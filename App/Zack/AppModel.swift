@@ -116,7 +116,7 @@ final class AppModel {
                 .deviceID(default: AudioDevices.defaultInputID())
         })
         capture = MicrophoneCapture(input: input)
-        inserter = Self.makeInserter(timing: .measured)
+        inserter = Self.makeInserter()
         let files = files
         let cleaner = cleaner
         let modelReady = modelReady
@@ -470,11 +470,10 @@ final class AppModel {
 
     // MARK: Wiring
 
-    private static func makeInserter(timing: InsertTiming) -> Inserter {
+    private static func makeInserter(restoreDelay: Duration = Inserter.measuredRestoreDelay) -> Inserter {
         Inserter(
             clipboard: SystemClipboard(), keystrokes: CGEventKeystrokes(),
-            canPostKeystrokes: { Permissions.accessibility() },
-            frontmostBundleID: { CGEventKeystrokes.frontmostBundleID() }, timing: timing)
+            canPostKeystrokes: { Permissions.accessibility() }, restoreDelay: restoreDelay)
     }
 
     /// Hotkey actions run one after the other, so a quick tap cannot overtake its own key down.
@@ -675,7 +674,7 @@ final class AppModel {
     #if DEBUG
         /// Debug: pastes a fixed text after 3 s (time to focus the target app) with restore delay `delay`.
         func debugInsertTest(delay: Duration) {
-            let inserter = Self.makeInserter(timing: InsertTiming(defaultDelay: delay))
+            let inserter = Self.makeInserter(restoreDelay: delay)
             Task {
                 try? await Task.sleep(for: .seconds(3))
                 _ = await inserter.insert("Zack-Einfügetest")

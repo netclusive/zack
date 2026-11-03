@@ -38,8 +38,7 @@ struct DictationReadinessTests {
         readiness: TestValue<MicrophoneReadiness>, modelReady: TestValue<Bool> = TestValue(true)
     ) -> DictationController<TestClock> {
         let inserter = Inserter(
-            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, frontmostBundleID: { nil },
-            sleep: { _ in })
+            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, sleep: { _ in })
         return DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor() }, modelReady: { modelReady.current }, microphoneAllowed: { true },

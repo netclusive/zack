@@ -34,8 +34,7 @@ struct DictationContextTests {
     ) -> DictationController<TestClock> {
         hasCleaner.set(cleaner != nil)
         let inserter = Inserter(
-            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, frontmostBundleID: { nil },
-            sleep: { _ in })
+            clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, sleep: { _ in })
         return DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor(cleaner: cleaner) }, modelReady: { true }, microphoneAllowed: { true },

@@ -7,28 +7,11 @@ public enum InsertOutcome: Equatable, Sendable {
     case clipboardOnly
 }
 
-/// Restore delay after Cmd+V, per app where needed.
-public struct InsertTiming: Sendable {
-    public var defaultDelay: Duration
-    /// Bundle ID to delay, for apps that read the clipboard late.
-    public var overrides: [String: Duration]
-
-    public init(defaultDelay: Duration = .milliseconds(250), overrides: [String: Duration] = [:]) {
-        self.defaultDelay = defaultDelay
-        self.overrides = overrides
-    }
-
-    /// Measured values.
-    public static let measured = InsertTiming()
-
-    public func restoreDelay(for bundleID: String?) -> Duration {
-        bundleID.flatMap { overrides[$0] } ?? defaultDelay
-    }
-}
-
 /// Inserts through the clipboard: save it, set the text, send Cmd+V, restore it after a pause.
 @MainActor
 public final class Inserter {
+    /// Measured pause between Cmd+V and the restore.
+    public static let measuredRestoreDelay: Duration = .milliseconds(250)
     /// Marker from nspasteboard.org: clipboard managers leave such entries out of their history.
     public static let transientType = "org.nspasteboard.TransientType"
     /// Marker from nspasteboard.org: password managers flag secrets with it; Zack never keeps or restores them.
@@ -42,22 +25,19 @@ public final class Inserter {
     private let clipboard: any Clipboard
     private let keystrokes: any KeystrokePoster
     private let canPostKeystrokes: @MainActor () -> Bool
-    private let frontmostBundleID: @MainActor () -> String?
-    private let timing: InsertTiming
+    private let restoreDelay: Duration
     private let sleep: @Sendable (Duration) async -> Void
     private var pending: PendingRestore?
 
     public init(
-        clipboard: any Clipboard, keystrokes: any KeystrokePoster,
-        canPostKeystrokes: @escaping @MainActor () -> Bool, frontmostBundleID: @escaping @MainActor () -> String?,
-        timing: InsertTiming = InsertTiming(),
+        clipboard: any Clipboard, keystrokes: any KeystrokePoster, canPostKeystrokes: @escaping @MainActor () -> Bool,
+        restoreDelay: Duration = measuredRestoreDelay,
         sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }
     ) {
         self.clipboard = clipboard
         self.keystrokes = keystrokes
         self.canPostKeystrokes = canPostKeystrokes
-        self.frontmostBundleID = frontmostBundleID
-        self.timing = timing
+        self.restoreDelay = restoreDelay
         self.sleep = sleep
     }
 
@@ -71,10 +51,9 @@ public final class Inserter {
         let saved = takePendingSnapshot() ?? savedClipboard()
         let own = clipboard.write(text, transient: true)
         keystrokes.postPaste()
-        let delay = timing.restoreDelay(for: frontmostBundleID())
         // Holds the inserter until the restore is done, also for a short-lived one (debug menu).
         let task = Task {
-            await sleep(delay)
+            await sleep(restoreDelay)
             guard !Task.isCancelled else { return }
             restore(saved, ifChangeCountIs: own)
         }

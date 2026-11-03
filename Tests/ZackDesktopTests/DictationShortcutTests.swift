@@ -63,8 +63,7 @@ struct DictationShortcutTests {
                     Self.runDuringPaste(action)
                 }
                 return true
-            }, frontmostBundleID: { nil },
-            sleep: { _ in })
+            }, sleep: { _ in })
         return DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor(cleaner: cleaner) }, modelReady: { true }, microphoneAllowed: { true },
