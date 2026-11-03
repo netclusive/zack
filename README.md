@@ -136,7 +136,9 @@ Build and install:
 
 `./build.sh` is the quality gate: secret scan, lint, tests, the release script's self-test and the builds. It
 generates `App/Zack.xcodeproj` with XcodeGen (not tracked) and builds the release app; `scripts/build-app.sh Debug`
-builds a debug app with a "Debug" menu of test tools (paste test, context reading).
+builds a debug app with a "Debug" menu of test tools (paste test, context reading). `--static-only` runs the secret
+scan, lint and version checks alone, `--skip-static` the tests and builds; `scripts/release.sh` checks the security
+advisories in between.
 
 Logic belongs in the package targets, where `swift test` covers it; `App/Zack` keeps only the SwiftUI views and the
 wiring, and has no test target of its own.

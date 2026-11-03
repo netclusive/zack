@@ -249,7 +249,7 @@ preflight() {
     step "preflight: GitHub and notary service"
     git fetch origin || die "git fetch origin failed"
     git rev-parse --verify --quiet refs/remotes/origin/main > /dev/null || die "origin/main does not exist"
-    # main may be ahead (the release commit is pushed in step 8), but neither behind nor diverged.
+    # main may be ahead (the release commit is pushed in step 9), but neither behind nor diverged.
     git merge-base --is-ancestor refs/remotes/origin/main refs/heads/main \
         || die "main is behind or has diverged from origin/main; integrate origin/main first"
     latest="$(release_view "" tagName .tagName)" || die "gh release view failed"
@@ -262,11 +262,13 @@ preflight() {
         || die "notary profile $NOTARY_PROFILE is missing or not usable"
 }
 
-# Step 2: secret scan, lint, versions, tests, package and app build; also generates App/Zack.xcodeproj.
+# Steps 2 and 4: ./build.sh in two parts, so the advisories (sca) come after lint and sast and before test and build.
+# Step 2 (--static-only): secret scan, lint, versions. Step 4 (--skip-static): tests, package and app build; it also
+# generates App/Zack.xcodeproj.
 gate() {
-    step "gate: ./build.sh"
+    step "gate: ./build.sh $1"
     # pipefail: a failing build.sh fails the pipeline even though mask succeeds.
-    ./build.sh 2>&1 | mask || die "./build.sh failed"
+    ./build.sh "$1" 2>&1 | mask || die "./build.sh $1 failed"
 }
 
 # Step 3: Swift has no SCA tool in the stack matrix; list the advisories of the pinned packages instead.
@@ -296,7 +298,7 @@ remove_distribution_logs() {
     done < <(sed -n 's/.*Created bundle at path "\(.*\.xcdistributionlogs\)".*/\1/p' "$1")
 }
 
-# Step 4: archive with feed and key, export with the signing of the mode; the export also re-signs Sparkle's helpers.
+# Step 5: archive with feed and key, export with the signing of the mode; the export also re-signs Sparkle's helpers.
 build_export() {
     step "archive and export"
     local method style signing exported
@@ -351,7 +353,7 @@ team_of() {
     sed -n 's/^TeamIdentifier=//p' <<< "$out"
 }
 
-# Step 5: signature, hardened runtime, entitlements, contents, feed and key, version, team of Sparkle's helpers.
+# Step 6: signature, hardened runtime, entitlements, contents, feed and key, version, team of Sparkle's helpers.
 verify_bundle() {
     step "verify Zack.app"
     local app="$OUT/Zack.app" out xml keys name value code runtime='flags=0x[0-9a-f]+\([^)]*runtime'
@@ -401,7 +403,7 @@ verify_bundle() {
     echo "  Sparkle and its helpers signed by the team of Zack.app"
 }
 
-# Step 6: notarize a temporary ZIP, staple the app, let Gatekeeper confirm.
+# Step 7: notarize a temporary ZIP, staple the app, let Gatekeeper confirm.
 notarize() {
     step "notarize (takes a few minutes)"
     local zip="$WORK/notarize.zip" log="$WORK/notarytool.log" id out
@@ -422,7 +424,7 @@ notarize() {
     echo "  Gatekeeper: Notarized Developer ID"
 }
 
-# Step 7: update ZIP, EdDSA signature, appcast with exactly one item.
+# Step 8: update ZIP, EdDSA signature, appcast with exactly one item.
 package_feed() {
     step "package and appcast"
     local sign format='^sparkle:edSignature="[A-Za-z0-9+/=]+" length="[0-9]+"$'
@@ -458,7 +460,7 @@ overview() {
     done
 }
 
-# Step 8: push, then create the release, or finish a draft an interrupted run left behind.
+# Step 9: push, then create the release, or finish a draft an interrupted run left behind.
 publish() {
     step "publish"
     local draft commits
@@ -512,7 +514,7 @@ zip_matches() {
     [[ "$(shasum -a 256 < "$WORK/download.zip")" == "$(shasum -a 256 < "$ZIP")" ]]
 }
 
-# Step 9: the public feed offers the new version, the public ZIP matches the local one.
+# Step 10: the public feed offers the new version, the public ZIP matches the local one.
 postcheck() {
     step "post-check"
     retry feed_offers_version || die "the feed at $FEED_URL does not offer $VERSION"
@@ -524,8 +526,9 @@ main() {
     WORK="$(mktemp -d)" || die "mktemp failed"
     trap 'rm -rf "$WORK"' EXIT
     preflight
-    gate
+    gate --static-only
     if [[ "$MODE" != local ]]; then advisories; fi
+    gate --skip-static
     build_export
     verify_bundle
     if [[ "$MODE" != local ]]; then notarize; fi
