@@ -20,6 +20,8 @@ public protocol AudioInput: AnyObject, Sendable {
 }
 
 extension AudioInput {
+    /// For sources with a single device, such as the test fakes: stop and start, without a device check.
+    /// `EngineAudioInput` implements its own, which throws when the device may have changed.
     public func restart(
         onChunk: @escaping @Sendable ([Float]) -> Void, onEvent: @escaping @Sendable (AudioInputEvent) -> Void
     ) throws {
