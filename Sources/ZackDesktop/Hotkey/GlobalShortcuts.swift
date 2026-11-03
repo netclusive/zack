@@ -29,11 +29,6 @@ public enum Shortcut: CaseIterable, Sendable {
     }
 }
 
-/// Esc may be registered as a global shortcut while a dictation runs.
-public enum GlobalShortcutsPolicy {
-    public static let registersEscape = true
-}
-
 /// Registers and releases global shortcuts through Carbon.
 @MainActor
 public final class CarbonShortcuts {

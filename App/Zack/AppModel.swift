@@ -510,8 +510,8 @@ final class AppModel {
         hotkeyMonitor?.start()
     }
 
-    /// Fallback while Esc is not registered (policy off, or the system refused): Esc read along still aborts, and the
-    /// app in front gets it as well.
+    /// Fallback while the system refuses to register Esc: Esc read along still aborts, and the app in front gets it as
+    /// well.
     private func abortOnUnregisteredEscape(_ input: UserInput) {
         guard input == .key(UInt16(Shortcut.cancel.keyCode)), dictation.isProcessing, !escapeRegistered else { return }
         abortDictation()
@@ -545,7 +545,7 @@ final class AppModel {
     private func updateEscape(for state: DictationState) {
         guard let shortcuts else { return }
         if state.isProcessing {
-            escapeRegistered = GlobalShortcutsPolicy.registersEscape && shortcuts.register(.cancel)
+            escapeRegistered = shortcuts.register(.cancel)
         } else {
             shortcuts.unregister(.cancel)
             escapeRegistered = false
