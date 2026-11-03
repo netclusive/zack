@@ -1,3 +1,5 @@
+import Foundation
+
 /// What the pill shows for a dictation state; the app only draws it.
 public struct PillContent: Equatable, Sendable {
     /// Lucide icon, by asset name in the app.
@@ -117,11 +119,10 @@ public struct PillContent: Equatable, Sendable {
         self.accessibilityLabel = label
     }
 
-    /// `m:ss`.
+    /// `m:ss`, seconds cut off, in ASCII digits whatever the locale.
     static func time(_ duration: Duration) -> String {
-        let seconds = max(0, Int(duration.components.seconds))
-        let minutes = seconds / 60
-        let rest = seconds % 60
-        return "\(minutes):\(rest < 10 ? "0" : "")\(rest)"
+        max(.zero, duration).formatted(
+            .time(pattern: .minuteSecond(padMinuteToLength: 1, roundFractionalSeconds: .towardZero))
+                .locale(Locale(identifier: "en_US_POSIX")))
     }
 }

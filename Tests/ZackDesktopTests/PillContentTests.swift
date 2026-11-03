@@ -10,6 +10,15 @@ struct PillContentTests {
         #expect(PillContent(.listening) == nil)
     }
 
+    /// The time cuts the seconds off, never rounds up, and shows nothing below zero.
+    @Test func timeCutsOffTheSeconds() {
+        #expect(PillContent.time(.milliseconds(4_600)) == "0:04")
+        #expect(PillContent.time(.milliseconds(59_700)) == "0:59")
+        #expect(PillContent.time(.seconds(65)) == "1:05")
+        #expect(PillContent.time(.seconds(3_725)) == "62:05")
+        #expect(PillContent.time(.seconds(-3)) == "0:00")
+    }
+
     @Test func recordingShowsTimeAndLevel() throws {
         let content = try #require(PillContent(.recording(elapsed: .seconds(7), level: 0.4)))
         #expect(content.text == "0:07")
