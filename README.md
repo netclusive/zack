@@ -119,6 +119,7 @@ Requirements:
 - Xcode 27 or later, XcodeGen 2.46 or later (`brew install xcodegen`) and an Apple Development certificate (a free
   Apple ID in Xcode is enough)
 - gitleaks (`brew install gitleaks`): `./build.sh` starts with a secret scan and stops without it
+- ShellCheck (`brew install shellcheck`): `./build.sh` lints the shell scripts with it
 - a German system voice, preferably Anna: the tests synthesize their speech sample with it
 
 Tested with Xcode 27.2 (swift-format 6.4.4), XcodeGen 2.46.0 and gitleaks 8.30.1; other versions may lint, format

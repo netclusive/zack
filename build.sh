@@ -12,6 +12,7 @@ git archive HEAD | tar -x -C "$TMP"
 echo "==> lint"
 xcrun swift-format lint --strict --recursive Package.swift Sources Tests App/Zack
 for script in build.sh scripts/*.sh; do bash -n "$script"; done
+shellcheck build.sh scripts/*.sh
 
 echo "==> version"
 PACKAGE_VERSION="$(sed -n 's/.*static let version = "\(.*\)"/\1/p' Sources/ZackCore/Zack.swift)"
