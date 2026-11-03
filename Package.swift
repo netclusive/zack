@@ -13,8 +13,6 @@ let package = Package(
         .library(name: "ZackDesktop", targets: ["ZackDesktop"]),
         // App only; keeps Sparkle out of the bench.
         .library(name: "ZackUpdate", targets: ["ZackUpdate"]),
-        // Bench command line behind zack-bench.
-        .library(name: "BenchSupport", targets: ["BenchSupport"]),
     ],
     dependencies: [
         .package(url: "https://github.com/FluidInference/FluidAudio.git", .upToNextMinor(from: "0.17.7")),
@@ -34,6 +32,7 @@ let package = Package(
             name: "ZackUpdate",
             dependencies: [.product(name: "Sparkle", package: "Sparkle")],
             resources: [.process("Localizable.xcstrings")]),
+        // Bench command line behind zack-bench.
         .target(
             name: "BenchSupport", dependencies: ["ZackCore", "ZackParakeet", "ZackApple", "ZackDesktop"]),
         .executableTarget(name: "zack-bench", dependencies: ["BenchSupport"]),
