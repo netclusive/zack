@@ -100,3 +100,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional on-device AI cleanup for self-corrections, with a time limit and a fallback to the rule-based result.
 - Benchmark tool that compares engines on a fixed set of dictation cases, with synthetic or microphone recordings and a summary report.
 - An open language model running on the Mac's GPU can be benchmarked as an alternative AI cleanup.
+
+[Unreleased]: https://github.com/netclusive/zack/commits/main
