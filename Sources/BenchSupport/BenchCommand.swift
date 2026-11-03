@@ -107,7 +107,7 @@ private struct Invocation {
         defaults = try BenchDefaults(arguments: arguments)
     }
 
-    var corpusURL: URL { URL(fileURLWithPath: arguments["corpus"] ?? defaults.corpus) }
+    var corpusURL: URL { URL(filePath: arguments["corpus"] ?? defaults.corpus) }
 
     func loadCorpus() throws -> Corpus {
         try Corpus.decode(Data(contentsOf: corpusURL))
@@ -121,10 +121,10 @@ private struct Invocation {
     }
 
     func synth() throws {
-        let directory = URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.synthDirectory)
+        let directory = URL(filePath: arguments["audio-dir"] ?? defaults.synthDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         for testCase in try selectedCases(try loadCorpus()) {
-            let output = directory.appendingPathComponent("\(testCase.id).wav")
+            let output = directory.appending(path: "\(testCase.id).wav")
             try Synthesizer.synthesize(testCase.spoken, voice: arguments["voice"] ?? defaults.voice, to: output)
             print("synth \(testCase.id)")
         }
@@ -147,12 +147,12 @@ private struct Invocation {
 
     func record() async throws {
         try await ensureMicrophoneAccess()
-        let directory = URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.audioDirectory)
+        let directory = URL(filePath: arguments["audio-dir"] ?? defaults.audioDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let capture = MicrophoneCapture()
         var device: String?
         for testCase in try selectedCases(try loadCorpus()) {
-            let output = directory.appendingPathComponent("\(testCase.id).wav")
+            let output = directory.appending(path: "\(testCase.id).wav")
             if FileManager.default.fileExists(atPath: output.path), !arguments.isSet("all"), arguments["id"] == nil {
                 continue
             }
@@ -226,16 +226,16 @@ private struct Invocation {
         let runner = BenchRunner(
             corpus: try loadCorpus(), transcriber: try Registry.transcriber(transcriberID, language: defaults.language),
             cleaner: try Registry.cleaner(arguments["cleaner"] ?? "none"),
-            audioDirectory: URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.audioDirectory),
+            audioDirectory: URL(filePath: arguments["audio-dir"] ?? defaults.audioDirectory),
             repeats: repeats, language: defaults.language)
         let result = try await runner.run()
-        let directory = URL(fileURLWithPath: arguments["results"] ?? "bench/results")
+        let directory = URL(filePath: arguments["results"] ?? "bench/results")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let stamp = formatter.string(from: result.date).replacingOccurrences(of: ":", with: "-")
             .replacingOccurrences(of: ".", with: "-")
-        let file = directory.appendingPathComponent("\(stamp)-\(result.transcriber)-\(result.cleaner).json")
+        let file = directory.appending(path: "\(stamp)-\(result.transcriber)-\(result.cleaner).json")
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
@@ -246,7 +246,7 @@ private struct Invocation {
     }
 
     func report() throws {
-        let directory = URL(fileURLWithPath: arguments["results"] ?? "bench/results")
+        let directory = URL(filePath: arguments["results"] ?? "bench/results")
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let runs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)

@@ -46,7 +46,7 @@ struct BenchRunner {
         let processor = TextProcessor(vocabulary: vocabulary, snippets: corpus.parsedSnippets, cleaner: cleaner)
 
         let available = corpus.cases.compactMap { testCase -> (CorpusCase, AudioClip)? in
-            let url = audioDirectory.appendingPathComponent("\(testCase.id).wav")
+            let url = audioDirectory.appending(path: "\(testCase.id).wav")
             guard let data = try? Data(contentsOf: url), let clip = try? WAVFile.decode(data) else { return nil }
             return (testCase, clip)
         }

@@ -3,7 +3,7 @@ import Foundation
 /// Creates synthetic recordings with the macOS system voice, for smoke runs without a human speaker.
 enum Synthesizer {
     static func synthesize(_ text: String, voice: String, to output: URL) throws {
-        let aiff = FileManager.default.temporaryDirectory.appendingPathComponent("zack-\(UUID().uuidString).aiff")
+        let aiff = FileManager.default.temporaryDirectory.appending(path: "zack-\(UUID().uuidString).aiff")
         defer { try? FileManager.default.removeItem(at: aiff) }
         try run("/usr/bin/say", ["-v", voice, "-o", aiff.path, "--", text], voice: voice)
         try run(
@@ -12,7 +12,7 @@ enum Synthesizer {
 
     private static func run(_ executable: String, _ arguments: [String], voice: String) throws {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: executable)
+        process.executableURL = URL(filePath: executable)
         process.arguments = arguments
         try process.run()
         process.waitUntilExit()
