@@ -3,6 +3,10 @@
 // The value after OU= is the team ID.
 DEVELOPMENT_TEAM = CHANGEME
 
+// Releases only (scripts/release.sh): team ID of the Developer ID Application certificate,
+// same command with -c "Developer ID Application".
+ZACK_RELEASE_TEAM = CHANGEME
+
 // Local update tests only: test feed and public test key; $() keeps the // in the URL from starting a comment.
 // ZACK_FEED_URL = http:/$()/127.0.0.1:8000/appcast.xml
 // ZACK_ED_PUBLIC_KEY = CHANGEME
