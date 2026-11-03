@@ -737,7 +737,7 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Nimmt auf, noch %lld Sekunden"
+                  "value" : "Nimmt auf, noch %lld Sekunde"
                 }
               },
               "other" : {

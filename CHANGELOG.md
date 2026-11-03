@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - If the dictionary, snippets or code apps file is a symbolic link, Zack now saves to the linked file and keeps the link.
 - Zack reads dictionary, snippets and code apps files saved in UTF-16 with a byte order mark, and no longer shows garbage entries for a file it cannot read as text.
+- In German, VoiceOver announces the last second of the recording countdown in the singular.
 
 ## [0.4.0] - 2026-10-30
 

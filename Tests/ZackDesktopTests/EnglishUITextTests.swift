@@ -70,7 +70,7 @@ struct EnglishUITextTests {
         let state = DictationState.recording(elapsed: .milliseconds(179_000), level: 0)
         #expect(pill(state) == ["2:59 · 1 s left", "Recording, 1 second left"])
         UIText.$locale.withValue(Locale(identifier: "de")) {
-            #expect(pill(state)?.last == "Nimmt auf, noch 1 Sekunden")
+            #expect(pill(state)?.last == "Nimmt auf, noch 1 Sekunde")
         }
     }
 
