@@ -310,6 +310,7 @@ build_export() {
         style=manual
         signing=(CODE_SIGN_STYLE=Manual "CODE_SIGN_IDENTITY=Developer ID Application" "DEVELOPMENT_TEAM=$TEAM")
     fi
+    # shellcheck disable=SC2015 # die if either step fails
     rm -rf "$OUT" && mkdir -p "$OUT" || die "cannot prepare $OUT"
     xcodebuild archive -project App/Zack.xcodeproj -scheme Zack -configuration Release \
         -clonedSourcePackagesDirPath .build/xcode-packages -onlyUsePackageVersionsFromResolvedFile \
@@ -438,6 +439,7 @@ package_feed() {
     echo "  $ZIP, $OUT/appcast.xml"
     if [[ "$MODE" == local ]]; then
         # Served on its own, so the HTTP server never exposes the archive or the app next to it.
+        # shellcheck disable=SC2015 # die if either step fails
         mkdir -p "$OUT/feed" && cp "$ZIP" "$OUT/appcast.xml" "$OUT/feed/" || die "cannot fill $OUT/feed"
         echo "  test feed in $OUT/feed; serve it with:"
         echo "  python3 -m http.server 8000 --bind 127.0.0.1 --directory \"$PWD/$OUT/feed\""
@@ -546,6 +548,7 @@ self_test() {
     local dir
     dir="$(mktemp -d)"
     # Expanded now: the trap fires after this function has returned.
+    # shellcheck disable=SC2064
     trap "rm -rf '$dir'" EXIT
 
     cat > "$dir/CHANGELOG.md" <<'MD'

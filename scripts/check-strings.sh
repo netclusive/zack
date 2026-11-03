@@ -182,6 +182,7 @@ data() {
 self_test() {
     local dir root derived inter out
     dir="$(mktemp -d)"
+    # shellcheck disable=SC2064 # expanded now: the trap fires after this function has returned
     trap "rm -rf '$dir'" EXIT
     root="$dir/repo"
     derived="$dir/derived"
