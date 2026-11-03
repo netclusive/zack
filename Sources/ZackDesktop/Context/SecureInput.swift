@@ -3,6 +3,7 @@ import Carbon
 import CoreGraphics
 
 /// Secure Event Input (password fields, Terminal "Secure Keyboard Entry"): the system hides key events from other apps.
+/// Zack's hotkey still arrives, so only a menu line (`SecureInputLine`) shows that Secure Input is on.
 public enum SecureInput {
     public static func isEnabled() -> Bool {
         IsSecureEventInputEnabled()
@@ -16,10 +17,6 @@ public enum SecureInput {
         else { return nil }
         return NSRunningApplication(processIdentifier: pid_t(pid))?.localizedName
     }
-
-    /// True if the hotkey does not arrive while Secure Input is on. It does arrive, so this is false. Read by
-    /// nothing: the menu line (`SecureInputLine`) is used instead; kept to document the result.
-    public static let blocksHotkey = false
 }
 
 /// The menu line that tells another app holds Secure Input; nil while it is off.
