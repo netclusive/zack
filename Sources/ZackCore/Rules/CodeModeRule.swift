@@ -86,20 +86,26 @@ public struct CodeModeRule: TextRule {
         return (String(word), punctuation)
     }
 
-    private static let fileNamePatterns: [DictationLanguage: NSRegularExpression] = Dictionary(
-        uniqueKeysWithValues: DictationLanguage.allCases.map { language in
-            let dotWord = NSRegularExpression.escapedPattern(for: language.pack.codeDotWord)
-            return (
-                language,
-                try! NSRegularExpression(
-                    pattern: #"(?<![\p{L}\p{N}])([\p{L}\p{N}_-]+)[ \t]+"# + dotWord + #"[ \t]+("#
-                        + extensions.joined(separator: "|") + #")(?![\p{L}\p{N}])"#,
-                    options: [.caseInsensitive])
-            )
-        })
+    private static let germanFileNames = makeFileNamePattern(for: .german)
+    private static let englishFileNames = makeFileNamePattern(for: .english)
+
+    private static func makeFileNamePattern(for language: DictationLanguage) -> NSRegularExpression {
+        let dotWord = NSRegularExpression.escapedPattern(for: language.pack.codeDotWord)
+        return try! NSRegularExpression(
+            pattern: #"(?<![\p{L}\p{N}])([\p{L}\p{N}_-]+)[ \t]+"# + dotWord + #"[ \t]+("#
+                + extensions.joined(separator: "|") + #")(?![\p{L}\p{N}])"#,
+            options: [.caseInsensitive])
+    }
+
+    private static func fileNamePattern(for language: DictationLanguage) -> NSRegularExpression {
+        switch language {
+        case .german: germanFileNames
+        case .english: englishFileNames
+        }
+    }
 
     static func joinFileNames(_ text: String, language: DictationLanguage = .german) -> String {
-        let regex = fileNamePatterns[language]!
+        let regex = fileNamePattern(for: language)
         let mutable = NSMutableString(string: text)
         for match in regex.matches(in: text, range: NSRange(location: 0, length: mutable.length)).reversed() {
             let name = mutable.substring(with: match.range(at: 1))

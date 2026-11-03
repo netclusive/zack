@@ -2,8 +2,15 @@ import Foundation
 
 /// Removes filler words including an adjacent comma and restores capitalization if a capitalized filler is removed.
 public struct FillerRule: TextRule {
-    private static let patterns: [DictationLanguage: NSRegularExpression] = Dictionary(
-        uniqueKeysWithValues: DictationLanguage.allCases.map { ($0, makePattern(for: $0)) })
+    private static let german = makePattern(for: .german)
+    private static let english = makePattern(for: .english)
+
+    private static func pattern(for language: DictationLanguage) -> NSRegularExpression {
+        switch language {
+        case .german: german
+        case .english: english
+        }
+    }
 
     private static func makePattern(for language: DictationLanguage) -> NSRegularExpression {
         let alternatives = language.pack.fillers.sorted { $0.count > $1.count }
@@ -36,7 +43,7 @@ public struct FillerRule: TextRule {
     public func apply(_ text: String, context: RuleContext) -> String {
         let language = context.language
         let mutable = NSMutableString(string: text)
-        let matches = Self.patterns[language]!.matches(
+        let matches = Self.pattern(for: language).matches(
             in: text, range: NSRange(location: 0, length: mutable.length))
         for match in matches.reversed() {
             let matched = mutable.substring(with: match.range)
