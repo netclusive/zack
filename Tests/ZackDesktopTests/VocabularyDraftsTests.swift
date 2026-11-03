@@ -66,6 +66,21 @@ struct VocabularyDraftsTests {
         #expect(try fileText() == "VMware\nKibana\n")
     }
 
+    /// Regression (e8f0ccf): the window losing key status writes what is valid and keeps a blank new row.
+    @Test func losingKeyStatusSavesValidDraftsAndKeepsABlankNewRow() throws {
+        defer { removeFolder() }
+        let drafts = try makeDrafts("VMware\n")
+        drafts.set(.heardAs, to: "VM Ware", row: .line(0), saved: vmware)
+        drafts.add()
+        drafts.savePending()
+        #expect(try fileText() == "VM Ware => VMware\n")
+        #expect(drafts.newEntry == VocabularyEntry(spelling: ""))
+
+        // Closing the window drops the blank row instead.
+        drafts.saveAll()
+        #expect(drafts.newEntry == nil)
+    }
+
     @Test func conflictDropsTheLineDraftAndSaysSo() throws {
         defer { removeFolder() }
         let drafts = try makeDrafts("VMware\n")

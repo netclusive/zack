@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import ZackDesktop
 
 extension View {
     /// Runs `action` just before the window showing this view closes, while the view still exists, so ⌘W keeps a
@@ -15,48 +16,18 @@ extension View {
     }
 }
 
-/// Empty view that learns its window and observes one notification of that window only.
+/// Puts a `WindowNotificationView` behind the content, which observes one notification of its window only.
 private struct WindowObserver: NSViewRepresentable {
     let name: Notification.Name
     let action: () -> Void
 
-    func makeNSView(context: Context) -> ObservingView {
-        let view = ObservingView(name: name)
+    func makeNSView(context: Context) -> WindowNotificationView {
+        let view = WindowNotificationView(name: name)
         view.action = action
         return view
     }
 
-    func updateNSView(_ view: ObservingView, context: Context) {
+    func updateNSView(_ view: WindowNotificationView, context: Context) {
         view.action = action
-    }
-
-    final class ObservingView: NSView {
-        let name: Notification.Name
-        var action: (() -> Void)?
-
-        init(name: Notification.Name) {
-            self.name = name
-            super.init(frame: .zero)
-        }
-
-        /// Never loaded from a nib.
-        @available(*, unavailable)
-        required init?(coder: NSCoder) { nil }
-
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
-            NotificationCenter.default.removeObserver(self, name: name, object: nil)
-            guard let window else { return }
-            // A selector observer goes away with the view; no explicit removal needed.
-            NotificationCenter.default.addObserver(self, selector: #selector(windowChanged), name: name, object: window)
-        }
-
-        /// Posted on the main thread, synchronously (for a close, during `close()`).
-        @objc private func windowChanged(_ notification: Notification) {
-            action?()
-        }
-
-        /// Never takes clicks meant for the content in front of it.
-        override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }
