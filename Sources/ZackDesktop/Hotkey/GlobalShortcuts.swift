@@ -29,21 +29,14 @@ public enum Shortcut: CaseIterable, Sendable {
     }
 }
 
-/// Registers and releases shortcuts; a fake stands in for Carbon in tests.
-@MainActor
-public protocol ShortcutRegistry: AnyObject {
-    /// False if the system refused, for example because another app holds the key.
-    func register(_ shortcut: Shortcut) -> Bool
-    func unregister(_ shortcut: Shortcut)
-}
-
 /// Esc may be registered as a global shortcut while a dictation runs.
 public enum GlobalShortcutsPolicy {
     public static let registersEscape = true
 }
 
+/// Registers and releases global shortcuts through Carbon.
 @MainActor
-public final class CarbonShortcuts: ShortcutRegistry {
+public final class CarbonShortcuts {
     /// "ZACK", the tag Zack also puts on its own key events.
     fileprivate nonisolated static let signature = OSType(HotkeyEventMapper.ownEventMarker)
 
@@ -59,6 +52,7 @@ public final class CarbonShortcuts: ShortcutRegistry {
     // No deinit: the handler holds `self` unretained and a main-actor deinit cannot touch the refs.
     // The object lives as long as the app.
 
+    /// False if the system refused, for example because another app holds the key.
     public func register(_ shortcut: Shortcut) -> Bool {
         if refs[shortcut] != nil { return true }
         guard installHandler() else { return false }
