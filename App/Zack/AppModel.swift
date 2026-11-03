@@ -78,8 +78,8 @@ final class AppModel {
     @ObservationIgnored private let files: UserFiles?
     @ObservationIgnored private let windows = WindowPresenter()
     @ObservationIgnored private let logger = Logger(subsystem: Signposts.subsystem, category: "app")
-    @ObservationIgnored private var inserter: Inserter!
-    @ObservationIgnored private var controller: DictationController<ContinuousClock>!
+    @ObservationIgnored private let inserter: Inserter
+    @ObservationIgnored private let controller: DictationController<ContinuousClock>
     @ObservationIgnored private var hotkeyMonitor: HotkeyMonitor?
     @ObservationIgnored private var shortcuts: CarbonShortcuts?
     /// Esc is registered for the running recognition; if not, `onInput` reads it along and the app in front gets it too.
@@ -116,7 +116,7 @@ final class AppModel {
                 .deviceID(default: AudioDevices.defaultInputID())
         })
         capture = MicrophoneCapture(input: input)
-        inserter = makeInserter(timing: .measured)
+        inserter = Self.makeInserter(timing: .measured)
         let files = files
         let cleaner = cleaner
         let modelReady = modelReady
@@ -289,7 +289,7 @@ final class AppModel {
 
     /// Reads the app in front here, on the main thread, then inserts the last dictation there.
     func insertLast() {
-        let controller = controller!
+        let controller = controller
         Task {
             await Self.keysReleased(.insertLast)
             var app: FrontApp?
@@ -301,7 +301,7 @@ final class AppModel {
     }
 
     func replaceWithRuleText() {
-        let controller = controller!
+        let controller = controller
         Task {
             await Self.keysReleased(.ruleText)
             await controller.replaceWithRuleText()
@@ -470,7 +470,7 @@ final class AppModel {
 
     // MARK: Wiring
 
-    private func makeInserter(timing: InsertTiming) -> Inserter {
+    private static func makeInserter(timing: InsertTiming) -> Inserter {
         Inserter(
             clipboard: SystemClipboard(), keystrokes: CGEventKeystrokes(),
             canPostKeystrokes: { Permissions.accessibility() },
@@ -481,7 +481,7 @@ final class AppModel {
     private func startHotkey() {
         let (stream, continuation) = AsyncStream.makeStream(of: (HotkeyAction, FrontApp?).self)
         actions = continuation
-        let controller = controller!
+        let controller = controller
         Task {
             for await (action, app) in stream {
                 switch action {
@@ -531,7 +531,7 @@ final class AppModel {
 
     /// Straight to the controller, not through the hotkey stream: that one waits behind the running `finish`.
     private func abortDictation() {
-        let controller = controller!
+        let controller = controller
         Task { await controller.abort() }
     }
 
@@ -597,7 +597,7 @@ final class AppModel {
     }
 
     private func observeDictation() {
-        let controller = controller!
+        let controller = controller
         Task { [weak self] in
             for await state in controller.states {
                 guard let self else { return }
@@ -635,7 +635,7 @@ final class AppModel {
     /// Idempotent, so every refresh may call it: with "Immer" the microphone opens as soon as permission and model
     /// are there (app start, permission granted, model loaded or adopted).
     private func applyReadiness() {
-        let controller = controller!
+        let controller = controller
         Task { await controller.applyReadiness() }
     }
 
@@ -643,7 +643,7 @@ final class AppModel {
     /// last dictation arrives once "Abgebrochen" already shows, and a late password verdict drops the retry audio
     /// after the failure showed, so no state brings either; opening the menu does.
     private func updateLastDictationActions() {
-        let controller = controller!
+        let controller = controller
         Task {
             canRetry = await controller.canRetry
             hasLastText = await controller.lastText != nil
@@ -675,7 +675,7 @@ final class AppModel {
     #if DEBUG
         /// Debug: pastes a fixed text after 3 s (time to focus the target app) with restore delay `delay`.
         func debugInsertTest(delay: Duration) {
-            let inserter = makeInserter(timing: InsertTiming(defaultDelay: delay))
+            let inserter = Self.makeInserter(timing: InsertTiming(defaultDelay: delay))
             Task {
                 try? await Task.sleep(for: .seconds(3))
                 _ = await inserter.insert("Zack-Einfügetest")
