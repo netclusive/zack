@@ -74,7 +74,7 @@ final class AppModel {
     @ObservationIgnored private let input: EngineAudioInput
     @ObservationIgnored private let capture: MicrophoneCapture
     @ObservationIgnored private let modelReady = Flag()
-    @ObservationIgnored private let modelSetup = try? ModelSetup.standard()
+    @ObservationIgnored private let modelSetup = AppModel.attempt("model setup") { try ModelSetup.standard() }
     @ObservationIgnored private let files: UserFiles?
     @ObservationIgnored private let windows = WindowPresenter()
     @ObservationIgnored private let logger = Logger(subsystem: Signposts.subsystem, category: "app")
@@ -107,7 +107,8 @@ final class AppModel {
             FileManager.default.fileExists(atPath: $0.vocabularyURL.path)
         }
         dictationLanguage = settings.resolveDictationLanguage(hasExistingFiles: hasExistingFiles ?? false)
-        files = try? UserFiles.standard(language: { settings.dictationLanguage })
+        // Without them there is no vocabulary, no snippets and no editors; the lookup above fails the same way.
+        files = Self.attempt("user files") { try UserFiles.standard(language: { settings.dictationLanguage }) }
         // Runs on the capture's control queue and on AVAudioEngine's notification queue:
         // only settings and static reads.
         input = EngineAudioInput(device: {
@@ -135,6 +136,17 @@ final class AppModel {
             // Read per dictation, on the controller actor.
             codeMode: { files?.loadCodeApps().mode(for: $0) ?? .prose },
             language: { settings.dictationLanguage })
+    }
+
+    /// `try?` that logs the error kind; its description may carry a path.
+    nonisolated private static func attempt<T>(_ label: String, _ body: () throws -> T) -> T? {
+        do {
+            return try body()
+        } catch {
+            Logger(subsystem: Signposts.subsystem, category: "app")
+                .error("\(label, privacy: .public): \(String(describing: type(of: error)), privacy: .public)")
+            return nil
+        }
     }
 
     /// A model that failed to load counts as missing: yellow, and a click opens the setup.

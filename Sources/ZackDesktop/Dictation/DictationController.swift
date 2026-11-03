@@ -336,7 +336,13 @@ public actor DictationController<C: Clock<Duration>> {
         kept = nil
         ruleTextEntry = nil
         // Keep the running input open if the setting asks for it; `stop` then leaves it running.
-        if readiness() != .off { try? capture.warmUp(preRoll: MicrophoneReadiness.preRoll) }
+        if readiness() != .off {
+            do {
+                try capture.warmUp(preRoll: MicrophoneReadiness.preRoll)
+            } catch {
+                logger.error("microphone warm-up failed: \(String(describing: type(of: error)), privacy: .public)")
+            }
+        }
         let clip = capture.stop()
         // The window counts from key release, so it cannot end unnoticed during recognition.
         keepReadyAfterDictation()
