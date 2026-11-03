@@ -25,6 +25,10 @@ struct SetupView: View {
                     done: model.inputMonitoring
                 ) {
                     Button("Systemeinstellungen öffnen") { model.openSettings(.inputMonitoring) }
+                        .accessibilityLabel("Eingabeüberwachungs-Einstellungen öffnen")
+                        .accessibilityInputLabels([
+                            "Systemeinstellungen öffnen", "Eingabeüberwachungs-Einstellungen öffnen",
+                        ])
                 }
             }
             recognitionModel
