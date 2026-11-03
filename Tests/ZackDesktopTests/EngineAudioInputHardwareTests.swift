@@ -23,8 +23,8 @@ private func recordedSamples(device: @escaping @Sendable () -> AudioObjectID?) a
     let capture = MicrophoneCapture(input: EngineAudioInput(device: device))
     try capture.start()
     do {
-        let deadline = Date().addingTimeInterval(2)
-        while capture.timings.firstChunk == nil && Date() < deadline {
+        let deadline = ContinuousClock.now + .seconds(2)
+        while capture.timings.firstChunk == nil && ContinuousClock.now < deadline {
             try await Task.sleep(for: .milliseconds(50))
         }
     } catch {
@@ -43,8 +43,8 @@ struct EngineAudioInputHardwareTests {
         let input = EngineAudioInput(device: { id })
         let counter = Counter()
         try input.start(onChunk: { _ in counter.increment() }, onEvent: { _ in })
-        let deadline = Date().addingTimeInterval(2)
-        while counter.value == 0 && Date() < deadline {
+        let deadline = ContinuousClock.now + .seconds(2)
+        while counter.value == 0 && ContinuousClock.now < deadline {
             try await Task.sleep(for: .milliseconds(50))
         }
         input.stop()
