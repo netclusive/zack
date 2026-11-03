@@ -655,7 +655,7 @@ struct DictationShortcutTests {
     @Test func ruleTextCountsUTF16UnitsForTheRange() async {
         let focus = FakeFocusSource()
         focus.queue(emptyField)
-        let emoji = "Das Treffen ist am Mittwoch 😀."
+        let emoji = "Das Treffen ist am Mittwoch \u{1F600}."
         let controller = makeController(
             transcriber: correction, cleaner: StubCleaner(output: emoji), focus: focus)
         await dictate(controller, tone(), app: textEdit)

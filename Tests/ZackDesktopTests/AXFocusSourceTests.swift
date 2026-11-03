@@ -7,7 +7,7 @@ import Testing
 struct AXFocusSourceTests {
     @Test func sliceCutsByUTF16Units() {
         #expect(AXFocusSource.utf16Slice("Max Mustermann", TextRange(location: 4, length: 3)) == "Mus")
-        #expect(AXFocusSource.utf16Slice("a😀b", TextRange(location: 1, length: 2)) == "😀")
+        #expect(AXFocusSource.utf16Slice("a\u{1F600}b", TextRange(location: 1, length: 2)) == "\u{1F600}")
         #expect(AXFocusSource.utf16Slice("abc", TextRange(location: 3, length: 0)) == "")
     }
 
