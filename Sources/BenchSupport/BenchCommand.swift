@@ -2,7 +2,7 @@ import Foundation
 import ZackCore
 import ZackDesktop
 
-/// Command line of `zack-bench`, shared with bench variants that add engines.
+/// Command line of `zack-bench`.
 public enum BenchCommand {
     static let spec = ArgumentSpec(
         values: [
@@ -10,25 +10,20 @@ public enum BenchCommand {
         ],
         flags: ["all"])
 
-    /// Runs the command in `CommandLine.arguments` and exits. `name` appears in help and error texts;
-    /// `extraCleaners` adds `--cleaner` ids next to the built-in ones.
-    public static func main(name: String = "zack-bench", extraCleaners: [String: CleanerFactory] = [:]) async
-        -> Never
-    {
-        let registry = Registry(extraCleaners: extraCleaners)
+    /// Runs the command in `CommandLine.arguments` and exits.
+    public static func main() async -> Never {
         if Arguments.wantsHelp(CommandLine.arguments) {
-            print(usage(name: name, registry: registry))
+            print(usage)
             exit(0)
         }
         let arguments: Arguments
         let command: Invocation
         do {
             arguments = try Arguments(CommandLine.arguments, spec: spec)
-            command = try Invocation(arguments: arguments, registry: registry)
+            command = try Invocation(arguments: arguments)
         } catch {
-            fail("\(ErrorDescription.text(error)) (see `\(name) help`)", code: 2)
+            fail("\(ErrorDescription.text(error)) (see `zack-bench help`)", code: 2)
         }
-        let help = usage(name: name, registry: registry)
         do {
             switch arguments.command {
             case "synth": try command.synth()
@@ -36,9 +31,9 @@ public enum BenchCommand {
             case "mic-check": try await command.micCheck()
             case "run": try await command.runBench()
             case "report": try command.report()
-            case "help": print(help)
+            case "help": print(usage)
             default:
-                FileHandle.standardError.write(Data("error: unknown command \(arguments.command)\n\(help)\n".utf8))
+                FileHandle.standardError.write(Data("error: unknown command \(arguments.command)\n\(usage)\n".utf8))
                 exit(2)
             }
         } catch {
@@ -47,9 +42,9 @@ public enum BenchCommand {
         exit(0)
     }
 
-    static func usage(name: String, registry: Registry) -> String {
+    static var usage: String {
         """
-        \(name) <command> [options]
+        zack-bench <command> [options]
 
           synth   [--language de|en] [--audio-dir bench/corpus/audio-synth] [--voice Anna] [--id <case>]
                   (en: Samantha, bench/corpus/audio-synth-en)
@@ -62,7 +57,7 @@ public enum BenchCommand {
           report  [--results bench/results] [--all]
 
         transcribers: \(Registry.transcriberIDs.joined(separator: ", "))
-        cleaners:     \(registry.cleanerIDs.joined(separator: ", "))
+        cleaners:     \(Registry.cleanerIDs.joined(separator: ", "))
         """
     }
 
@@ -105,12 +100,10 @@ struct BenchDefaults: Equatable {
 /// One parsed command line.
 private struct Invocation {
     let arguments: Arguments
-    let registry: Registry
     let defaults: BenchDefaults
 
-    init(arguments: Arguments, registry: Registry) throws {
+    init(arguments: Arguments) throws {
         self.arguments = arguments
-        self.registry = registry
         defaults = try BenchDefaults(arguments: arguments)
     }
 
@@ -232,7 +225,7 @@ private struct Invocation {
         let repeats = try arguments.positiveInteger("repeat", default: 5)
         let runner = BenchRunner(
             corpus: try loadCorpus(), transcriber: try Registry.transcriber(transcriberID, language: defaults.language),
-            cleaner: try registry.cleaner(arguments["cleaner"] ?? "none"),
+            cleaner: try Registry.cleaner(arguments["cleaner"] ?? "none"),
             audioDirectory: URL(fileURLWithPath: arguments["audio-dir"] ?? defaults.audioDirectory),
             repeats: repeats, language: defaults.language)
         let result = try await runner.run()

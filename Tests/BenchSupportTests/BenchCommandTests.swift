@@ -4,39 +4,20 @@ import ZackCore
 
 @testable import BenchSupport
 
-private struct FakeCleaner: Cleaner {
-    let id: String
-    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws -> String
-    { text }
+@Test func cleanersAreNoneAndAppleFM() throws {
+    #expect(Registry.cleanerIDs == ["none", "apple-fm"])
+    #expect(try Registry.cleaner("none") == nil)
+    #expect(try Registry.cleaner("apple-fm")?.id == "apple-fm")
 }
 
-private let extras: [String: CleanerFactory] = [
-    "fake-b": { FakeCleaner(id: "fake-b") }, "fake-a": { FakeCleaner(id: "fake-a") },
-]
-
-@Test func builtInCleanersComeFirstAndExtrasAreSorted() {
-    #expect(Registry().cleanerIDs == ["none", "apple-fm"])
-    #expect(Registry(extraCleaners: extras).cleanerIDs == ["none", "apple-fm", "fake-a", "fake-b"])
-}
-
-@Test func extraCleanerIsCreatedByItsFactory() throws {
-    let registry = Registry(extraCleaners: extras)
-    #expect(try registry.cleaner("fake-a")?.id == "fake-a")
-    #expect(try registry.cleaner("none") == nil)
-    #expect(try registry.cleaner("apple-fm")?.id == "apple-fm")
-}
-
-@Test func unknownCleanerListsExtras() {
-    #expect(
-        throws: ArgumentError.invalidValue(
-            option: "--cleaner", value: "nope", allowed: ["none", "apple-fm", "fake-a", "fake-b"])
-    ) {
-        try Registry(extraCleaners: extras).cleaner("nope")
+@Test func unknownCleanerListsTheCleaners() {
+    #expect(throws: ArgumentError.invalidValue(option: "--cleaner", value: "nope", allowed: ["none", "apple-fm"])) {
+        try Registry.cleaner("nope")
     }
 }
 
-/// The plain bench must keep its help text.
-@Test func defaultUsageIsUnchanged() {
+/// The bench must keep its help text.
+@Test func usageIsUnchanged() {
     let expected = """
         zack-bench <command> [options]
 
@@ -53,7 +34,7 @@ private let extras: [String: CleanerFactory] = [
         transcribers: apple-speech, apple-dictation, parakeet-v3, parakeet-ultra
         cleaners:     none, apple-fm
         """
-    #expect(BenchCommand.usage(name: "zack-bench", registry: Registry()) == expected)
+    #expect(BenchCommand.usage == expected)
 }
 
 @Test func whisperIsNoLongerATranscriber() {
@@ -64,12 +45,6 @@ private let extras: [String: CleanerFactory] = [
     let arguments = try Arguments(
         ["zack-bench", "run", "--transcriber", "parakeet-v3", "--repeat", "3"], spec: BenchCommand.spec)
     #expect(try arguments.positiveInteger("repeat", default: 5) == 3)
-}
-
-@Test func usageNamesTheToolAndListsExtraCleaners() {
-    let usage = BenchCommand.usage(name: "zack-bench-x", registry: Registry(extraCleaners: extras))
-    #expect(usage.hasPrefix("zack-bench-x <command> [options]"))
-    #expect(usage.contains("cleaners:     none, apple-fm, fake-a, fake-b"))
 }
 
 private func defaults(_ extra: [String]) throws -> BenchDefaults {

@@ -13,7 +13,7 @@ let package = Package(
         .library(name: "ZackDesktop", targets: ["ZackDesktop"]),
         // App only; keeps Sparkle out of the bench.
         .library(name: "ZackUpdate", targets: ["ZackUpdate"]),
-        // Bench command line, reused by bench variants that add engines.
+        // Bench command line behind zack-bench.
         .library(name: "BenchSupport", targets: ["BenchSupport"]),
     ],
     dependencies: [
