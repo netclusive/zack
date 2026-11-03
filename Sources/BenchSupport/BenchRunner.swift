@@ -19,6 +19,10 @@ enum BenchError: Error, CustomStringConvertible {
 
 /// Runs every corpus case with an audio file through one transcriber and one cleaner.
 struct BenchRunner {
+    /// Same digits as `String(format: "%.0f")`: no grouping, POSIX locale.
+    static let wholeNumber = FloatingPointFormatStyle<Double>.number.precision(.fractionLength(0)).grouping(.never)
+        .locale(Locale(identifier: "en_US_POSIX"))
+
     let corpus: Corpus
     let transcriber: any Transcriber
     let cleaner: (any Cleaner)?
@@ -83,7 +87,8 @@ struct BenchRunner {
                     if let failure = current.failure {
                         log("\(testCase.id)  FAILED: \(failure)")
                     } else {
-                        log(String(format: "%@  %.0f ms  %@", testCase.id, current.transcribeMs, current.final))
+                        let milliseconds = current.transcribeMs.formatted(Self.wholeNumber)
+                        log("\(testCase.id)  \(milliseconds) ms  \(current.final)")
                     }
                 } else if let failure = current.failure {
                     log("warning: pass \(pass) \(testCase.id) FAILED, no timing kept: \(failure)")
