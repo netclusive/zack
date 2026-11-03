@@ -37,13 +37,6 @@ private func recordedSamples(device: @escaping @Sendable () -> AudioObjectID?) a
 /// Real devices only; needs `ZACK_INTEGRATION=1`.
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["ZACK_INTEGRATION"] == "1"), .serialized)
 struct EngineAudioInputHardwareTests {
-    private final class Counter: @unchecked Sendable {
-        private let lock = NSLock()
-        private var value = 0
-        func increment() { lock.withLock { value += 1 } }
-        var count: Int { lock.withLock { value } }
-    }
-
     @Test(.enabled(if: mismatchingInputDevice() != nil))
     func deliversChunksFromDeviceWithOtherRate() async throws {
         let id = try #require(mismatchingInputDevice())
@@ -51,11 +44,11 @@ struct EngineAudioInputHardwareTests {
         let counter = Counter()
         try input.start(onChunk: { _ in counter.increment() }, onEvent: { _ in })
         let deadline = Date().addingTimeInterval(2)
-        while counter.count == 0 && Date() < deadline {
+        while counter.value == 0 && Date() < deadline {
             try await Task.sleep(for: .milliseconds(50))
         }
         input.stop()
-        #expect(counter.count > 0)
+        #expect(counter.value > 0)
     }
 
     /// Setting a device makes the engine post one spurious configuration change; the recording must survive it.
