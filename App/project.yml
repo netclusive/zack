@@ -7,6 +7,10 @@ options:
 configFiles:
   Debug: Zack.xcconfig
   Release: Zack.xcconfig
+settings:
+  base:
+    # At project level too, so XcodeGen's 5.0 default does not sit next to the target's 6.0.
+    SWIFT_VERSION: "6.0"
 packages:
   zack:
     path: ..
