@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-04
+
 ### Fixed
 
 - The code apps search also finds apps by the name shown in the list, not only by their bundle ID.
@@ -107,5 +109,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark tool that compares engines on a fixed set of dictation cases, with synthetic or microphone recordings and a summary report.
 - An open language model running on the Mac's GPU can be benchmarked as an alternative AI cleanup.
 
-[Unreleased]: https://github.com/netclusive/zack/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/netclusive/zack/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/netclusive/zack/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/netclusive/zack/releases/tag/v1.0.0
