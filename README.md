@@ -11,11 +11,7 @@ active window. `zack-bench` compares recognition and cleanup engines on a test c
 
 Zack needs macOS 26 or later on Apple Silicon; AI cleanup needs Apple Intelligence turned on.
 
-There is no ready-made build yet; until the first one appears on the
-[releases page](https://github.com/netclusive/zack/releases), build Zack from source (see below).
-With a release:
-
-1. Download the latest `Zack-<version>.zip` from the releases page.
+1. Download the latest `Zack-<version>.zip` from the [releases page](https://github.com/netclusive/zack/releases).
 2. Open the ZIP and move `Zack.app` to the Applications folder, then start it.
 3. Allow Microphone and Accessibility when asked.
 4. "Settings › Setup" offers the speech model for download (about 600 MB, see below).
