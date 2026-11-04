@@ -288,10 +288,11 @@ advisories() {
 
 # remove_distribution_logs <export log> [temp folder, default the user temp folder]
 # The export writes a log bundle (team, signing identities) to the user temp folder on success and failure; it
-# ignores TMPDIR. Delete the bundle the export log names, but only directly inside that folder.
+# ignores TMPDIR. Delete the bundle the export log names, but only directly inside that folder; without one, nothing.
 remove_distribution_logs() {
     local temp="${2-}" path
     [[ -n "$temp" ]] || temp="$(getconf DARWIN_USER_TEMP_DIR)" || return 0
+    [[ -n "$temp" ]] || return 0
     temp="${temp%/}/"
     while IFS= read -r path; do
         if [[ "$path" == "$temp"* && "${path#"$temp"}" != */* ]]; then rm -rf "$path"; fi
@@ -667,6 +668,15 @@ XCCONFIG
     printf 'Created bundle at path "%s".\n' "$logs/$bundle" "$logs/nested/$bundle" > "$dir/export.log"
     remove_distribution_logs "$dir/export.log" "$logs"
     [[ ! -e "$logs/$bundle" && -d "$logs/nested/$bundle" ]] || { echo "self-test: distribution logs" >&2; return 1; }
+
+    # Without a temp folder (getconf prints nothing) nothing is deleted, not even a bundle directly under /.
+    local removed=()
+    getconf() { :; }
+    rm() { removed+=("$@"); }
+    printf 'Created bundle at path "/%s".\n' "$bundle" > "$dir/root.log"
+    remove_distribution_logs "$dir/root.log"
+    unset -f getconf rm
+    ((${#removed[@]} == 0)) || { echo "self-test: distribution logs without temp folder" >&2; return 1; }
 
     echo "release self-test passed"
 }
