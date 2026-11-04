@@ -134,7 +134,7 @@ Build and install:
 generates `App/Zack.xcodeproj` with XcodeGen (not tracked) and builds the release app; `scripts/build-app.sh Debug`
 builds a debug app with a "Debug" menu of test tools (paste test, context reading). `--static-only` runs the secret
 scan, lint and version checks alone, `--skip-static` the tests and builds; `scripts/release.sh` checks the security
-advisories in between.
+advisories in between and stops if a pinned package lies in an affected range or a range cannot be read.
 
 Logic belongs in the package targets, where `swift test` covers it; `App/Zack` keeps only the SwiftUI views and the
 wiring, and has no test target of its own.
@@ -146,8 +146,9 @@ p95 (stop early with Ctrl-C). The system log keeps them for a few minutes only, 
 
 `scripts/release.sh` builds, notarizes and publishes a release; output goes to `.build/zack-release/<version>/`.
 
-- No option: the real release. It builds, notarizes, signs with the EdDSA key from the keychain, writes
-  `appcast.xml`, pushes `main` and the tag, and creates the GitHub release.
+- `--publish`: the real release. It builds, notarizes, signs with the EdDSA key from the keychain, writes
+  `appcast.xml`, pushes `main` and the tag, and creates the GitHub release. It asks nothing on the way.
+- No option: prints the usage only.
 - `--dry-run`: everything except push and publication, notarization included.
 - `--local`: Apple Development signing, no notarization, a test feed on 127.0.0.1:8000 and a test key from the
   keychain account `zack-test`.

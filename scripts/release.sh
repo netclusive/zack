@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Builds, notarizes and publishes a Zack release with its Sparkle appcast; stops at the first failure.
-# Usage: scripts/release.sh [--local | --dry-run | --self-test]
-#   (none)       real release from main: checks, gate, archive, notarization, appcast, push, GitHub release, post-check
+# Usage: scripts/release.sh --publish | --dry-run | --local | --self-test
+#   --publish    real release from main: checks, gate, archive, notarization, appcast, push, GitHub release, post-check;
+#                it asks nothing, so start it only for an approved release
 #   --dry-run    the same without push, publish and post-check
 #   --local      Apple Development build for the local test feed, signed with the test key; no notarization, no network
 #   --self-test  checks the CHANGELOG, appcast and version helpers without any network
@@ -58,6 +59,26 @@ version_greater() {
         if ((10#$x < 10#$y)); then return 1; fi
     done
     return 1
+}
+
+# version_in_range <version> <range>: exit 0 if the dotted version meets every comma-separated constraint of a GitHub
+# vulnerable_version_range (=, <, <=, >, >= and a dotted version), 1 if not, 2 if the range cannot be read.
+version_in_range() {
+    local version="$1" range="$2" part op bound parts=()
+    [[ "$range" =~ [^[:space:]] && "$range" != *, ]] || return 2
+    IFS=, read -r -a parts <<< "$range"
+    for part in "${parts[@]}"; do
+        [[ "$part" =~ ^[[:space:]]*(<=|>=|<|>|=)[[:space:]]*([0-9]+(\.[0-9]+)*)[[:space:]]*$ ]] || return 2
+        op="${BASH_REMATCH[1]}" bound="${BASH_REMATCH[2]}"
+        case "$op" in
+            "<=") ! version_greater "$version" "$bound" || return 1 ;;
+            "<") version_greater "$bound" "$version" || return 1 ;;
+            ">=") ! version_greater "$bound" "$version" || return 1 ;;
+            ">") version_greater "$version" "$bound" || return 1 ;;
+            "=") ! version_greater "$version" "$bound" && ! version_greater "$bound" "$version" || return 1 ;;
+        esac
+    done
+    return 0
 }
 
 # write_appcast <version> <zip-url> <sign-attributes> <notes-file> <out>
@@ -118,14 +139,6 @@ die() {
 
 step() {
     echo "==> $*"
-}
-
-# Ask on the terminal; anything but exactly "ja" aborts.
-confirm() {
-    local answer=""
-    printf '%s ' "$1" 2> /dev/null > /dev/tty || die "no terminal for the confirmation"
-    IFS= read -r answer < /dev/tty || true
-    [[ "$answer" == "ja" ]] || die "aborted"
 }
 
 # Hide team IDs, signing identity names and email addresses (Apple ID) in tool output (stdin to stdout).
@@ -271,19 +284,36 @@ gate() {
     ./build.sh "$1" 2>&1 | mask || die "./build.sh $1 failed"
 }
 
-# Step 3: Swift has no SCA tool in the stack matrix; list the advisories of the pinned packages instead.
+# Step 3: Swift has no SCA tool in the stack matrix; check the advisories of the pinned packages instead. One line per
+# affected range; a pinned version inside a range, or a missing or unreadable range, stops the release for a review.
 advisories() {
     step "security advisories of the pinned packages"
-    local repo list
-    local format='.[] | "    \((.published_at // "")[0:10])  \(.severity // "-")  \(.summary)'
-    format+='  (affected: \([.vulnerabilities[]?.vulnerable_version_range // empty] | join(", ")))"'
+    local repo pinned list date severity summary range verdict review=0
+    local format='.[] | select(.withdrawn_at == null)'
+    format+=' | [((.published_at // "")[0:10]), (.severity // ""), (.summary // "")]'
+    format+=' + ([.vulnerabilities[]? | .vulnerable_version_range // "-"] | if length == 0 then ["-"] else . end'
+    format+=' | .[] | [.]) | map(if . == "" then "-" else . end) | @tsv'
     for repo in sparkle-project/Sparkle FluidInference/FluidAudio; do
+        pinned="$(pinned_version "$(printf '%s' "${repo#*/}" | tr '[:upper:]' '[:lower:]')")"
+        [[ -n "$pinned" ]] || die "no pinned version of $repo in Package.resolved"
         list="$(gh api --paginate "repos/$repo/security-advisories" --jq "$format")" \
             || die "cannot list the advisories of $repo"
-        echo "  $repo, pinned $(pinned_version "$(printf '%s' "${repo#*/}" | tr '[:upper:]' '[:lower:]')"):"
-        printf '%s\n' "${list:-    none}"
+        echo "  $repo, pinned $pinned:"
+        [[ -n "$list" ]] || { echo "    none"; continue; }
+        while IFS=$'\t' read -r date severity summary range; do
+            if version_in_range "$pinned" "$range"; then
+                verdict="AFFECTED"
+                review=1
+            elif (($? == 1)); then
+                verdict="not affected"
+            else
+                verdict="RANGE UNREADABLE"
+                review=1
+            fi
+            echo "    $date  $severity  $summary  (affected: $range): $verdict"
+        done <<< "$list"
     done
-    confirm "weiter? (ja)"
+    ((review == 0)) || die "an advisory may affect a pinned package; review it before releasing"
 }
 
 # remove_distribution_logs <export log> [temp folder, default the user temp folder]
@@ -469,7 +499,6 @@ publish() {
     commits="$(git log --oneline refs/remotes/origin/main..refs/heads/main)" || die "git log failed"
     echo "  commits git push origin main will push:"
     printf '%s\n' "${commits:-none}" | sed 's/^/    /'
-    confirm "veröffentlichen? (ja)"
     git push origin main || die "git push origin main failed"
     # The full ref, so a branch of the same name cannot make the push ambiguous.
     git push origin "refs/tags/v$VERSION" || die "git push origin refs/tags/v$VERSION failed"
@@ -678,16 +707,30 @@ XCCONFIG
     unset -f getconf rm
     ((${#removed[@]} == 0)) || { echo "self-test: distribution logs without temp folder" >&2; return 1; }
 
+    # Ranges as GitHub writes vulnerable_version_range: 0 inside, 1 outside, 2 unreadable.
+    local case version range code
+    for case in '2.9.5|<= 2.9.5|0' '2.10.1|<= 2.9.5|1' '2.5.0|>= 2.2.0, <= 2.9.5|0' '2.1.9|>= 2.2.0, <= 2.9.5|1' \
+        '2.9.0|< 2.9.1|0' '2.9.1|< 2.9.1|1' '1.0.0|= 1.0.0|0' '1.0.1|= 1.0.0|1' '1.0.1|> 1.0|0' '1.0|> 1.0.0|1' \
+        '2.10.1||2' '2.10.1|-|2' '2.10.1|<= 2.9.5,|2' '2.10.1|~> 2.0|2' '2.10.1|<= 2.9.5-beta|2' '2.10.1|2.9.5|2'; do
+        IFS='|' read -r version range code <<< "$case"
+        version_in_range "$version" "$range" && got=0 || got=$?
+        [[ "$got" == "$code" ]] || { echo "self-test: version_in_range $version '$range'" >&2; return 1; }
+    done
+
+    # Without --publish the script only prints its usage; no other argument publishes.
+    "$BASH" scripts/release.sh > /dev/null 2>&1 && got=0 || got=$?
+    [[ "$got" == 2 ]] || { echo "self-test: no argument must print the usage" >&2; return 1; }
+
     echo "release self-test passed"
 }
 
 usage() {
-    echo "usage: $0 [--local | --dry-run | --self-test]" >&2
+    echo "usage: $0 --publish | --dry-run | --local | --self-test" >&2
     exit 2
 }
 
-if (($# > 1)); then usage; fi
-case "${1-}" in
+if (($# != 1)); then usage; fi
+case "$1" in
     --self-test) self_test ;;
     --local)
         MODE=local
@@ -697,8 +740,7 @@ case "${1-}" in
         MODE=dry-run
         main
         ;;
-    "")
-        if (($# == 1)); then usage; fi
+    --publish)
         MODE=release
         main
         ;;
