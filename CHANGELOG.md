@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-04
+
 ### Added
 
 - After you allow it, Zack checks once a day for a new version, offers it, and can install it automatically when it quits. Turn this on or off in the settings.
@@ -33,8 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zack reads dictionary, snippets and code apps files saved in UTF-16 with a byte order mark, and no longer shows garbage entries for a file it cannot read as text.
 - In German, VoiceOver announces the last second of the recording countdown in the singular.
 - VoiceOver tells the System Settings buttons in Setup apart, including the one for Input Monitoring.
-- When the settings window opens and after a click in its sidebar, the sidebar has the keyboard focus, so the selected pane shows in the accent colour.
-- The settings sidebar is wide enough for all pane names.
 
 ## [0.4.0] - 2026-10-30
 
@@ -103,4 +103,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark tool that compares engines on a fixed set of dictation cases, with synthetic or microphone recordings and a summary report.
 - An open language model running on the Mac's GPU can be benchmarked as an alternative AI cleanup.
 
-[Unreleased]: https://github.com/netclusive/zack/commits/main
+[Unreleased]: https://github.com/netclusive/zack/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/netclusive/zack/releases/tag/v1.0.0
