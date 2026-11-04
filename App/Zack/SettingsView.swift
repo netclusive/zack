@@ -23,9 +23,10 @@ struct SettingsView: View {
             .focused($sidebarFocused)
             // AppKit focuses the first key view once the window is ordered front, which happens after onAppear.
             .onAppear { Task { sidebarFocused = true } }
-            .navigationSplitViewColumnWidth(180)
             // Fixed sidebar as in System Settings; collapsed, it would hide the only way between the panes.
             .toolbar(removing: .sidebarToggle)
+            // After the toolbar modifier: before it, the width is ignored and the sidebar gets a fifth of the window.
+            .navigationSplitViewColumnWidth(180)
         } detail: {
             switch model.settingsPane {
             case .general: GeneralPane(model: model)

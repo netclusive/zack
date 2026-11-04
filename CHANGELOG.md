@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In German, VoiceOver announces the last second of the recording countdown in the singular.
 - VoiceOver tells the System Settings buttons in Setup apart, including the one for Input Monitoring.
 - When the settings window opens and after a click in its sidebar, the sidebar has the keyboard focus, so the selected pane shows in the accent colour.
+- The settings sidebar is wide enough for all pane names.
 
 ## [0.4.0] - 2026-10-30
 
