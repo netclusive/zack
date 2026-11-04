@@ -65,6 +65,23 @@ struct CodeAppsTests {
         }
     }
 
+    /// The list shows the app's name instead of its bundle ID; the search finds both.
+    @Test func searchFindsTheShownAppName() {
+        let text = "com.microsoft.VSCode\ncom.apple.Terminal\ncom.jetbrains.*\n"
+        let document = EntryDocument<CodeAppsFormat>(text: text)
+        let names = ["com.microsoft.VSCode": "Visual Studio Code", "com.apple.Terminal": "Terminal"]
+        let shownName: (CodeAppEntry) -> String? = { entry in
+            switch entry {
+            case .app(let id): names[id]
+            case .prefix: nil
+            }
+        }
+        #expect(document.items(matching: "studio", alsoIn: shownName).map(\.line) == [0])
+        #expect(document.items(matching: "VSCode", alsoIn: shownName).map(\.line) == [0])
+        #expect(document.items(matching: "jetbrains", alsoIn: shownName).map(\.line) == [2])
+        #expect(document.items(matching: "", alsoIn: shownName).count == 3)
+    }
+
     @Test func lonePrefixStarIsUnreadable() {
         #expect(EntryDocument<CodeAppsFormat>(text: "*\ncom.example.Editor\n").unreadableCount == 1)
     }

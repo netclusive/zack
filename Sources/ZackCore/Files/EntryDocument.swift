@@ -95,9 +95,17 @@ public struct EntryDocument<Format: EntryFormat>: Equatable, Sendable {
     }
 
     public func items(matching query: String) -> [Item] {
+        items(matching: query, alsoIn: { _ in nil })
+    }
+
+    /// Like `items(matching:)`; an item also matches on `extra`, such as a name the list shows instead of the entry.
+    public func items(matching query: String, alsoIn extra: (Format.Entry) -> String?) -> [Item] {
         let all = items
         guard !query.isEmpty else { return all }
-        return all.filter { Format.searchText(for: $0.entry).localizedCaseInsensitiveContains(query) }
+        return all.filter { item in
+            Format.searchText(for: item.entry).localizedCaseInsensitiveContains(query)
+                || extra(item.entry)?.localizedCaseInsensitiveContains(query) == true
+        }
     }
 
     public var unreadableCount: Int {

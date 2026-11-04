@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The code apps search also finds apps by the name shown in the list, not only by their bundle ID.
+
 ## [1.0.0] - 2026-11-04
 
 ### Added

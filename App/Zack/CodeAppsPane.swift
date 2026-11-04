@@ -45,7 +45,7 @@ private struct CodeAppsList: View {
             TextField("Suchen", text: $query)
                 .textFieldStyle(.roundedBorder)
             List(selection: $selection) {
-                ForEach(document.items(matching: query)) { item in
+                ForEach(document.items(matching: query, alsoIn: Self.shownName)) { item in
                     row(item.entry)
                         .tag(item.line)
                 }
@@ -89,6 +89,13 @@ private struct CodeAppsList: View {
 
     private static var genericIcon: NSImage {
         NSWorkspace.shared.icon(for: .applicationBundle)
+    }
+
+    /// The name a row shows for an installed app, so the search finds it; nil for prefixes and missing apps.
+    private static func shownName(of entry: CodeAppEntry) -> String? {
+        guard case .app(let id) = entry, let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id)
+        else { return nil }
+        return FileManager.default.displayName(atPath: url.path)
     }
 
     // MARK: Actions
