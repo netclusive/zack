@@ -6,13 +6,23 @@ import ZackUpdate
 struct SettingsView: View {
     let model: AppModel
     let updater: Updater?
+    /// The sidebar holds the keyboard focus when the window opens and after a click on a pane, so its selection shows
+    /// in the accent colour. Otherwise AppKit focuses the first search field, and a row click leaves no focus at all.
+    @FocusState private var sidebarFocused: Bool
 
     var body: some View {
         NavigationSplitView {
             List(SettingsPane.allCases, selection: selection) { pane in
                 Label(pane.title, image: pane.icon)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(.rect)
+                    // A click on the selected pane leaves the selection unchanged and never reaches the binding.
+                    .simultaneousGesture(TapGesture().onEnded { sidebarFocused = true })
                     .tag(pane)
             }
+            .focused($sidebarFocused)
+            // AppKit focuses the first key view once the window is ordered front, which happens after onAppear.
+            .onAppear { Task { sidebarFocused = true } }
             .navigationSplitViewColumnWidth(180)
             // Fixed sidebar as in System Settings; collapsed, it would hide the only way between the panes.
             .toolbar(removing: .sidebarToggle)
@@ -39,6 +49,7 @@ struct SettingsView: View {
             get: { model.settingsPane },
             set: { pane in
                 if let pane { model.selectSettingsPane(pane) }
+                sidebarFocused = true
             })
     }
 }
