@@ -32,7 +32,7 @@ private struct UpdateSwitches: View {
             }
         } footer: {
             Text(
-                "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘."
+                "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse, die bevorzugten Sprachen und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘."
             )
         }
     }

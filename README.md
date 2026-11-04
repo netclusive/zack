@@ -47,7 +47,8 @@ Zack needs macOS 26 or later on Apple Silicon; AI cleanup needs Apple Intelligen
   clipboard.
 - Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Setup" moves a copy from
   zack-bench (`~/Library/Application Support/FluidAudio/Models`) or downloads it on click (about 600 MB from
-  Hugging Face, USA; only the IP address is transmitted). The app never downloads on its own.
+  Hugging Face, USA; the request carries your IP address, the app and macOS version and your preferred languages).
+  The app never downloads on its own.
 
 ### Files
 
@@ -104,8 +105,8 @@ once a day. The switches are in "Settings › Updates", "Check for Updates…" i
   and its changes.
 
 Privacy: the update check runs only after your consent, once a day, and can be turned off in the settings. Feed and
-downloads come from GitHub (GitHub Inc., USA). A request carries your IP address and the user agent
-`Zack/<version> Sparkle/<version>`; Sparkle sends no system profile.
+downloads come from GitHub (GitHub Inc., USA). A request carries your IP address, your preferred languages and the
+user agent `Zack/<version> Sparkle/<version>`; Sparkle sends no system profile.
 
 ## Build from source
 
@@ -220,7 +221,8 @@ on click in "Settings › Setup". Later runs work offline.
 | `apple-fm` | part of Apple Intelligence | managed by macOS | not measured |
 
 Downloads fetch model files only; transcription and cleanup run on the Mac. An interrupted download
-is completed on the next run.
+is completed on the next run. If `HF_TOKEN`, `HUGGING_FACE_HUB_TOKEN` or `HUGGINGFACEHUB_API_TOKEN` is set,
+FluidAudio also sends it to Hugging Face as a token.
 
 ## License
 

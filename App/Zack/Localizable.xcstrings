@@ -276,18 +276,18 @@
         }
       }
     },
-    "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘." : {
+    "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse, die bevorzugten Sprachen und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘."
+            "value" : "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse, die bevorzugten Sprachen und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Checks run only with your consent, once a day. The feed and downloads come from GitHub (GitHub Inc., USA); each request sends the IP address and the user agent “Zack/<Version> Sparkle/<Version>”."
+            "value" : "Checks run only with your consent, once a day. The feed and downloads come from GitHub (GitHub Inc., USA); each request sends the IP address, the preferred languages and the user agent “Zack/<Version> Sparkle/<Version>”."
           }
         }
       }
@@ -532,18 +532,18 @@
         }
       }
     },
-    "Größe %@. Quelle: Hugging Face (USA); übertragen wird nur die IP-Adresse. Lizenz: CC BY 4.0." : {
+    "Größe %@. Quelle: Hugging Face (USA); übertragen werden IP-Adresse, App- und macOS-Version und bevorzugte Sprachen. Lizenz: CC BY 4.0." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Größe %@. Quelle: Hugging Face (USA); übertragen wird nur die IP-Adresse. Lizenz: CC BY 4.0."
+            "value" : "Größe %@. Quelle: Hugging Face (USA); übertragen werden IP-Adresse, App- und macOS-Version und bevorzugte Sprachen. Lizenz: CC BY 4.0."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Size: %@. Source: Hugging Face (USA); only the IP address is sent. License: CC BY 4.0."
+            "value" : "Size: %@. Source: Hugging Face (USA); the request sends the IP address, the app and macOS version and the preferred languages. License: CC BY 4.0."
           }
         }
       }

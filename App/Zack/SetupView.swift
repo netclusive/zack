@@ -99,7 +99,7 @@ struct SetupView: View {
             }
             if model.modelStatus == .missing {
                 Text(
-                    "Größe \(ModelSetup.downloadSize). Quelle: Hugging Face (USA); übertragen wird nur die IP-Adresse. Lizenz: CC BY 4.0."
+                    "Größe \(ModelSetup.downloadSize). Quelle: Hugging Face (USA); übertragen werden IP-Adresse, App- und macOS-Version und bevorzugte Sprachen. Lizenz: CC BY 4.0."
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
