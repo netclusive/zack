@@ -121,7 +121,7 @@ public enum AudioDevices {
     }
 
     /// Reads a CFString property of an audio object; nil if it is not delivered.
-    private static func stringProperty(_ selector: AudioObjectPropertySelector, of object: AudioObjectID) -> String? {
+    static func stringProperty(_ selector: AudioObjectPropertySelector, of object: AudioObjectID) -> String? {
         var address = AudioObjectPropertyAddress(
             mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
         var value: Unmanaged<CFString>?

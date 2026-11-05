@@ -53,6 +53,11 @@ active window.
 - AI cleanup ("Settings › General › AI cleanup of self-corrections"): if a dictation contains a
   self-correction such as "Montag, nein, Dienstag" or "Tuesday, no, Wednesday", Apple's on-device model smooths
   the sentence.
+- Pause playback ("Settings › General › Pause playback while dictating", on by default): if Spotify or a YouTube
+  video in Chrome is playing when the pill appears, Zack pauses it and resumes it when the recording ends. Zack
+  cannot tell paused players from playing ones directly, so after a dictation playback may also start that you paused
+  yourself just before (up to about 2 seconds for Spotify, 10 for Chrome), or, if Chrome played another sound such
+  as a notification in the last 10 seconds, the player macOS last used.
 - Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
   the menu shows "Secure Input Active"; dictation works, only canceling with another key does not.
 
@@ -118,6 +123,10 @@ elsewhere.
   press, the next click or an app switch.
 - **Microphone readiness:** while the microphone is open between dictations, only the last half second is kept in
   memory, continuously overwritten, never recognized or stored, and macOS shows the orange microphone indicator.
+- **Playback pause:** to see whether Spotify or Chrome is playing, Zack asks macOS which apps are sending audio
+  right now (app identifiers only, no titles). It pauses and resumes them through MediaRemote, a non-public macOS
+  interface. Nothing of this is stored or logged. A macOS update may stop the feature without notice; dictation is
+  not affected.
 - **Network:** Zack goes online only for two things.
   - The model download you start in "Settings › Setup", from Hugging Face (USA). The request carries your IP
     address, the app and macOS version and your preferred languages. If `HF_TOKEN`, `HUGGING_FACE_HUB_TOKEN` or

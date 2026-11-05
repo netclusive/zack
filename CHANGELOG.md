@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Zack can pause Spotify and YouTube in Chrome while you dictate and resume afterwards (Settings > General).
+
 ## [1.0.2] - 2026-11-05
 
 ### Fixed

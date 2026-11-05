@@ -101,6 +101,10 @@ public actor DictationController<C: Clock<Duration>> {
     private let codeMode: @Sendable (String?) -> TextMode
     /// Dictation language, read once per dictation or repeat so a change applies from the next one.
     private let language: @Sendable () -> DictationLanguage
+    /// Pauses playback once the pill shows and resumes it when the recording ends.
+    private let media: MediaPause?
+    /// "Wiedergabe beim Diktieren pausieren", read when the pill appears so a change applies from the next dictation.
+    private let pausePlayback: @Sendable () -> Bool
     private let logger = Logger(subsystem: "com.netclusive.zack", category: "dictation")
 
     public private(set) var state = DictationState.idle
@@ -188,7 +192,8 @@ public actor DictationController<C: Clock<Duration>> {
         microphoneAllowed: @escaping @Sendable () -> Bool, signposts: Signposts? = nil,
         readiness: @escaping @Sendable () -> MicrophoneReadiness = { .off }, focus: (any FocusSource)? = nil,
         memory: CursorMemory = CursorMemory(), codeMode: @escaping @Sendable (String?) -> TextMode = { _ in .prose },
-        language: @escaping @Sendable () -> DictationLanguage = { .german }
+        language: @escaping @Sendable () -> DictationLanguage = { .german }, media: MediaPause? = nil,
+        pausePlayback: @escaping @Sendable () -> Bool = { false }
     ) {
         (states, continuation) = AsyncStream.makeStream(bufferingPolicy: .bufferingNewest(32))
         self.capture = capture
@@ -204,6 +209,8 @@ public actor DictationController<C: Clock<Duration>> {
         self.memory = memory
         self.codeMode = codeMode
         self.language = language
+        self.media = media
+        self.pausePlayback = pausePlayback
     }
 
     public var canRetry: Bool { kept?.cleared == true }
@@ -262,6 +269,8 @@ public actor DictationController<C: Clock<Duration>> {
             return
         }
         publish(.recording(elapsed: elapsed(), level: capture.level))
+        // Returns at once; Core Audio and the command run on the pause's own queue.
+        media?.shown(enabled: pausePlayback())
         startPrewarming()
     }
 
@@ -647,12 +656,13 @@ public actor DictationController<C: Clock<Duration>> {
         }
     }
 
-    /// Every end of a capture stops the ticker, and with it the prewarming.
+    /// Every end of a capture stops the ticker, and with it the prewarming, and resumes playback paused for it.
     private func stopTicker() {
         ticker?.cancel()
         ticker = nil
         prewarmer?.cancel()
         prewarmer = nil
+        media?.ended()
     }
 
     /// Readies one cleaner session every `prewarmInterval` until the capture ends; the cleanup at release takes it.

@@ -11,6 +11,7 @@ public struct Settings: @unchecked Sendable {
         static let microphoneReadiness = "microphoneReadiness"
         static let microphoneUID = "microphoneUID"
         static let microphoneName = "microphoneName"
+        static let pausePlayback = "pausePlayback"
     }
 
     private let defaults: UserDefaults
@@ -28,6 +29,12 @@ public struct Settings: @unchecked Sendable {
     public var aiCleanup: Bool {
         get { defaults.object(forKey: Key.aiCleanup) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Key.aiCleanup) }
+    }
+
+    /// "Wiedergabe beim Diktieren pausieren"; on by default.
+    public var pausePlayback: Bool {
+        get { defaults.object(forKey: Key.pausePlayback) as? Bool ?? true }
+        nonmutating set { defaults.set(newValue, forKey: Key.pausePlayback) }
     }
 
     /// Dictation language; a missing or unknown value reads as German.
