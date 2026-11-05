@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-05
+
 ### Added
 
 - Zack can pause Spotify and YouTube in Chrome while you dictate and resume afterwards (Settings > General).
@@ -119,7 +121,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark tool that compares engines on a fixed set of dictation cases, with synthetic or microphone recordings and a summary report.
 - An open language model running on the Mac's GPU can be benchmarked as an alternative AI cleanup.
 
-[Unreleased]: https://github.com/netclusive/zack/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/netclusive/zack/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/netclusive/zack/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/netclusive/zack/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/netclusive/zack/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/netclusive/zack/releases/tag/v1.0.0
