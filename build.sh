@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-# The versions the README names as tested; another version only warns.
+# The versions docs/development.md names as tested; another version only warns.
 warn_untested() {
     if [[ "$3" != "$2" ]]; then echo "warning: $1 ${3:-not found}, tested with $2" >&2; fi
 }
