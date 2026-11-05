@@ -2,7 +2,7 @@ import SwiftUI
 import ZackCore
 import ZackDesktop
 
-/// "Allgemein": language, hotkey, microphone readiness, login item and the AI cleanup.
+/// "Allgemein": language, hotkey, microphone readiness, login item, the AI cleanup and the playback pause.
 struct GeneralPane: View {
     let model: AppModel
 
@@ -51,6 +51,12 @@ struct GeneralPane: View {
                 if let hint = model.cleanerHint {
                     Text(hint)
                         .foregroundStyle(.secondary)
+                }
+            }
+            Section {
+                Toggle(isOn: Binding(get: { model.pausePlayback }, set: { model.setPausePlayback($0) })) {
+                    Text("Wiedergabe beim Diktieren pausieren")
+                    Text("Hält Spotify und YouTube in Chrome während eines Diktats an und setzt sie danach fort.")
                 }
             }
         }

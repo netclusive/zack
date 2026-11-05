@@ -548,6 +548,22 @@
         }
       }
     },
+    "Hält Spotify und YouTube in Chrome während eines Diktats an und setzt sie danach fort." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hält Spotify und YouTube in Chrome während eines Diktats an und setzt sie danach fort."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauses Spotify and YouTube in Chrome during a dictation and resumes them afterwards."
+          }
+        }
+      }
+    },
     "Hält das Mikrofon nach einem Diktat offen, damit der Anfang nicht fehlt. Solange es offen ist, zeigt macOS den orangen Punkt." : {
       "localizations" : {
         "de" : {
@@ -1200,6 +1216,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Other components"
+          }
+        }
+      }
+    },
+    "Wiedergabe beim Diktieren pausieren" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiedergabe beim Diktieren pausieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause playback while dictating"
           }
         }
       }

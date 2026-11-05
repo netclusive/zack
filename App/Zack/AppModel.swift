@@ -33,6 +33,7 @@ struct CodeModeMenuItem: Equatable {
 final class AppModel {
     private(set) var hotkey: HotkeyKey
     private(set) var aiCleanup: Bool
+    private(set) var pausePlayback: Bool
     private(set) var dictationLanguage: DictationLanguage
     private(set) var microphoneReadiness: MicrophoneReadiness
     private(set) var launchAtLogin = false
@@ -86,6 +87,7 @@ final class AppModel {
     @ObservationIgnored private var escapeRegistered = false
     @ObservationIgnored private let focus = AXFocusSource()
     @ObservationIgnored private let memory = CursorMemory()
+    @ObservationIgnored private let media = MediaPause(commands: MediaRemoteCommands(), outputs: CoreAudioOutputs())
     @ObservationIgnored private var lastActive: (name: String, bundleID: String)?
     @ObservationIgnored private var activationObservation: (any NSObjectProtocol)?
     @ObservationIgnored private var actions: AsyncStream<(HotkeyAction, FrontApp?)>.Continuation?
@@ -100,6 +102,7 @@ final class AppModel {
     init() {
         hotkey = settings.hotkey
         aiCleanup = settings.aiCleanup
+        pausePlayback = settings.pausePlayback
         microphoneReadiness = settings.microphoneReadiness
         let settings = settings
         // Resolved before the example files exist, so an existing vocabulary file still means German.
@@ -121,6 +124,7 @@ final class AppModel {
         let cleaner = cleaner
         let modelReady = modelReady
         let memory = memory
+        let media = media
         controller = DictationController(
             capture: capture, transcriber: transcriber, inserter: inserter, clock: ContinuousClock(),
             makeProcessor: {
@@ -135,7 +139,9 @@ final class AppModel {
             focus: focus, memory: memory,
             // Read per dictation, on the controller actor.
             codeMode: { files?.loadCodeApps().mode(for: $0) ?? .prose },
-            language: { settings.dictationLanguage })
+            language: { settings.dictationLanguage }, media: media,
+            // Read when the pill appears, on the controller actor.
+            pausePlayback: { settings.pausePlayback })
     }
 
     /// `try?` that logs the error kind; its description may carry a path.
@@ -256,6 +262,12 @@ final class AppModel {
     func setAICleanup(_ on: Bool) {
         settings.aiCleanup = on
         aiCleanup = on
+    }
+
+    /// Applies from the next dictation; a running one still resumes what it paused.
+    func setPausePlayback(_ on: Bool) {
+        settings.pausePlayback = on
+        pausePlayback = on
     }
 
     /// Applies at once: "Aus" closes a ready microphone, "Immer" opens it (if permission and model are there).
@@ -381,6 +393,11 @@ final class AppModel {
     /// Closes the settings window if it is open; its panes save pending edits synchronously while it closes.
     func closeSettings() {
         windows.close(id: Self.settingsWindow)
+    }
+
+    /// Quitting: playback paused for a running dictation resumes before the app exits.
+    func resumePlayback() {
+        media.resumeNow()
     }
 
     private static let settingsWindow = "settings"

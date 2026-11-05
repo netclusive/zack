@@ -39,7 +39,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// Quitting or logging out saves pending edits: the editors' close hooks run inside the close, before exit.
+    /// Playback paused for a running dictation resumes.
     func applicationWillTerminate(_ notification: Notification) {
         model.closeSettings()
+        model.resumePlayback()
     }
 }
