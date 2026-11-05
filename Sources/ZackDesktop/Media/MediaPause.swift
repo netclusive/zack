@@ -11,16 +11,23 @@ public final class MediaPause: Sendable {
 
     private let commands: any PlaybackCommands
     private let outputs: any AudioOutputs
+    /// Shortest time from a pause of its own to the play: Spotify ignores a play within about 250 ms of a pause and
+    /// stays paused, as after a hold just past the pill.
+    private let minimumPause: Duration
     /// Wait after the play in `resumeNow`: a command sent right before the process exits does not arrive.
     private let exitGrace: Duration
     private let queue = DispatchQueue(label: "com.netclusive.zack.media", qos: .userInitiated)
-    /// The running dictation paused playback; changed on `queue` only.
-    private let paused = Mutex(false)
+    /// When the running dictation paused playback, nil if it did not; changed on `queue` only.
+    private let pausedAt = Mutex<ContinuousClock.Instant?>(nil)
     private let logger = Logger(subsystem: Signposts.subsystem, category: "media")
 
-    public init(commands: any PlaybackCommands, outputs: any AudioOutputs, exitGrace: Duration = .milliseconds(300)) {
+    public init(
+        commands: any PlaybackCommands, outputs: any AudioOutputs, minimumPause: Duration = .milliseconds(600),
+        exitGrace: Duration = .milliseconds(300)
+    ) {
         self.commands = commands
         self.outputs = outputs
+        self.minimumPause = minimumPause
         self.exitGrace = exitGrace
     }
 
@@ -38,8 +45,7 @@ public final class MediaPause: Sendable {
     /// The app quits: resumes a pause of its own before returning, then gives the command time to leave the process.
     public func resumeNow() {
         guard queue.sync(execute: { resume() }) else { return }
-        let (seconds, attoseconds) = exitGrace.components
-        Thread.sleep(forTimeInterval: Double(seconds) + Double(attoseconds) / 1e18)
+        Self.sleep(exitGrace)
     }
 
     /// Waits until the queued work is done.
@@ -48,18 +54,27 @@ public final class MediaPause: Sendable {
     }
 
     private func pauseIfPlaying() {
-        guard !paused.withLock({ $0 }), !outputs.playingBundleIDs().isDisjoint(with: Self.players) else { return }
+        guard pausedAt.withLock({ $0 }) == nil, !outputs.playingBundleIDs().isDisjoint(with: Self.players) else {
+            return
+        }
         commands.pause()
-        paused.withLock { $0 = true }
+        pausedAt.withLock { $0 = .now }
         logger.info("paused")
     }
 
-    /// True if it sent a play.
+    /// True if it sent a play. Waits on the queue, not on the caller, until the pause has settled.
     private func resume() -> Bool {
-        guard paused.withLock({ $0 }) else { return false }
+        guard let since = pausedAt.withLock({ $0 }) else { return false }
+        let remaining = minimumPause - since.duration(to: .now)
+        if remaining > .zero { Self.sleep(remaining) }
         commands.play()
-        paused.withLock { $0 = false }
+        pausedAt.withLock { $0 = nil }
         logger.info("resumed")
         return true
+    }
+
+    private static func sleep(_ duration: Duration) {
+        let (seconds, attoseconds) = duration.components
+        Thread.sleep(forTimeInterval: Double(seconds) + Double(attoseconds) / 1e18)
     }
 }

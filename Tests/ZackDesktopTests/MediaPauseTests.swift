@@ -5,8 +5,10 @@ import Testing
 struct MediaPauseTests {
     let commands = FakePlaybackCommands()
 
-    func makePause(_ outputs: FakeAudioOutputs, exitGrace: Duration = .zero) -> MediaPause {
-        MediaPause(commands: commands, outputs: outputs, exitGrace: exitGrace)
+    func makePause(
+        _ outputs: FakeAudioOutputs, minimumPause: Duration = .zero, exitGrace: Duration = .zero
+    ) -> MediaPause {
+        MediaPause(commands: commands, outputs: outputs, minimumPause: minimumPause, exitGrace: exitGrace)
     }
 
     @Test(arguments: ["com.spotify.client", "com.google.Chrome.helper"])
@@ -86,6 +88,38 @@ struct MediaPauseTests {
         outputs.release()
         media.drain()
         #expect(commands.calls == [.pause, .play])
+    }
+
+    /// Spotify ignores a play that comes within about 250 ms of a pause and stays paused.
+    @Test func playWaitsUntilThePauseHasSettled() {
+        let media = makePause(FakeAudioOutputs(["com.spotify.client"]), minimumPause: .milliseconds(200))
+        media.shown(enabled: true)
+        media.ended()
+        media.drain()
+        #expect(commands.calls == [.pause, .play])
+        #expect((commands.pauseToPlay ?? .zero) >= .milliseconds(200))
+    }
+
+    @Test func playAfterASettledPauseDoesNotWait() async throws {
+        let media = makePause(FakeAudioOutputs(["com.spotify.client"]), minimumPause: .milliseconds(200))
+        media.shown(enabled: true)
+        media.drain()
+        try await Task.sleep(for: .milliseconds(250))
+        let elapsed = ContinuousClock().measure {
+            media.ended()
+            media.drain()
+        }
+        #expect(elapsed < .milliseconds(150))
+        #expect(commands.calls == [.pause, .play])
+    }
+
+    @Test func resumeNowWaitsUntilThePauseHasSettled() {
+        let media = makePause(FakeAudioOutputs(["com.spotify.client"]), minimumPause: .milliseconds(200))
+        media.shown(enabled: true)
+        media.drain()
+        media.resumeNow()
+        #expect(commands.calls == [.pause, .play])
+        #expect((commands.pauseToPlay ?? .zero) >= .milliseconds(200))
     }
 
     @Test func resumeNowPlaysAnOwnPauseBeforeReturning() {

@@ -3,20 +3,30 @@ import Synchronization
 
 @testable import ZackDesktop
 
-/// Records the commands sent to the player, in order.
+/// Records the commands sent to the player, in order and with the time they were sent.
 final class FakePlaybackCommands: PlaybackCommands {
     enum Call: Equatable { case pause, play }
 
-    private let recorded = Mutex<[Call]>([])
+    private let recorded = Mutex<[(call: Call, at: ContinuousClock.Instant)]>([])
 
-    var calls: [Call] { recorded.withLock { $0 } }
+    var calls: [Call] { recorded.withLock { $0.map(\.call) } }
+
+    /// Time from the first pause to the first play after it.
+    var pauseToPlay: Duration? {
+        recorded.withLock { recorded in
+            guard let pause = recorded.firstIndex(where: { $0.call == .pause }),
+                let play = recorded[pause...].first(where: { $0.call == .play })
+            else { return nil }
+            return recorded[pause].at.duration(to: play.at)
+        }
+    }
 
     func pause() {
-        recorded.withLock { $0.append(.pause) }
+        recorded.withLock { $0.append((.pause, .now)) }
     }
 
     func play() {
-        recorded.withLock { $0.append(.play) }
+        recorded.withLock { $0.append((.play, .now)) }
     }
 }
 

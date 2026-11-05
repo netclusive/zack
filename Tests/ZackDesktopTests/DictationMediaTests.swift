@@ -28,17 +28,19 @@ struct DictationMediaTests {
     init() {
         keystrokes = FakeKeystrokes(clipboard: clipboard)
         capture = MicrophoneCapture(input: input)
-        media = MediaPause(commands: commands, outputs: outputs, exitGrace: .zero)
+        media = MediaPause(commands: commands, outputs: outputs, minimumPause: .zero, exitGrace: .zero)
     }
 
-    func makeController(modelReady: Bool = true, focus: FakeFocusSource? = nil) -> DictationController<TestClock> {
+    func makeController(
+        modelReady: Bool = true, focus: FakeFocusSource? = nil, media: MediaPause? = nil
+    ) -> DictationController<TestClock> {
         let inserter = Inserter(
             clipboard: clipboard, keystrokes: keystrokes, canPostKeystrokes: { true }, sleep: { _ in })
         let pausePlayback = pausePlayback
         return DictationController(
             capture: capture, transcriber: FakeTranscriber("Hallo Welt."), inserter: inserter, clock: clock,
             makeProcessor: { TextProcessor(cleaner: nil) }, modelReady: { modelReady }, microphoneAllowed: { true },
-            focus: focus, media: media, pausePlayback: { pausePlayback.current })
+            focus: focus, media: media ?? self.media, pausePlayback: { pausePlayback.current })
     }
 
     /// One second of speech, then the key comes up.
@@ -109,6 +111,24 @@ struct DictationMediaTests {
         #expect(await eventually { await controller.state == expected })
         media.drain()
         #expect(commands.calls == [.pause, .play])
+    }
+
+    /// A hold just past the pill: pause and play would follow each other within milliseconds, and Spotify ignores
+    /// a play that close to a pause. The play waits until the pause has settled.
+    @Test func shortHoldResumesOnlyOnceThePauseSettled() async {
+        let settling = MediaPause(
+            commands: commands, outputs: outputs, minimumPause: .milliseconds(200), exitGrace: .zero)
+        let controller = makeController(media: settling)
+        await controller.begin()
+        capture.waitForControl()
+        await controller.confirm()
+        input.push(tone(seconds: 0.2))
+        clock.advance(by: .milliseconds(250))
+        await controller.finish()
+        #expect(await controller.state == .idle)
+        settling.drain()
+        #expect(commands.calls == [.pause, .play])
+        #expect((commands.pauseToPlay ?? .zero) >= .milliseconds(200))
     }
 
     /// The pill shows a known failure (here the model is missing): nothing records, so nothing pauses.
