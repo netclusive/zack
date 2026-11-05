@@ -63,6 +63,14 @@ struct SettingsTests {
         }
     }
 
+    @Test func pausePlaybackIsOnByDefaultAndPersists() throws {
+        try withSuite { defaults in
+            #expect(Settings(defaults: defaults).pausePlayback)
+            Settings(defaults: defaults).pausePlayback = false
+            #expect(!Settings(defaults: defaults).pausePlayback)
+        }
+    }
+
     @Test func unknownStoredKeyFallsBackToFn() throws {
         try withSuite { defaults in
             defaults.set("capsLock", forKey: Settings.Key.hotkey)
