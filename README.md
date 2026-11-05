@@ -54,8 +54,10 @@ active window.
   self-correction such as "Montag, nein, Dienstag" or "Tuesday, no, Wednesday", Apple's on-device model smooths
   the sentence.
 - Pause playback ("Settings › General › Pause playback while dictating", on by default): if Spotify or a YouTube
-  video in Chrome is playing when the pill appears, Zack pauses it and resumes it when the recording ends. Playback
-  you paused yourself just before (up to about 2 seconds for Spotify, 10 for Chrome) may resume as well.
+  video in Chrome is playing when the pill appears, Zack pauses it and resumes it when the recording ends. Zack
+  cannot tell paused players from playing ones directly, so after a dictation playback may also start that you paused
+  yourself just before (up to about 2 seconds for Spotify, 10 for Chrome), or, if Chrome played another sound such
+  as a notification in the last 10 seconds, the player macOS last used.
 - Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
   the menu shows "Secure Input Active"; dictation works, only canceling with another key does not.
 
