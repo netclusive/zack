@@ -40,6 +40,18 @@ struct MediaPauseTests {
         #expect(commands.calls.isEmpty)
     }
 
+    /// Without MediaRemote a pause would change nothing, yet the log said "paused" and "resumed".
+    @Test func unavailableCommandsPauseNothing() {
+        let commands = FakePlaybackCommands(isAvailable: false)
+        let media = MediaPause(
+            commands: commands, outputs: FakeAudioOutputs(["com.spotify.client"]), minimumPause: .zero,
+            exitGrace: .zero)
+        media.shown(enabled: true)
+        media.ended()
+        media.drain()
+        #expect(commands.calls.isEmpty)
+    }
+
     @Test func disabledPausesNothingAndReadsNothing() {
         let outputs = FakeAudioOutputs(["com.spotify.client"])
         let media = makePause(outputs)

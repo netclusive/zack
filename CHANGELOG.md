@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- When macOS does not offer the playback controls, Zack no longer logs a pause and resume that did not happen.
+
 ## [1.1.0] - 2026-11-05
 
 ### Added

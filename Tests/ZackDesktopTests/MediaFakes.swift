@@ -9,6 +9,12 @@ final class FakePlaybackCommands: PlaybackCommands {
 
     private let recorded = Mutex<[(call: Call, at: ContinuousClock.Instant)]>([])
 
+    let isAvailable: Bool
+
+    init(isAvailable: Bool = true) {
+        self.isAvailable = isAvailable
+    }
+
     var calls: [Call] { recorded.withLock { $0.map(\.call) } }
 
     /// Time from the first pause to the first play after it.

@@ -53,10 +53,11 @@ public final class MediaPause: Sendable {
         queue.sync {}
     }
 
+    /// Checks the commands last, so MediaRemote still loads only once a listed player plays.
     private func pauseIfPlaying() {
-        guard pausedAt.withLock({ $0 }) == nil, !outputs.playingBundleIDs().isDisjoint(with: Self.players) else {
-            return
-        }
+        guard pausedAt.withLock({ $0 }) == nil, !outputs.playingBundleIDs().isDisjoint(with: Self.players),
+            commands.isAvailable
+        else { return }
         commands.pause()
         pausedAt.withLock { $0 = .now }
         logger.info("paused")

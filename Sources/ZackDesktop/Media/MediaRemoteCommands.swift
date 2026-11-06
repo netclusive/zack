@@ -37,7 +37,7 @@ public final class MediaRemoteCommands: PlaybackCommands {
     }
 
     /// Loads the framework if needed; false if it or its command is missing.
-    var isAvailable: Bool { sendCommand() != nil }
+    public var isAvailable: Bool { sendCommand() != nil }
 
     private func send(_ command: UInt32) {
         // Always true, even when nothing plays, so it is not checked.
