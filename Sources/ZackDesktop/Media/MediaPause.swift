@@ -19,6 +19,8 @@ public final class MediaPause: Sendable {
     private let queue = DispatchQueue(label: "com.netclusive.zack.media", qos: .userInitiated)
     /// When the running dictation paused playback, nil if it did not; changed on `queue` only.
     private let pausedAt = Mutex<ContinuousClock.Instant?>(nil)
+    /// Set by `resumeNow`: the app quits, so no later pill may pause again; changed on `queue` only.
+    private let closed = Mutex(false)
     private let logger = Logger(subsystem: Signposts.subsystem, category: "media")
 
     public init(
@@ -43,8 +45,13 @@ public final class MediaPause: Sendable {
     }
 
     /// The app quits: resumes a pause of its own before returning, then gives the command time to leave the process.
+    /// Pills after this pause nothing.
     public func resumeNow() {
-        guard queue.sync(execute: { resume() }) else { return }
+        let played = queue.sync {
+            closed.withLock { $0 = true }
+            return resume()
+        }
+        guard played else { return }
         Self.sleep(exitGrace)
     }
 
@@ -55,7 +62,8 @@ public final class MediaPause: Sendable {
 
     /// Checks the commands last, so MediaRemote still loads only once a listed player plays.
     private func pauseIfPlaying() {
-        guard pausedAt.withLock({ $0 }) == nil, !outputs.playingBundleIDs().isDisjoint(with: Self.players),
+        guard !closed.withLock({ $0 }), pausedAt.withLock({ $0 }) == nil,
+            !outputs.playingBundleIDs().isDisjoint(with: Self.players),
             commands.isAvailable
         else { return }
         commands.pause()

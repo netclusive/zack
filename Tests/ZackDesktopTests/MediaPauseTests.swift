@@ -145,6 +145,18 @@ struct MediaPauseTests {
         #expect(commands.calls == [.pause, .play])
     }
 
+    /// A pill while the app quits came after the play and paused again; nothing would have resumed it.
+    @Test func noPauseAfterResumeNow() {
+        let media = makePause(FakeAudioOutputs(["com.spotify.client"]))
+        media.shown(enabled: true)
+        media.drain()
+        media.resumeNow()
+        media.shown(enabled: true)
+        media.ended()
+        media.drain()
+        #expect(commands.calls == [.pause, .play])
+    }
+
     @Test func resumeNowWithoutOwnPauseDoesNothing() {
         let media = makePause(FakeAudioOutputs(["com.spotify.client"]))
         media.resumeNow()
