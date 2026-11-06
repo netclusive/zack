@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - When macOS does not offer the playback controls, Zack no longer logs a pause and resume that did not happen.
 - Music no longer stays paused when a dictation starts while Zack is quitting.
 
+### Security
+
+- The speech model download accepts only the exact model version Zack was tested with.
+
 ## [1.1.0] - 2026-11-05
 
 ### Added

@@ -276,6 +276,38 @@
         }
       }
     },
+    "Das geladene Modell weicht von der geprüften Fassung ab und wurde gelöscht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das geladene Modell weicht von der geprüften Fassung ab und wurde gelöscht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The downloaded model differs from the checked version and was deleted."
+          }
+        }
+      }
+    },
+    "Die Kopie weicht von der geprüften Fassung ab. Bitte das Modell laden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Kopie weicht von der geprüften Fassung ab. Bitte das Modell laden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The copy differs from the checked version. Please download the model."
+          }
+        }
+      }
+    },
     "Die Suche läuft nur nach Zustimmung, einmal am Tag. Feed und Downloads kommen von GitHub (GitHub Inc., USA); jede Anfrage überträgt die IP-Adresse, die bevorzugten Sprachen und den User-Agent ‚Zack/<Version> Sparkle/<Version>‘." : {
       "localizations" : {
         "de" : {

@@ -24,11 +24,38 @@ struct ModelSetupTests {
         }
     }
 
-    func makeSetup(downloads: Counter = Counter()) -> ModelSetup {
-        ModelSetup(modelsDirectory: models, legacyDirectory: legacy) { _, progress in
-            downloads.increment()
-            progress(1)
-        }
+    /// The fake files carry no real model, so the verification is stubbed: it passes unless `verified` is false.
+    func makeSetup(downloads: Counter = Counter(), verified: Bool = true, downloadWrites: Bool = false) -> ModelSetup {
+        let models = models
+        return ModelSetup(
+            modelsDirectory: models, legacyDirectory: legacy,
+            downloader: { _, progress in
+                downloads.increment()
+                if downloadWrites { try makeModel(in: models) }
+                progress(1)
+            },
+            verifier: { _ in if !verified { throw ZackError.modelUnverified("config.json") } })
+    }
+
+    @Test func downloadKeepsAVerifiedModel() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        try await makeSetup(downloadWrites: true).download { _ in }
+        #expect(makeSetup().status() == .ready)
+    }
+
+    @Test func downloadDropsAModelThatFailsVerification() async throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        let setup = makeSetup(verified: false, downloadWrites: true)
+        await #expect(throws: ZackError.modelUnverified("config.json")) { try await setup.download { _ in } }
+        #expect(makeSetup().status() == .missing)
+        #expect(!FileManager.default.fileExists(atPath: ParakeetModelStore.modelFolder(.ultra, in: models).path))
+    }
+
+    @Test func adoptRefusesABenchCopyThatFailsVerification() throws {
+        defer { try? FileManager.default.removeItem(at: root) }
+        try makeModel(in: legacy)
+        #expect(throws: ZackError.modelUnverified("config.json")) { try makeSetup(verified: false).adopt() }
+        #expect(makeSetup().status() == .adoptable)
     }
 
     @Test func missingWithoutAnyCopy() {

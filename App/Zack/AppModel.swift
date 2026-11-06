@@ -451,6 +451,10 @@ final class AppModel {
         do {
             try modelSetup?.adopt()
             setupError = nil
+        } catch ZackError.modelUnverified {
+            logger.error("model adopt: unverified")
+            setupError = String(
+                localized: "Die Kopie weicht von der geprüften Fassung ab. Bitte das Modell laden.")
         } catch {
             logger.error("model adopt: \(String(describing: type(of: error)), privacy: .public)")
             setupError = String(localized: "Übernehmen fehlgeschlagen. Bitte erneut versuchen oder das Modell laden.")
@@ -476,6 +480,10 @@ final class AppModel {
                         if self.downloadProgress != nil { self.downloadProgress = fraction }
                     }
                 }
+            } catch ZackError.modelUnverified {
+                logger.error("model download: unverified")
+                setupError = String(
+                    localized: "Das geladene Modell weicht von der geprüften Fassung ab und wurde gelöscht.")
             } catch {
                 logger.error("model download: \(String(describing: type(of: error)), privacy: .public)")
                 setupError = String(localized: "Laden fehlgeschlagen. Bitte Netzwerk prüfen und erneut versuchen.")
