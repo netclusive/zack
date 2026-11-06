@@ -46,7 +46,7 @@ targets:
       base:
         PRODUCT_NAME: Zack
         PRODUCT_BUNDLE_IDENTIFIER: com.netclusive.zack
-        MARKETING_VERSION: 1.1.0
+        MARKETING_VERSION: 1.1.1
         CURRENT_PROJECT_VERSION: $(MARKETING_VERSION)
         MACOSX_DEPLOYMENT_TARGET: "26.0"
         ARCHS: arm64
