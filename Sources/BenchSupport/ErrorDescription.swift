@@ -18,6 +18,7 @@ public enum ErrorDescription {
             case .audioFormat: return "audio format conversion failed"
             case .timeout: return "timeout"
             case .modelMissing(let engine): return "model missing: \(engine)"
+            case .modelUnverified(let file): return "model file differs from the checked version: \(file)"
             case .inputTooLong: return "input too long"
             }
         case let error as CustomStringConvertible: return error.description

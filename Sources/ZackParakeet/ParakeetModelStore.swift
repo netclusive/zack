@@ -28,13 +28,28 @@ public enum ParakeetModelStore {
         ModelNames.ASR.requiredModelsV3().sorted() + [ModelNames.ASR.vocabularyFile]
     }
 
-    /// Downloads the variant from Hugging Face into `base`; `progress` gets 0...1 on an unspecified queue.
+    /// Downloads the variant from Hugging Face into `base`; `progress` gets 0...1 on an unspecified queue. Ultra comes
+    /// from the pinned commit; `verify` checks the files afterwards.
     public static func download(
         _ variant: ParakeetTranscriber.Variant, to base: URL, progress: @escaping @Sendable (Double) -> Void
     ) async throws {
+        pinRevision(variant)
         try await AsrModels.download(to: modelFolder(variant, in: base), version: version(variant)) {
             progress($0.fractionCompleted)
         }
+    }
+
+    /// Points FluidAudio's listing and file requests for Ultra at the commit in the manifest, so a later push to the
+    /// repository's `main` cannot change what a download gets. v3 (bench only) stays on FluidAudio's default.
+    static func pinRevision(_ variant: ParakeetTranscriber.Variant) {
+        guard variant == .ultra else { return }
+        ModelRegistry.revisionOverrides[repo(variant).remotePath] = ParakeetModelManifest.ultraRevision
+    }
+
+    /// Checks every file of the variant against the manifest; v3 has none, so it never passes.
+    public static func verify(_ variant: ParakeetTranscriber.Variant, in base: URL) throws {
+        guard variant == .ultra else { throw ZackError.modelUnverified(variant.rawValue) }
+        try ParakeetModelManifest.verify(ParakeetModelManifest.ultra, in: modelFolder(variant, in: base))
     }
 
     /// Loads complete local models without network access. `AsrModels.load` would delete and download again

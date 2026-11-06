@@ -23,6 +23,8 @@ public enum ZackError: Error, Equatable, Sendable {
     case timeout
     /// Model files are not on disk and the caller does not allow a download.
     case modelMissing(String)
+    /// A model file is missing or differs from the checked version; names the file or the variant.
+    case modelUnverified(String)
     /// Input exceeds what the engine can handle in one call.
     case inputTooLong
 }
