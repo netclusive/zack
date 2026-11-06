@@ -125,8 +125,8 @@ elsewhere.
   memory, continuously overwritten, never recognized or stored, and macOS shows the orange microphone indicator.
 - **Playback pause:** to see whether Spotify or Chrome is playing, Zack asks macOS which apps are sending audio
   right now (app identifiers only, no titles). It pauses and resumes them through MediaRemote, a non-public macOS
-  interface. Nothing of this is stored or logged. A macOS update may stop the feature without notice; dictation is
-  not affected.
+  interface. The app identifiers are neither stored nor logged; the log only notes that Zack paused and resumed. A
+  macOS update may stop the feature without notice; dictation is not affected.
 - **Network:** Zack goes online only for two things.
   - The model download you start in "Settings › Setup", from Hugging Face (USA). The request carries your IP
     address, the app and macOS version and your preferred languages. If `HF_TOKEN`, `HUGGING_FACE_HUB_TOKEN` or
