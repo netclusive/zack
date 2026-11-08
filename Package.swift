@@ -15,7 +15,8 @@ let package = Package(
         .library(name: "ZackUpdate", targets: ["ZackUpdate"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/FluidInference/FluidAudio.git", .upToNextMinor(from: "0.17.7")),
+        // No traits: drops the NeMo text-normalization engine (a Rust staticlib); Zack uses neither ITN nor TTS.
+        .package(url: "https://github.com/FluidInference/FluidAudio.git", .upToNextMinor(from: "0.17.7"), traits: []),
         .package(url: "https://github.com/sparkle-project/Sparkle", .upToNextMinor(from: "2.10.1")),
     ],
     targets: [
