@@ -104,9 +104,9 @@ elsewhere.
 
 - `vocabulary.txt`: one term per line, which Zack writes exactly as given and passes to the recognition as a hint;
   `wrong => right` replaces a spelling.
-- `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break; dictating "Baustein <Name>"
-  (English: "snippet <name>") inserts the text. Known limits: a literal `\n` in snippet text becomes a line
-  break, and spaces at the start and end of a field are dropped.
+- `snippets.txt`: one snippet per line as `Name => Text`, `\n` for a line break and `\\` for a backslash
+  (a single backslash before any other character stays as written); dictating "Baustein <Name>" (English:
+  "snippet <name>") inserts the text. Known limit: spaces at the start and end of a field are dropped.
 - `code-apps.txt`: the apps for code mode (bundle IDs, or prefixes ending in `*`). In these apps spoken file names
   ("readme punkt md", English "readme dot md") and case commands become code, and short commands get no trailing
   period. The menu switches the current app on or off, "Settings › Code Apps" adds apps; the file is read again

@@ -11,17 +11,45 @@ public struct Snippet: Sendable, Equatable, Codable {
 }
 
 public enum SnippetFile {
-    /// Parses lines `Name => Text`. `\n` in the text becomes a line break, `#` starts a comment line.
+    /// Parses lines `Name => Text`, the text read with `unescaped`; `#` starts a comment line.
     public static func parse(_ content: String) -> [Snippet] {
         content.split(whereSeparator: \.isNewline).compactMap { line in
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             guard !trimmed.isEmpty, !trimmed.hasPrefix("#"), let arrow = trimmed.range(of: "=>") else { return nil }
             let name = trimmed[..<arrow.lowerBound].trimmingCharacters(in: .whitespaces)
-            let text = trimmed[arrow.upperBound...].trimmingCharacters(in: .whitespaces)
-                .replacingOccurrences(of: "\\n", with: "\n")
+            let text = unescaped(trimmed[arrow.upperBound...].trimmingCharacters(in: .whitespaces))
             guard !name.isEmpty, !text.isEmpty else { return nil }
             return Snippet(name: name, text: text)
         }
+    }
+
+    /// Snippet text as stored in the file: `\n` is a line break, `\\` a backslash, any other backslash stays.
+    public static func unescaped(_ stored: String) -> String {
+        var text = ""
+        var escaping = false
+        for character in stored {
+            if escaping {
+                escaping = false
+                switch character {
+                case "n": text.append("\n")
+                case "\\": text.append("\\")
+                default: text.append("\\\(character)")
+                }
+            } else if character == "\\" {
+                escaping = true
+            } else {
+                text.append(character)
+            }
+        }
+        if escaping { text.append("\\") }
+        return text
+    }
+
+    /// The inverse of `unescaped`: backslashes doubled, line breaks written as `\n`.
+    public static func escaped(_ text: String) -> String {
+        text.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+            .map { $0.replacingOccurrences(of: "\\", with: "\\\\") }
+            .joined(separator: "\\n")
     }
 }
 

@@ -19,6 +19,26 @@ import Testing
 }
 
 @Test(arguments: [
+    "printf(\"%d\\n\", x)", "C:\\neu", "a\\\\b", "a\\\nb", "Ende\\", "\\", "Zeile 1\nZeile 2",
+])
+func typedBackslashSurvivesSavingAndReading(text: String) {
+    let line = SnippetFormat.line(for: Snippet(name: "Code", text: text))
+    #expect(SnippetFile.parse(line) == [Snippet(name: "Code", text: text)])
+    guard case .entry(let entry) = SnippetFormat.kind(of: line) else {
+        Issue.record("unreadable: \(line)")
+        return
+    }
+    #expect(entry == Snippet(name: "Code", text: text))
+}
+
+@Test func handWrittenLinesKeepTheirMeaning() {
+    #expect(
+        SnippetFile.parse("Pfad => C:\\Users\\Max\nGruß => Viele Grüße\\nMax\n") == [
+            Snippet(name: "Pfad", text: "C:\\Users\\Max"), Snippet(name: "Gruß", text: "Viele Grüße\nMax"),
+        ])
+}
+
+@Test(arguments: [
     ("Baustein Gruß.", "Viele Grüße\nMax Mustermann"),
     ("baustein gruss", "Viele Grüße\nMax Mustermann"),
     ("Baustein unbekannt.", "Baustein unbekannt."),

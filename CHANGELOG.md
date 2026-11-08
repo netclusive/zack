@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A backslash typed in a snippet, as in `C:\new` or `\n` in code, now stays as typed instead of becoming a line break.
+
 ## [1.1.1] - 2026-11-06
 
 ### Fixed
