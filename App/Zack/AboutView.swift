@@ -24,9 +24,6 @@ struct AboutView: View {
             Component(
                 name: String(localized: "Japanische Textaufbereitung (in FluidAudio)"),
                 license: "Apache-2.0, MIT, BSD", file: "JapaneseG2P-LICENSE"),
-            Component(
-                name: String(localized: "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)"),
-                license: "Apache-2.0, MIT", file: "NemoTextProcessing-LICENSE"),
             Component(name: "Sparkle", license: "MIT, BSD, zlib", file: "Sparkle-LICENSE"),
             Component(name: "Lucide Icons", license: "ISC, MIT", file: "Lucide-LICENSE"),
         ]

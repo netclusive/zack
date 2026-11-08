@@ -948,22 +948,6 @@
         }
       }
     },
-    "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "NemoTextProcessing mit NeMo Text Processing, rustfst, flate2 (in FluidAudio)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "NemoTextProcessing with NeMo Text Processing, rustfst, flate2 (in FluidAudio)"
-          }
-        }
-      }
-    },
     "Noch nicht vorhanden." : {
       "localizations" : {
         "de" : {
