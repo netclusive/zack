@@ -56,7 +56,7 @@ struct GeneralPane: View {
             Section {
                 Toggle(isOn: Binding(get: { model.pausePlayback }, set: { model.setPausePlayback($0) })) {
                     Text("Wiedergabe beim Diktieren pausieren")
-                    Text("Hält Spotify und YouTube in Chrome während eines Diktats an und setzt sie danach fort.")
+                    Text("Hält Spotify während eines Diktats an und setzt es danach fort.")
                 }
             }
         }

@@ -580,18 +580,18 @@
         }
       }
     },
-    "Hält Spotify und YouTube in Chrome während eines Diktats an und setzt sie danach fort." : {
+    "Hält Spotify während eines Diktats an und setzt es danach fort." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hält Spotify und YouTube in Chrome während eines Diktats an und setzt sie danach fort."
+            "value" : "Hält Spotify während eines Diktats an und setzt es danach fort."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pauses Spotify and YouTube in Chrome during a dictation and resumes them afterwards."
+            "value" : "Pauses Spotify during a dictation and resumes it afterwards."
           }
         }
       }

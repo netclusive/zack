@@ -6,8 +6,9 @@ import os
 /// own is resumed. Calls return at once and run in order on a queue of their own, so play never overtakes pause and
 /// neither the pill nor the release waits for Core Audio.
 public final class MediaPause: Sendable {
-    /// Tested players only: Spotify, and Chrome's audio helper for YouTube.
-    public static let players: Set<String> = ["com.spotify.client", "com.google.Chrome.helper"]
+    /// Spotify only. Chrome's audio helper also outputs for tabs that are not the current playback, so a pause reached
+    /// a paused Spotify and the play started it.
+    public static let players: Set<String> = ["com.spotify.client"]
 
     private let commands: any PlaybackCommands
     private let outputs: any AudioOutputs

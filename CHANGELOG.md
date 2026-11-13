@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Zack no longer pauses YouTube in Chrome while you dictate; it pauses Spotify only.
+
+### Fixed
+
+- A paused Spotify no longer starts playing after a dictation while a browser tab plays sound.
+
 ## [1.1.2] - 2026-11-08
 
 ### Changed

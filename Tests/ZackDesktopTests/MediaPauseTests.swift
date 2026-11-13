@@ -11,15 +11,25 @@ struct MediaPauseTests {
         MediaPause(commands: commands, outputs: outputs, minimumPause: minimumPause, exitGrace: exitGrace)
     }
 
-    @Test(arguments: ["com.spotify.client", "com.google.Chrome.helper"])
-    func pausesWhenAListedPlayerPlays(_ player: String) {
-        let media = makePause(FakeAudioOutputs([player, "com.rogueamoeba.arkaudiod"]))
+    @Test(arguments: [["com.spotify.client"], ["com.spotify.client", "com.google.Chrome.helper"]])
+    func pausesWhenSpotifyPlays(_ players: Set<String>) {
+        let media = makePause(FakeAudioOutputs(players.union(["com.rogueamoeba.arkaudiod"])))
         media.shown(enabled: true)
         media.drain()
         #expect(commands.calls == [.pause])
         media.ended()
         media.drain()
         #expect(commands.calls == [.pause, .play])
+    }
+
+    /// A Chrome tab can send sound for minutes without being the current playback; the pause then reached a paused
+    /// Spotify and the play started it.
+    @Test func chromeOutputPausesNothing() {
+        let media = makePause(FakeAudioOutputs(["com.google.Chrome.helper"]))
+        media.shown(enabled: true)
+        media.ended()
+        media.drain()
+        #expect(commands.calls.isEmpty)
     }
 
     /// Rogue Amoeba's audio service outputs all the time; a process without a bundle ID is no player either.
