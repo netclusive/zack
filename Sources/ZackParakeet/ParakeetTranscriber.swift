@@ -99,15 +99,21 @@ public actor ParakeetTranscriber: Transcriber {
     }
 
     public func transcribe(_ audio: AudioClip, hints: [String]) async throws -> String {
+        try await recognize(audio, hints: hints).text
+    }
+
+    public func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition {
         guard audio.sampleRate == 16_000 else { throw ZackError.unsupportedSampleRate(audio.sampleRate) }
         // FluidAudio throws invalidAudioData below its minimum; treat such clips as silence.
-        guard audio.duration >= EngineLimits.minimumClipDuration else { return "" }
+        guard audio.duration >= EngineLimits.minimumClipDuration else { return Recognition(text: "") }
         // Silence and near-silence make models invent text (Whisper: "Vielen Dank.").
-        guard !EngineLimits.isSilent(audio) else { return "" }
+        guard !EngineLimits.isSilent(audio) else { return Recognition(text: "") }
         let manager = try await loadedManager()
         // Fresh decoder state per call: every dictation is independent.
         var decoderState = TdtDecoderState.make()
         let result = try await manager.transcribe(audio.samples, decoderState: &decoderState)
-        return result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return Recognition(
+            text: result.text.trimmingCharacters(in: .whitespacesAndNewlines),
+            words: ParakeetWords.group(result.tokenTimings ?? []))
     }
 }

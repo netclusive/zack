@@ -35,6 +35,15 @@ public protocol Transcriber: Sendable {
     /// Loads or downloads models; called once before the first transcription.
     func prepare() async throws
     func transcribe(_ audio: AudioClip, hints: [String]) async throws -> String
+    /// Text plus word confidences where the engine has them.
+    func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition
+}
+
+extension Transcriber {
+    /// Engines without word confidences: the text alone.
+    public func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition {
+        Recognition(text: try await transcribe(audio, hints: hints))
+    }
 }
 
 /// Language-model based cleanup of a dictation.
