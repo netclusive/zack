@@ -43,7 +43,7 @@ public struct TextProcessor: Sendable {
                 cleanerRejected: false,
                 cleanerDuration: nil)
         }
-        let ruled = applyRules(raw, context: context)
+        let ruled = applyingRules(raw, context: context)
         guard let cleaner, SignalWords.contains(ruled, language: context.language, original: raw) else {
             let final = cursorRule.apply(ruled, context: context)
             return ProcessingResult(
@@ -71,11 +71,19 @@ public struct TextProcessor: Sendable {
     public func needsCleaner(_ raw: String, context: RuleContext) -> Bool {
         guard cleaner != nil, snippetRule.match(raw, language: context.language) == nil else { return false }
         return SignalWords.contains(
-            applyRules(raw, context: context), language: context.language, original: raw)
+            applyingRules(raw, context: context), language: context.language, original: raw)
     }
 
-    private func applyRules(_ raw: String, context: RuleContext) -> String {
+    /// The rule chain without snippet, cleaner or cursor join.
+    public func applyingRules(_ raw: String, context: RuleContext) -> String {
         rules.reduce(raw) { $1.apply($0, context: context) }
+    }
+
+    /// True if the sense check may look at this dictation: prose, no snippet and no signal word after the rules.
+    /// Independent of whether a cleaner or repairer is set.
+    public func checkApplies(_ raw: String, context: RuleContext) -> Bool {
+        guard context.mode == .prose, snippetRule.match(raw, language: context.language) == nil else { return false }
+        return !SignalWords.contains(applyingRules(raw, context: context), language: context.language, original: raw)
     }
 
     /// Cleaners tend to drop the final sentence mark; put the one from the rule output back.
