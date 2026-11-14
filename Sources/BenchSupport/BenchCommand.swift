@@ -31,6 +31,7 @@ public enum BenchCommand {
             case "mic-check": try await command.micCheck()
             case "run": try await command.runBench()
             case "report": try command.report()
+            case "words": try await command.words()
             case "help": print(usage)
             default:
                 FileHandle.standardError.write(Data("error: unknown command \(arguments.command)\n\(usage)\n".utf8))
@@ -55,6 +56,8 @@ public enum BenchCommand {
                   [--audio-dir bench/corpus/audio] [--results bench/results]
                   (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
+          words   --results <file> [--language de|en] [--transcriber parakeet-ultra]
+                  [--corpus bench/corpus/cases.json] [--audio-dir bench/corpus/audio]
 
         transcribers: \(Registry.transcriberIDs.joined(separator: ", "))
         cleaners:     \(Registry.cleanerIDs.joined(separator: ", "))
@@ -245,6 +248,21 @@ private struct Invocation {
         print("\n" + BenchReport.markdown([RunSummary(result)]))
         print("\n" + BenchReport.footnote)
         print("\ngespeichert: \(file.path(percentEncoded: false))")
+    }
+
+    /// One recognition per case with audio; writes the rule words with their confidence as JSON.
+    func words() async throws {
+        let file = URL(filePath: try arguments.required("results"))
+        let transcriber = try Registry.transcriber(
+            arguments["transcriber"] ?? "parakeet-ultra", language: defaults.language)
+        let cases = try await WordsExport.run(
+            corpus: try loadCorpus(), transcriber: transcriber,
+            audioDirectory: URL(filePath: arguments["audio-dir"] ?? defaults.audioDirectory),
+            language: defaults.language)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        try encoder.encode(cases).write(to: file)
+        print("\(cases.count) Fälle gespeichert: \(file.path(percentEncoded: false))")
     }
 
     func report() throws {

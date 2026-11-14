@@ -30,11 +30,20 @@ import ZackCore
                   [--audio-dir bench/corpus/audio] [--results bench/results]
                   (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
+          words   --results <file> [--language de|en] [--transcriber parakeet-ultra]
+                  [--corpus bench/corpus/cases.json] [--audio-dir bench/corpus/audio]
 
         transcribers: apple-speech, apple-dictation, parakeet-v3, parakeet-ultra
         cleaners:     none, apple-fm
         """
     #expect(BenchCommand.usage == expected)
+}
+
+@Test func wordsCommandIsKnown() throws {
+    let arguments = try Arguments(["zack-bench", "words", "--results", "x.json"], spec: BenchCommand.spec)
+    #expect(arguments.command == "words")
+    #expect(arguments["results"] == "x.json")
+    #expect(BenchCommand.usage.contains("  words   --results <file>"))
 }
 
 @Test func whisperIsNoLongerATranscriber() {
