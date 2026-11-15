@@ -17,8 +17,8 @@
 
 ## Highlights
 
-- **On your Mac:** speech recognition with Parakeet Ultra, optional AI cleanup with Apple's on-device model. Audio
-  and text stay in memory.
+- **On your Mac:** speech recognition with Parakeet Ultra, optional AI cleanup with Apple's on-device model and an
+  optional term check with Whisper. Audio and text stay in memory.
 - **German or English:** one dictation language per user. The interface is in German or English and follows the
   macOS language; other languages get English.
 - **Self-corrections smoothed:** with AI cleanup on, Apple's on-device model smooths a dictation such as "Tuesday,
@@ -53,6 +53,11 @@ active window.
 - AI cleanup ("Settings › General › AI cleanup of self-corrections"): if a dictation contains a
   self-correction such as "Montag, nein, Dienstag" or "Tuesday, no, Wednesday", Apple's on-device model smooths
   the sentence.
+- Double-check terms ("Settings › General › Double-check terms", off by default): when Zack is unsure about a word,
+  Whisper listens to the recording again with the terms from your dictionary and replaces only that word; the pill
+  shows "Cleaning Up…" meanwhile. It checks prose dictations up to 30 seconds without a self-correction or snippet,
+  and only while the dictionary has terms. Turning it on downloads a second model once (about 650 MB, see
+  [Privacy](#privacy)) and loads it; the first load can take up to two minutes, until then dictations run unchecked.
 - Pause playback ("Settings › General › Pause playback while dictating", on by default): if Spotify is playing when
   the pill appears, Zack pauses it and resumes it when the recording ends. Zack cannot tell a paused Spotify from a
   playing one directly, so after a dictation Spotify may also start if you paused it yourself up to about 2 seconds
@@ -67,7 +72,7 @@ active window.
 | Hold fn or the right ⌥ (Option) key | Dictate (change the key in "Settings › General › Dictation key") |
 | Esc | While the pill shows "Recognizing…" or "Cleaning Up…": cancel; nothing is inserted, the result is kept as the last dictation |
 | ⌃⌥V | Insert the last dictation again at the cursor |
-| ⌃⌥O | Replace the AI-cleaned dictation just inserted with the rule text; after 10 seconds or once the text has changed, the rule text is copied instead |
+| ⌃⌥O | Replace the AI-cleaned or term-checked dictation just inserted with the rule text; after 10 seconds or once the text has changed, the rule text is copied instead |
 
 The menu section "Last Dictation" has the same actions ("Insert", "Insert Without AI Cleanup"), plus "Copy" and,
 after a failed recognition, "Try Again". A shortcut another app already holds is marked "(Shortcut in Use)".
@@ -75,14 +80,18 @@ after a failed recognition, "Try Again". A shortcut another app already holds is
 ### Settings and permissions
 
 - The settings window ("Settings…" in the menu, ⌘,) has the panes General (language, key, microphone
-  readiness, launch at login, AI cleanup), Dictionary, Snippets, Code Apps, Updates and Setup. If a
-  permission or the speech model is missing, Zack opens it in Setup.
+  readiness, launch at login, AI cleanup, double-check terms), Dictionary, Snippets, Code Apps, Updates and
+  Setup. If a permission or the speech model is missing, Zack opens it in Setup.
 - Permissions: Microphone, and Accessibility for inserting with Cmd+V, for reading the text before the cursor and
   for canceling with another key. The key itself works without Accessibility; the text then stays on the
   clipboard.
 - Model: Parakeet Ultra in `~/Library/Application Support/Zack/Models`. "Settings › Setup" moves a copy from
   zack-bench (`~/Library/Application Support/FluidAudio/Models`) or downloads it on click (about 600 MB). The app
   never downloads on its own.
+- Term check model: Whisper large-v3 turbo in the same folder, under `models/argmaxinc/whisperkit-coreml` and
+  `models/openai/whisper-large-v3`. Zack checks every file against the tested version before loading and deletes a
+  copy that differs. Turning the switch off unloads the model and keeps the files; to remove them, turn the switch
+  off, quit Zack and delete both folders.
 
 ### Microphone
 
@@ -114,7 +123,8 @@ elsewhere.
 ## Privacy
 
 - **Audio and text** stay in memory, the clipboard entry is marked transient and restored afterwards, and logs
-  contain durations, engines and error types only. AI cleanup uses Apple's on-device model only.
+  contain durations, engines and error types only. AI cleanup uses Apple's on-device model only; the term check
+  runs Whisper on your Mac and gives it only the recording and your dictionary terms.
 - **Text before the cursor** (needs Accessibility): Zack reads it to add a space and adapt capitalization, at most
   the 500 characters before the cursor, or the field text up to 100,000 characters if the app offers nothing
   narrower, and keeps only the current line of it. It stays in memory only, is never logged and is dropped when
@@ -126,10 +136,12 @@ elsewhere.
   (app identifiers only, no titles). It pauses and resumes Spotify through MediaRemote, a non-public macOS
   interface. The app identifiers are neither stored nor logged; the log only notes that Zack paused and resumed. A
   macOS update may stop the feature without notice; dictation is not affected.
-- **Network:** Zack goes online only for two things.
+- **Network:** Zack goes online only for these things.
   - The model download you start in "Settings › Setup", from Hugging Face (USA). The request carries your IP
     address, the app and macOS version and your preferred languages. If `HF_TOKEN`, `HUGGING_FACE_HUB_TOKEN` or
     `HUGGINGFACEHUB_API_TOKEN` is set, it is also sent to Hugging Face as a token.
+  - The term check model download, started when you turn on "Double-check terms", also from Hugging Face (USA),
+    with the same data as the speech model download. No dictation is sent.
   - In official builds, the update check you allow. Feed and downloads come from GitHub (GitHub Inc., USA). A
     request carries your IP address, your preferred languages and the user agent `Zack/<version> Sparkle/<version>`;
     Sparkle sends no system profile.

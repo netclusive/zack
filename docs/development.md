@@ -81,6 +81,14 @@ Run from the repository root:
   the corpus in n passes, one case after the other per pass: quality is averaged per case over all passes, then
   over the cases, and latency percentiles use the timings of all passes (a later pass with a different result
   prints a warning; the raw text of every pass is stored in the result). Model loading and warm-up are not timed.
+  `--check whisper-terms` adds the term check as in the app (default `none`); it needs the Whisper model the app's
+  switch installs, the bench never downloads it. The result then holds per case whether the check ran in the first
+  pass, whether it replaced a word and how long it took, and the word error rate of the final text against the
+  expected text; the run notes the prompt's token count. `--prewarm` waits the
+  length of each recording before recognizing it and prewarms the cleaner meanwhile, as the app does while you
+  speak.
+- `words --results <file>` recognizes every case with audio once and writes the rule words with their confidence
+  as JSON, for choosing the term check's threshold.
 - `report` shows the newest run per engine combination and audio folder; `--all` shows every run. Each latency
   cell shows the number of timings behind it, e.g. `57 (n=220)`. `Fälle` is the number of cases without error,
   `Ø lang s` the mean recording length of the long cases, `instabil` the number of cases whose final text differs
@@ -114,6 +122,7 @@ on click in "Settings › Setup". Later runs work offline.
 | `parakeet-v3` | Hugging Face, via FluidAudio | `~/Library/Application Support/Zack/Models` (earlier downloads in `~/Library/Application Support/FluidAudio/Models` keep working) | about 460 MB |
 | `parakeet-ultra` | Hugging Face, via FluidAudio | `~/Library/Application Support/Zack/Models` (earlier downloads in `~/Library/Application Support/FluidAudio/Models` keep working) | about 600 MB |
 | `apple-fm` | part of Apple Intelligence | managed by macOS | not measured |
+| `whisper-terms` (`--check`) | Hugging Face, pinned commits, downloaded only by the app's switch "Double-check terms" | `~/Library/Application Support/Zack/Models` | about 650 MB |
 
 Downloads fetch model files only; transcription and cleanup run on the Mac. An interrupted download
 is completed on the next run. If `HF_TOKEN`, `HUGGING_FACE_HUB_TOKEN` or `HUGGINGFACEHUB_API_TOKEN` is set,
