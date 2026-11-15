@@ -12,7 +12,8 @@ public enum TermSplice {
     }
 
     /// Each marked range takes the other text's words between its aligned neighbours, if those are 1 to n + 2 words
-    /// for n marked words. Text start and end stand in for a missing neighbour only if the other side has a real one.
+    /// for n marked words and add no sentence mark the range does not have. Text start and end stand in for a missing
+    /// neighbour only if the other side has a real one.
     public static func apply(_ marked: MarkedText, other: String) -> Result {
         let own = marked.segments
         let ownWords = own.indices.filter { own[$0].isWord }
@@ -34,6 +35,8 @@ public enum TermSplice {
             let ownRange = ownWords[range.lowerBound]...ownWords[range.upperBound]
             let taken = otherSegments[otherWords[left + 1]...otherWords[right - 1]]
             guard taken.map(\.text) != own[ownRange].map(\.text) else { continue }
+            // Whisper invents short sentences ("Vielen Dank."), mostly at the edges of a recording.
+            guard sentenceMarks(taken) <= sentenceMarks(own[ownRange]) else { continue }
             replacements.append((ownRange, taken))
         }
 
@@ -49,6 +52,13 @@ public enum TermSplice {
         let words = marked.segments.indices.filter { marked.segments[$0].isWord }
         return ranges(marked, words: words).map { range in
             words[range].map { marked.segments[$0].text }.joined()
+        }
+    }
+
+    /// Sentence marks in the separators between the words of a slice that starts and ends with a word.
+    private static func sentenceMarks(_ segments: ArraySlice<WordSegment>) -> Int {
+        segments.filter { !$0.isWord }.reduce(0) { count, segment in
+            count + segment.text.filter { ".!?…".contains($0) }.count
         }
     }
 

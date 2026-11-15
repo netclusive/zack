@@ -66,6 +66,31 @@ private func marking(_ text: String, _ words: Set<String>) -> MarkedText {
     #expect(pair == TermSplice.Result(text: "Pierre Pistane", replacedRuns: 0))
 }
 
+/// Whisper invents short sentences ("Vielen Dank.") at the edges of a recording; text start or end as the anchor
+/// must not let such a sentence into the dictation.
+@Test func sentenceAppendedAfterAnEndRangeIsNotTaken() {
+    let result = TermSplice.apply(marking("das ist Faulan.", ["Faulan"]), other: "das ist VLAN. Vielen Dank.")
+    #expect(result == TermSplice.Result(text: "das ist Faulan.", replacedRuns: 0))
+}
+
+@Test func sentencePrependedBeforeAStartRangeIsNotTaken() {
+    let result = TermSplice.apply(marking("Homeroot ist da.", ["Homeroot"]), other: "Danke. Homebrew ist da.")
+    #expect(result == TermSplice.Result(text: "Homeroot ist da.", replacedRuns: 0))
+}
+
+@Test func sentenceBreakInsideAMiddleRangeIsNotTaken() {
+    let result = TermSplice.apply(
+        marking("ich nutze Homeroot dafür", ["Homeroot"]), other: "ich nutze Home. Brew dafür")
+    #expect(result == TermSplice.Result(text: "ich nutze Homeroot dafür", replacedRuns: 0))
+}
+
+@Test func sentenceBreakTheRangeAlreadyHasMayStay() {
+    let result = TermSplice.apply(
+        marking("Server im Homeroot. Faulan läuft.", ["Homeroot", "Faulan"]),
+        other: "Server im Homebrew. VLAN läuft.")
+    #expect(result == TermSplice.Result(text: "Server im Homebrew. VLAN läuft.", replacedRuns: 1))
+}
+
 @Test func sameWordsAreNoReplacement() {
     let text = "Über Homeroot ziehe ich gitleaks."
     let result = TermSplice.apply(marking(text, ["Homeroot"]), other: text)
