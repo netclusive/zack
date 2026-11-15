@@ -46,6 +46,10 @@ final class AppModel {
     private(set) var accessibility = false
     private(set) var inputMonitoring = false
     private(set) var cleanerAvailability = CleanerAvailability.notReady
+    /// "Fachbegriffe gegenprüfen", as the service reports it.
+    private(set) var termCheckState = TermCheckState.off
+    /// The term check acts only on vocabulary terms; read on every refresh.
+    private(set) var vocabularyIsEmpty = false
     private(set) var microphoneMenu = MicrophoneMenu(saved: nil, devices: [], defaultID: nil, selectionFailed: false)
     private(set) var downloadProgress: Double?
     private(set) var setupError: String?
@@ -76,6 +80,8 @@ final class AppModel {
     @ObservationIgnored private let capture: MicrophoneCapture
     @ObservationIgnored private let modelReady = Flag()
     @ObservationIgnored private let modelSetup = AppModel.attempt("model setup") { try ModelSetup.standard() }
+    /// Nil only without Application Support; the switch then stays off and greyed out.
+    @ObservationIgnored private let termCheck: TermCheckService?
     @ObservationIgnored private let files: UserFiles?
     @ObservationIgnored private let windows = WindowPresenter()
     @ObservationIgnored private let logger = Logger(subsystem: Signposts.subsystem, category: "app")
@@ -105,6 +111,10 @@ final class AppModel {
         pausePlayback = settings.pausePlayback
         microphoneReadiness = settings.microphoneReadiness
         let settings = settings
+        let termCheck = Self.makeTermCheck(settings: settings)
+        self.termCheck = termCheck
+        // Holds Whisper only while the term check is ready; read per dictation.
+        let secondOpinion = termCheck?.slot
         // Resolved before the example files exist, so an existing vocabulary file still means German.
         let hasExistingFiles = (try? UserFiles.standard()).map {
             FileManager.default.fileExists(atPath: $0.vocabularyURL.path(percentEncoded: false))
@@ -131,7 +141,8 @@ final class AppModel {
                 let loaded = files?.load() ?? (vocabulary: Vocabulary(), snippets: [])
                 let useCleaner = settings.aiCleanup && AppleFoundationCleaner.availability == .available
                 return TextProcessor(
-                    vocabulary: loaded.vocabulary, snippets: loaded.snippets, cleaner: useCleaner ? cleaner : nil)
+                    vocabulary: loaded.vocabulary, snippets: loaded.snippets, cleaner: useCleaner ? cleaner : nil,
+                    secondOpinion: secondOpinion?.current)
             },
             modelReady: { modelReady.isSet },
             microphoneAllowed: { Permissions.microphone() == .granted },
@@ -142,6 +153,17 @@ final class AppModel {
             language: { settings.dictationLanguage }, media: media,
             // Read when the pill appears, on the controller actor.
             pausePlayback: { settings.pausePlayback })
+    }
+
+    /// The service on the main actor; a failure is logged like `attempt` does.
+    private static func makeTermCheck(settings: Settings) -> TermCheckService? {
+        do {
+            return try TermCheckService.standard(settings: settings)
+        } catch {
+            Logger(subsystem: Signposts.subsystem, category: "app")
+                .error("term check: \(String(describing: type(of: error)), privacy: .public)")
+            return nil
+        }
     }
 
     /// `try?` that logs the error kind; its description may carry a path.
@@ -181,6 +203,38 @@ final class AppModel {
         }
     }
 
+    var termCheckAvailable: Bool { termCheck != nil }
+
+    /// On while the model downloads, loads or is ready, and at launch until Parakeet has loaded (setting on, not
+    /// started yet). A failure shows off.
+    var termCheckOn: Bool {
+        switch termCheckState {
+        case .downloading, .loading, .ready: true
+        case .off: termCheckAvailable && settings.termCheck
+        case .failed: false
+        }
+    }
+
+    /// Secondary lines under the switch: what the model is doing or why the switch went off, and an empty vocabulary.
+    var termCheckHints: [String] {
+        var hints: [String] = []
+        let loading = String(localized: "Modell wird geladen … Beim ersten Mal kann das bis zu zwei Minuten dauern.")
+        switch termCheckState {
+        case .loading: hints.append(loading)
+        case .off where termCheckOn: hints.append(loading)
+        case .failed(.missing): hints.append(String(localized: "Das Modell fehlt. Zum Laden wieder einschalten."))
+        case .failed(.download):
+            hints.append(String(localized: "Download fehlgeschlagen. Bitte später erneut einschalten."))
+        case .failed(.unverified):
+            hints.append(
+                String(localized: "Das geladene Modell ist nicht die geprüfte Fassung und wurde gelöscht."))
+        case .failed(.load): hints.append(String(localized: "Das Modell ließ sich nicht laden."))
+        case .off, .downloading, .ready: break
+        }
+        if vocabularyIsEmpty { hints.append(String(localized: "Wirkt nur mit Begriffen im Wörterbuch.")) }
+        return hints
+    }
+
     func start() {
         do {
             try files?.createMissing()
@@ -216,6 +270,7 @@ final class AppModel {
             MainActor.assumeIsolated { self?.refresh() }
         }
         observeActivation()
+        termCheck?.onStateChange = { [weak self] in self?.termCheckState = $0 }
         refresh()
         if status.opensSetup { showSetup() }
     }
@@ -233,6 +288,7 @@ final class AppModel {
         cleanerAvailability = AppleFoundationCleaner.availability
         updateMicrophoneMenu()
         updateCodeModeApp()
+        updateVocabularyIsEmpty()
         launchAtLogin = LoginItem.isEnabled
         modelStatus = modelSetup?.status() ?? .missing
         // A model that is gone, adopted or downloaded again gets a fresh load.
@@ -262,6 +318,16 @@ final class AppModel {
     func setAICleanup(_ on: Bool) {
         settings.aiCleanup = on
         aiCleanup = on
+    }
+
+    /// On downloads a missing model, then loads it; off cancels a download and unloads Whisper.
+    func setTermCheck(_ on: Bool) {
+        if on { termCheck?.enable() } else { termCheck?.disable() }
+    }
+
+    /// The vocabulary pane may have changed the file since the last refresh.
+    private func updateVocabularyIsEmpty() {
+        vocabularyIsEmpty = files?.load().vocabulary.terms.isEmpty ?? true
     }
 
     /// Applies from the next dictation; a running one still resumes what it paused.
@@ -387,6 +453,7 @@ final class AppModel {
         settingsPane = pane
         windows.setTitle(pane.title, id: Self.settingsWindow)
         if pane == .setup { refresh() }
+        if pane == .general { updateVocabularyIsEmpty() }
         updateSetupPolling()
     }
 
@@ -685,6 +752,8 @@ final class AppModel {
                 try await transcriber.prepare()
                 try await transcriber.warmUp()
                 modelLoaded = true
+                // Whisper loads after Parakeet; until it is ready, dictations run without the check.
+                termCheck?.start()
             } catch {
                 logger.error("model load: \(String(describing: type(of: error)), privacy: .public)")
                 modelLoadFailed = true

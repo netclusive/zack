@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import ZackCore
 
-/// "Über Zack": version, attribution for the CC BY 4.0 model, licenses of the bundled components.
+/// "Über Zack": version, attribution for the CC BY 4.0 model and the Whisper model, licenses of the bundled components.
 struct AboutView: View {
     struct Component: Identifiable {
         let name: String
@@ -24,6 +24,9 @@ struct AboutView: View {
             Component(
                 name: String(localized: "Japanische Textaufbereitung (in FluidAudio)"),
                 license: "Apache-2.0, MIT, BSD", file: "JapaneseG2P-LICENSE"),
+            Component(name: "WhisperKit", license: "MIT", file: "WhisperKit-LICENSE"),
+            Component(
+                name: "swift-transformers (in WhisperKit)", license: "Apache-2.0", file: "swift-transformers-LICENSE"),
             Component(name: "Sparkle", license: "MIT, BSD, zlib", file: "Sparkle-LICENSE"),
             Component(name: "Lucide Icons", license: "ISC, MIT", file: "Lucide-LICENSE"),
         ]
@@ -49,6 +52,18 @@ struct AboutView: View {
             )
             .fixedSize(horizontal: false, vertical: true)
             Link("Lizenz: CC BY 4.0", destination: URL(string: "https://creativecommons.org/licenses/by/4.0/")!)
+            Divider()
+            Text("Fachbegriffe gegenprüfen")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            Text(
+                "„Whisper large-v3 turbo“ von OpenAI, für Core ML umgewandelt von Argmax (argmaxinc/whisperkit-coreml), mit dem Tokenizer aus openai/whisper-large-v3. Zack lädt das Modell erst, wenn „Fachbegriffe gegenprüfen“ eingeschaltet wird, und nutzt die Gewichte unverändert."
+            )
+            .fixedSize(horizontal: false, vertical: true)
+            Link("Lizenz Core-ML-Modell: MIT", destination: URL(string: "https://opensource.org/license/mit")!)
+            Link(
+                "Lizenz Tokenizer: Apache 2.0",
+                destination: URL(string: "https://www.apache.org/licenses/LICENSE-2.0")!)
             Divider()
             Text("Weitere Komponenten")
                 .font(.headline)
