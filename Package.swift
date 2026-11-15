@@ -39,7 +39,7 @@ let package = Package(
         .executableTarget(name: "zack-bench", dependencies: ["BenchSupport"]),
         // Shared by the test targets only; not a product.
         .target(name: "ZackTestSupport", dependencies: ["ZackCore"], path: "Tests/ZackTestSupport"),
-        .testTarget(name: "ZackCoreTests", dependencies: ["ZackCore"]),
+        .testTarget(name: "ZackCoreTests", dependencies: ["ZackCore", "ZackTestSupport"]),
         .testTarget(name: "ZackEnginesTests", dependencies: ["ZackParakeet", "ZackApple", "ZackTestSupport"]),
         .testTarget(name: "ZackDesktopTests", dependencies: ["ZackDesktop", "ZackParakeet", "ZackTestSupport"]),
         .testTarget(

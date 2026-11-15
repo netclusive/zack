@@ -46,6 +46,14 @@ extension Transcriber {
     }
 }
 
+/// A second recognizer that hears the audio again with the vocabulary as a hint.
+public protocol SecondOpinion: Sendable {
+    var id: String { get }
+    /// `focus`: `TermSplice.focus` of the marked text.
+    func recognize(_ audio: AudioClip, terms: [String], focus: [String], language: DictationLanguage)
+        async throws -> String
+}
+
 /// Language-model based cleanup of a dictation.
 public protocol Cleaner: Sendable {
     var id: String { get }
