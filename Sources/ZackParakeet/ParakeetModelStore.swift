@@ -49,7 +49,7 @@ public enum ParakeetModelStore {
     /// Checks every file of the variant against the manifest; v3 has none, so it never passes.
     public static func verify(_ variant: ParakeetTranscriber.Variant, in base: URL) throws {
         guard variant == .ultra else { throw ZackError.modelUnverified(variant.rawValue) }
-        try ParakeetModelManifest.verify(ParakeetModelManifest.ultra, in: modelFolder(variant, in: base))
+        try ModelManifest.verify(ParakeetModelManifest.ultra, in: modelFolder(variant, in: base))
     }
 
     /// Loads complete local models without network access. `AsrModels.load` would delete and download again
