@@ -55,10 +55,10 @@ private func wordConfidences(_ segments: [WordSegment]) -> [Float?] {
         SuspiciousWords.annotate("eins zwei drei", words: words(("eins", 0.59), ("zwei", 0.6)), terms: []),
         below: 0.6)
     #expect(text.markedCount == 1)
-    #expect(text.rendered() == "⟦eins⟧ zwei drei")
+    #expect(text.runs == [0...0])
 }
 
-@Test func runsAreRenderedTogether() {
+@Test func spaceSeparatedMarksFormOneRun() {
     let text = SuspiciousWords.marked(
         SuspiciousWords.annotate(
             "Den Bericht von Pierre Pistane schicke ich.",
@@ -67,7 +67,7 @@ private func wordConfidences(_ segments: [WordSegment]) -> [Float?] {
                 ("ich.", 0.99)),
             terms: []),
         below: 0.6)
-    #expect(text.rendered() == "Den Bericht von ⟦Pierre Pistane⟧ schicke ich.")
+    #expect(text.runs == [6...8])
     #expect(text.markedCount == 2)
 }
 
@@ -76,13 +76,13 @@ private func wordConfidences(_ segments: [WordSegment]) -> [Float?] {
         SuspiciousWords.annotate(
             "eins, zwei drei", words: words(("eins,", 0.1), ("zwei", 0.1), ("drei", 0.1)), terms: []),
         below: 0.6)
-    #expect(text.rendered() == "⟦eins⟧, ⟦zwei drei⟧")
+    #expect(text.runs == [0...0, 2...4])
 }
 
 @Test func noWordsMarkNothing() {
     let text = SuspiciousWords.marked(SuspiciousWords.annotate("Alles gut.", words: [], terms: []), below: 0.6)
     #expect(text.markedCount == 0)
-    #expect(text.rendered() == "Alles gut.")
+    #expect(text.runs.isEmpty)
 }
 
 @Test func splitKeepsTheText() {

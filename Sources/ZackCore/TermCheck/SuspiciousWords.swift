@@ -11,7 +11,7 @@ public struct MarkedText: Sendable, Equatable {
 
     public var markedCount: Int { marked.count }
 
-    /// Segment ranges of marked words that only whitespace separates; each is one run for the model.
+    /// Segment ranges of marked words that only whitespace separates.
     public var runs: [ClosedRange<Int>] {
         var runs: [ClosedRange<Int>] = []
         var index = 0
@@ -30,24 +30,6 @@ public struct MarkedText: Sendable, Equatable {
             index = end + 1
         }
         return runs
-    }
-
-    /// The text with each run between `SenseCheck.openMark` and `SenseCheck.closeMark`.
-    public func rendered() -> String {
-        var starts: [Int: Int] = [:]
-        for run in runs { starts[run.lowerBound] = run.upperBound }
-        var result = ""
-        var index = 0
-        while index < segments.count {
-            if let end = starts[index] {
-                result += SenseCheck.openMark + segments[index...end].map(\.text).joined() + SenseCheck.closeMark
-                index = end + 1
-            } else {
-                result += segments[index].text
-                index += 1
-            }
-        }
-        return result
     }
 }
 
