@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 import ZackCore
+import ZackTestSupport
 
 @testable import BenchSupport
 
@@ -151,6 +152,82 @@ private func fixture() throws -> (Corpus, URL) {
     #expect(summary.errorCount == 0)
     #expect(summary.failedLaterPasses == 1)
     #expect(BenchReport.markdown([summary]).contains("| 2 | 0 (+1) |"))
+}
+
+/// Recognizes "ich nutze Homeroot dafür" with Homeroot below the term check threshold.
+private struct UnsureTranscriber: Transcriber {
+    let id = "unsure"
+
+    func transcribe(_ audio: AudioClip, hints: [String]) async throws -> String { "ich nutze Homeroot dafür" }
+
+    func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition {
+        let words = ["ich", "nutze", "Homeroot", "dafür"].map {
+            RecognizedWord(text: $0, confidence: $0 == "Homeroot" ? 0.3 : 0.99)
+        }
+        return Recognition(text: try await transcribe(audio, hints: hints), words: words)
+    }
+}
+
+/// One prose case "ich nutze Homebrew dafür" with Homebrew in the vocabulary.
+private func homebrewFixture() throws -> (Corpus, URL) {
+    let json = """
+        {"vocabulary":["Homebrew"],"snippets":[],"cases":[
+         {"id":"h","group":"vocabulary","mode":"prose","spoken":"ich nutze Homebrew dafür",
+          "expected":"ich nutze Homebrew dafür","terms":["Homebrew"]}]}
+        """
+    let directory = FileManager.default.temporaryDirectory.appending(path: "zack-runner-\(UUID().uuidString)")
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    try WAVFile.encode(AudioClip(samples: Array(repeating: 0.1, count: 1600)))
+        .write(to: directory.appending(path: "h.wav"))
+    return (try Corpus.decode(Data(json.utf8)), directory)
+}
+
+@Test func checkedCaseRecordsItsFlags() async throws {
+    let (corpus, directory) = try homebrewFixture()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let opinion = RecordingSecondOpinion(.answer("ich nutze Homebrew dafür"))
+    let check = BenchCheck(id: "recording", opinion: opinion, prepare: {}, lastPromptTokens: { 7 })
+    let runner = BenchRunner(
+        corpus: corpus, transcriber: UnsureTranscriber(), cleaner: nil, audioDirectory: directory, repeats: 2,
+        check: check, log: { _ in })
+    let result = try await runner.run()
+    let checked = try #require(result.cases.first)
+    #expect(checked.final == "ich nutze Homebrew dafür")
+    #expect(checked.checked == true)
+    #expect(checked.usedCheck == true)
+    #expect(checked.checkMs != nil)
+    #expect(checked.finalWer == 0)
+    #expect(result.check == "recording")
+    #expect(result.checkLoadMs != nil)
+    #expect(result.promptTokens == 7)
+    // Two passes, each checks once.
+    #expect(await opinion.calls.count == 2)
+}
+
+@Test func finalWerComparesTheFinalText() async throws {
+    let (corpus, directory) = try fixture()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let transcriber = FakeTranscriber { _, count in count == 1600 ? "eins drei" : "drei vier" }
+    let runner = BenchRunner(
+        corpus: corpus, transcriber: transcriber, cleaner: nil, audioDirectory: directory, repeats: 1,
+        log: { _ in })
+    let result = try await runner.run()
+    #expect(result.cases.map(\.finalWer) == [0.5, 0])
+    #expect(RunSummary(result).meanFinalWER == 0.25)
+}
+
+@Test func runWithoutCheckWritesNoCheckFields() async throws {
+    let (corpus, directory) = try fixture()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let transcriber = FakeTranscriber { _, count in count == 1600 ? "eins zwei" : "drei vier" }
+    let runner = BenchRunner(
+        corpus: corpus, transcriber: transcriber, cleaner: nil, audioDirectory: directory, repeats: 1,
+        log: { _ in })
+    let json = String(decoding: try JSONEncoder().encode(try await runner.run()), as: UTF8.self)
+    for key in ["\"check\"", "checkLoadMs", "promptTokens", "\"checked\"", "usedCheck", "checkMs"] {
+        #expect(!json.contains(key), "\(key)")
+    }
+    #expect(json.contains("finalWer"))
 }
 
 @Test func runnerAppliesItsLanguageToRulesAndWordErrorRate() async throws {

@@ -53,6 +53,6 @@ let package = Package(
         .testTarget(
             name: "ZackUpdateTests",
             dependencies: ["ZackUpdate", .product(name: "Sparkle", package: "Sparkle")]),
-        .testTarget(name: "BenchSupportTests", dependencies: ["BenchSupport"]),
+        .testTarget(name: "BenchSupportTests", dependencies: ["BenchSupport", "ZackTestSupport"]),
     ]
 )

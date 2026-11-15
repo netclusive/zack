@@ -39,6 +39,14 @@ public struct CaseResult: Codable, Sendable {
     public let rawPasses: [String]?
     /// Later passes whose transcription failed (logged and dropped); nil in older runs.
     public let failedLaterPasses: Int?
+    /// Word error rate of the final text (pass 1) against `expected`; nil in older runs.
+    public let finalWer: Double?
+    /// Pass 1 called the term check's second opinion; nil in runs without `--check`.
+    public let checked: Bool?
+    /// Pass 1 took words from the second opinion; nil in runs without `--check`.
+    public let usedCheck: Bool?
+    /// Duration of the second opinion in pass 1; nil if it was not called.
+    public let checkMs: Double?
 
     public init(
         id: String, group: String, raw: String, final: String, wer: Double, termHitRate: Double?,
@@ -47,7 +55,8 @@ public struct CaseResult: Codable, Sendable {
         processSamplesMs: [Double]? = nil, audioSeconds: Double? = nil, werPasses: [Double]? = nil,
         termHitPasses: [Double]? = nil, matchPasses: [Bool]? = nil, cleanerAttemptedPasses: [Bool]? = nil,
         cleanerRejectedPasses: [Bool]? = nil, finalPasses: [String]? = nil, rawPasses: [String]? = nil,
-        failedLaterPasses: Int? = nil
+        failedLaterPasses: Int? = nil, finalWer: Double? = nil, checked: Bool? = nil, usedCheck: Bool? = nil,
+        checkMs: Double? = nil
     ) {
         self.id = id
         self.group = group
@@ -74,6 +83,10 @@ public struct CaseResult: Codable, Sendable {
         self.finalPasses = finalPasses
         self.rawPasses = rawPasses
         self.failedLaterPasses = failedLaterPasses
+        self.finalWer = finalWer
+        self.checked = checked
+        self.usedCheck = usedCheck
+        self.checkMs = checkMs
     }
 
     /// Quality values of every pass; old runs have only the one of pass 1.
@@ -120,12 +133,18 @@ public struct RunResult: Codable, Sendable {
     public let loadMemoryMB: Double
     /// OS version string including the build (Apple's on-device models change with OS updates); nil in old runs.
     public let osBuild: String?
+    /// Term check (`--check`); nil without one.
+    public let check: String?
+    /// Load and warm-up of the term check's engine; nil without one.
+    public let checkLoadMs: Double?
+    /// Largest prompt the term check sent in this run, in tokens; nil without one or if unknown.
+    public let promptTokens: Int?
     public let cases: [CaseResult]
 
     public init(
         date: Date, transcriber: String, cleaner: String, audioDir: String, peakMemoryMB: Double,
-        loadMemoryMB: Double = 0, osBuild: String? = nil,
-        cases: [CaseResult]
+        loadMemoryMB: Double = 0, osBuild: String? = nil, check: String? = nil, checkLoadMs: Double? = nil,
+        promptTokens: Int? = nil, cases: [CaseResult]
     ) {
         self.date = date
         self.transcriber = transcriber
@@ -134,6 +153,9 @@ public struct RunResult: Codable, Sendable {
         self.peakMemoryMB = peakMemoryMB
         self.loadMemoryMB = loadMemoryMB
         self.osBuild = osBuild
+        self.check = check
+        self.checkLoadMs = checkLoadMs
+        self.promptTokens = promptTokens
         self.cases = cases
     }
 }
@@ -141,6 +163,8 @@ public struct RunResult: Codable, Sendable {
 public struct RunSummary: Sendable {
     public let run: RunResult
     public let meanWER: Double?
+    /// Mean over the cases of the final text's word error rate against `expected`; nil for older runs.
+    public let meanFinalWER: Double?
     public let termRate: Double?
     public let denglTermRate: Double?
     public let correctionRate: Double?
@@ -181,6 +205,7 @@ public struct RunSummary: Sendable {
         }
         // Per case the mean over its passes, then the mean over cases.
         meanWER = optionalMean(cases.map { mean($0.allWER) })
+        meanFinalWER = optionalMean(cases.compactMap(\.finalWer))
         meanLongSeconds = optionalMean(cases.filter { $0.group == "long" }.compactMap(\.audioSeconds))
         func termRate(_ cases: [CaseResult]) -> Double? {
             optionalMean(cases.compactMap { optionalMean($0.allTermHitRates) })
@@ -215,13 +240,13 @@ public struct RunSummary: Sendable {
 
 public enum BenchReport {
     public static let footnote =
-        "WER ist der Mittelwert über die Fälle (nicht über Wörter); fehlgeschlagene Fälle sind ausgeschlossen. Begriffe und Denglisch zählen nur Fälle mit Begriffen. WER und Korrekturen ignorieren die Schreibweise von Komposita (Bindestrich, getrennt, zusammen). Fälle zählt die ausgewerteten Fälle ohne Fehler. Fehler zeigt X (+Y): X fehlgeschlagene Fälle, Y fehlgeschlagene spätere Durchläufe. p95 10 s nutzt die Fälle der Gruppe long (je etwa 10 s Sprache), Ø lang s ist deren mittlere Aufnahmedauer in Sekunden. Latenzen sind Perzentile über alle Messungen aller Durchläufe (--repeat), n = Anzahl der Messungen; ohne/mit KI trennt die Messungen danach, ob der Glätter aufgerufen wurde oder nicht; Qualitätswerte sind über alle Durchläufe gemittelt. KI verworfen ist der Anteil verworfener oder abgelaufener Glätter-Aufrufe über alle Durchläufe. instabil zählt die Fälle, deren Endtext zwischen den Durchläufen abweicht. Speicher misst nur diesen Prozess: Apple Speech (n/a) und das Apple-Sprachmodell (apple-fm) laufen außerhalb des Prozesses, ihr Speicher ist nicht enthalten. - = keine Daten."
+        "WER ist der Mittelwert über die Fälle (nicht über Wörter); fehlgeschlagene Fälle sind ausgeschlossen. WER Endtext vergleicht den Endtext (Durchlauf 1) mit dem erwarteten Text, WER die Erkennung mit dem gesprochenen. Begriffe und Denglisch zählen nur Fälle mit Begriffen. WER und Korrekturen ignorieren die Schreibweise von Komposita (Bindestrich, getrennt, zusammen). Fälle zählt die ausgewerteten Fälle ohne Fehler. Fehler zeigt X (+Y): X fehlgeschlagene Fälle, Y fehlgeschlagene spätere Durchläufe. p95 10 s nutzt die Fälle der Gruppe long (je etwa 10 s Sprache), Ø lang s ist deren mittlere Aufnahmedauer in Sekunden. Latenzen sind Perzentile über alle Messungen aller Durchläufe (--repeat), n = Anzahl der Messungen; ohne/mit KI trennt die Messungen danach, ob der Glätter aufgerufen wurde oder nicht; Qualitätswerte sind über alle Durchläufe gemittelt. KI verworfen ist der Anteil verworfener oder abgelaufener Glätter-Aufrufe über alle Durchläufe. instabil zählt die Fälle, deren Endtext zwischen den Durchläufen abweicht. Speicher misst nur diesen Prozess: Apple Speech (n/a) und das Apple-Sprachmodell (apple-fm) laufen außerhalb des Prozesses, ihr Speicher ist nicht enthalten. - = keine Daten."
 
-    /// Newest run per (transcriber, cleaner, audio directory) combination.
+    /// Newest run per (transcriber, cleaner, check, audio directory) combination.
     public static func latest(_ runs: [RunResult]) -> [RunResult] {
         var newest: [String: RunResult] = [:]
         for run in runs {
-            let key = "\(run.transcriber)|\(run.cleaner)|\(run.audioDir)"
+            let key = "\(run.transcriber)|\(run.cleaner)|\(run.check ?? "none")|\(run.audioDir)"
             if let existing = newest[key], existing.date >= run.date { continue }
             newest[key] = run
         }
@@ -232,8 +257,8 @@ public enum BenchReport {
 
     public static func markdown(_ summaries: [RunSummary]) -> String {
         var lines = [
-            "| Erkennung | Glättung | Audio | WER | Begriffe | Denglisch | Korrekturen | p50 Erk. ms | p95 Erk. ms | p95 ohne KI ms | p95 10 s ohne KI ms | Ø lang s | p95 mit KI ms | KI verworfen | instabil | Fälle | Fehler | Speicher Laden MB | Speicher Lauf MB |",
-            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+            "| Erkennung | Glättung | Audio | WER | WER Endtext | Begriffe | Denglisch | Korrekturen | p50 Erk. ms | p95 Erk. ms | p95 ohne KI ms | p95 10 s ohne KI ms | Ø lang s | p95 mit KI ms | KI verworfen | instabil | Fälle | Fehler | Speicher Laden MB | Speicher Lauf MB |",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
         ]
         let ordered = summaries.sorted {
             $0.run.audioDir != $1.run.audioDir
@@ -241,7 +266,7 @@ public enum BenchReport {
         }
         for s in ordered {
             let quality: [String] = [
-                s.meanWER.map(percent) ?? "-", s.termRate.map(percent) ?? "-",
+                s.meanWER.map(percent) ?? "-", s.meanFinalWER.map(percent) ?? "-", s.termRate.map(percent) ?? "-",
                 s.denglTermRate.map(percent) ?? "-", s.correctionRate.map(percent) ?? "-",
             ]
             let latency: [String] = [
@@ -258,7 +283,8 @@ public enum BenchReport {
                 s.failedLaterPasses > 0 ? "\(s.errorCount) (+\(s.failedLaterPasses))" : String(s.errorCount),
                 memory(s.run.loadMemoryMB, for: s.run), memory(s.run.peakMemoryMB, for: s.run),
             ]
-            let cells = [s.run.transcriber, s.run.cleaner, s.run.audioDir] + quality + latency + rest
+            let recognition = s.run.check.map { "\(s.run.transcriber) + \($0)" } ?? s.run.transcriber
+            let cells = [recognition, s.run.cleaner, s.run.audioDir] + quality + latency + rest
             lines.append("| " + cells.joined(separator: " | ") + " |")
         }
         var osBuilds: [String] = []

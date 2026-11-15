@@ -30,6 +30,8 @@ struct BenchRunner {
     /// Timed round-robin passes over all cases; timings and quality come from every pass (raw/final shown: pass 1).
     var repeats = 5
     var language: DictationLanguage = .german
+    /// Term check: recognized words and audio go to the processor's second opinion.
+    var check: BenchCheck?
     var log: (String) -> Void = { print($0) }
 
     /// Timings and output of one case in one pass.
@@ -39,6 +41,7 @@ struct BenchRunner {
         var processed: ProcessingResult?
         var transcribeMs: Double = 0
         var processMs: Double = 0
+        var promptTokens: Int?
         var final: String { processed?.final ?? raw }
     }
 
@@ -46,8 +49,15 @@ struct BenchRunner {
         // Model loading and first-call warm-up stay outside the timed passes.
         try await transcriber.prepare()
         try await cleaner?.prepare()
+        var checkLoadMs: Double?
+        if let check {
+            do {
+                checkLoadMs = try await ContinuousClock().measure { try await check.prepare() }.milliseconds
+            } catch { throw BenchError.warmUpFailed(check.id, "\(error)") }
+        }
         let vocabulary = corpus.parsedVocabulary
-        let processor = TextProcessor(vocabulary: vocabulary, snippets: corpus.parsedSnippets, cleaner: cleaner)
+        let processor = TextProcessor(
+            vocabulary: vocabulary, snippets: corpus.parsedSnippets, cleaner: cleaner, secondOpinion: check?.opinion)
 
         let available = corpus.cases.compactMap { testCase -> (CorpusCase, AudioClip)? in
             let url = audioDirectory.appending(path: "\(testCase.id).wav")
@@ -58,7 +68,7 @@ struct BenchRunner {
             throw ZackError.engineUnavailable("no audio in \(audioDirectory.path)")
         }
         do {
-            _ = try await transcriber.transcribe(warmUp.1, hints: vocabulary.terms)
+            _ = try await transcriber.recognize(warmUp.1, hints: vocabulary.terms)
         } catch { throw BenchError.warmUpFailed(transcriber.id, "\(error)") }
         if let cleaner {
             do {
@@ -75,6 +85,7 @@ struct BenchRunner {
         var processSamples = Array(repeating: [Double](), count: available.count)
         var passes = Array(repeating: [Pass](), count: available.count)
         var failedLater = Array(repeating: 0, count: available.count)
+        var promptTokens: Int?
         for pass in 1...max(repeats, 1) {
             if repeats > 1 { log("pass \(pass)/\(repeats)") }
             for (index, (testCase, clip)) in available.enumerated() {
@@ -82,6 +93,7 @@ struct BenchRunner {
                 if pass > 1, firstPass[index].failure != nil { continue }
                 let current = await measure(clip, mode: testCase.mode, processor: processor, hints: vocabulary.terms)
                 peakFootprint = max(peakFootprint, MemoryFootprint.currentMB())
+                if let tokens = current.promptTokens { promptTokens = max(promptTokens ?? 0, tokens) }
                 if pass == 1 {
                     firstPass.append(current)
                     if let failure = current.failure {
@@ -115,26 +127,31 @@ struct BenchRunner {
             date: Date(), transcriber: transcriber.id, cleaner: cleaner?.id ?? "none",
             audioDir: audioDirectory.lastPathComponent, peakMemoryMB: peakFootprint,
             loadMemoryMB: loadFootprint,
-            osBuild: ProcessInfo.processInfo.operatingSystemVersionString, cases: results)
+            osBuild: ProcessInfo.processInfo.operatingSystemVersionString, check: check?.id,
+            checkLoadMs: checkLoadMs, promptTokens: promptTokens, cases: results)
     }
 
     private func measure(_ clip: AudioClip, mode: TextMode, processor: TextProcessor, hints: [String]) async -> Pass {
         let clock = ContinuousClock()
         var current = Pass()
+        var recognition = Recognition(text: "")
         current.transcribeMs = await clock.measure {
             do {
-                current.raw = try await transcriber.transcribe(clip, hints: hints)
+                recognition = try await transcriber.recognize(clip, hints: hints)
             } catch {
                 current.failure = "\(error)"
             }
         }.milliseconds
         guard current.failure == nil else { return current }
-        let raw = current.raw
+        current.raw = recognition.text
+        let recognized = recognition
         var processed: ProcessingResult?
         current.processMs = await clock.measure {
-            processed = await processor.process(raw, context: RuleContext(mode: mode, language: language))
+            processed = await processor.process(
+                recognized, audio: clip, context: RuleContext(mode: mode, language: language))
         }.milliseconds
         current.processed = processed
+        if let check, processed?.checked == true { current.promptTokens = await check.lastPromptTokens() }
         return current
     }
 
@@ -167,7 +184,11 @@ struct BenchRunner {
             matchPasses: passes.map { Metrics.matches(expected: testCase.expected, actual: $0.final) },
             cleanerAttemptedPasses: passes.map { $0.processed?.cleanerDuration != nil },
             cleanerRejectedPasses: passes.map { $0.processed?.cleanerRejected ?? false },
-            finalPasses: passes.map(\.final), rawPasses: passes.map(\.raw), failedLaterPasses: failedLaterPasses)
+            finalPasses: passes.map(\.final), rawPasses: passes.map(\.raw), failedLaterPasses: failedLaterPasses,
+            finalWer: Metrics.wordErrorRate(reference: testCase.expected, hypothesis: pass.final, language: language),
+            checked: check.map { _ in processed?.checked ?? false },
+            usedCheck: check.map { _ in processed?.usedCheck ?? false },
+            checkMs: processed?.checkDuration?.milliseconds)
     }
 }
 

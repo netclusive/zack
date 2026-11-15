@@ -280,7 +280,7 @@ private func sample(
     #expect(summary.p50TranscribeMs == nil)
     #expect(summary.p95TranscribeMs == nil)
     let row = String(BenchReport.markdown([summary]).split(separator: "\n").last ?? "")
-    #expect(row.hasPrefix("| t | none | a | - | - | - | - | - | - | - | - | - | - | - | - | 0 | 1 |"))
+    #expect(row.hasPrefix("| t | none | a | - | - | - | - | - | - | - | - | - | - | - | - | - | 0 | 1 |"))
 }
 
 @Test func reportListsDistinctOSBuildsBelowTable() {
@@ -520,4 +520,29 @@ private func timed(
     #expect(note.contains("KI verworfen"))
     #expect(note.contains("X (+Y)"))
     #expect(note.contains("Schreibweise von Komposita"))
+    #expect(note.contains("WER Endtext"))
+}
+
+@Test func reportShowsFinalWer() {
+    func scored(_ id: String, _ finalWer: Double) -> CaseResult {
+        CaseResult(
+            id: id, group: "prose", raw: "", final: "", wer: 0, termHitRate: nil, matchesExpected: true,
+            usedCleaner: false, cleanerAttempted: false, cleanerRejected: false, cleanerMs: 0, transcribeMs: 1,
+            processMs: 1, finalWer: finalWer)
+    }
+    let run = RunResult(
+        date: Date(), transcriber: "parakeet-ultra", cleaner: "none", audioDir: "a", peakMemoryMB: 1,
+        check: "whisper-terms", cases: [scored("a", 0.5), scored("b", 0)])
+    let table = BenchReport.markdown([RunSummary(run)])
+    #expect(table.contains("| WER | WER Endtext | Begriffe |"))
+    #expect(table.contains("| parakeet-ultra + whisper-terms | none | a | 0.0 % | 25.0 % |"), "\(table)")
+}
+
+@Test func latestKeepsRunsWithAndWithoutCheckApart() {
+    let runs = [nil, "whisper-terms"].map { check in
+        RunResult(
+            date: Date(), transcriber: "parakeet-ultra", cleaner: "none", audioDir: "a", peakMemoryMB: 1,
+            check: check, cases: [])
+    }
+    #expect(BenchReport.latest(runs).count == 2)
 }
