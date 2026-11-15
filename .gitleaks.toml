@@ -1,0 +1,10 @@
+# False positives only; every default rule stays active.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public Hugging Face commit hashes that sit next to a word like 'tokenizer'"
+regexes = [
+  # openai/whisper-large-v3, pinned in Sources/ZackWhisper/WhisperModelManifest.swift
+  '''^06f233fe06e710322aca913c1bc4249a0d71fce1$''',
+]
