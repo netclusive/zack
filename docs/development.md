@@ -114,7 +114,7 @@ Recordings and results contain voice and text and are not tracked by Git.
 ## Model downloads
 
 In `zack-bench`, the first run of an engine downloads its model and needs network access; the app downloads only
-on click in "Settings › Setup". Later runs work offline.
+when asked: on click in "Settings › Setup" and when "Double-check terms" is turned on. Later runs work offline.
 
 | Engine | Source | Stored in | Size |
 |---|---|---|---|
