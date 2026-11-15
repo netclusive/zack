@@ -123,6 +123,8 @@ public final class SecondOpinionSlot: Sendable {
     }
 
     private func load(download: Bool, generation current: Int) async {
+        // Turned off while it waited for the previous run: no download, no verify with the switch off.
+        guard generation == current, !Task.isCancelled else { return }
         do {
             if download {
                 try await setup.download { [weak self] fraction in

@@ -282,6 +282,26 @@ struct TermCheckServiceTests {
         #expect(f.settings.termCheck)
     }
 
+    @Test func queuedRunTurnedOffBeforeItStartsDoesNothing() async throws {
+        let engine = FakeTermCheckEngine(holdPrepare: true)
+        let f = try makeFixture(engine: engine, modelPresent: true)
+        defer { f.cleanup() }
+        f.service.enable()
+        #expect(await eventually { await engine.events == [.prepare] })
+        f.service.disable()
+        // Queued behind the running load, then turned off again before it ever started.
+        f.service.enable()
+        f.service.disable()
+        await engine.releasePrepare()
+        #expect(await eventually { await engine.events.count == 3 })
+        await settle()
+        // Only the first run checked the copy; the queued one neither verifies nor downloads.
+        #expect(f.verifications.value == 1)
+        #expect(f.downloads.value == 0)
+        #expect(await engine.events == [.prepare, .unload, .unload])
+        #expect(f.service.state == .off)
+    }
+
     // App start
 
     @Test func startWithModelLoadsAndFillsTheSlot() async throws {
