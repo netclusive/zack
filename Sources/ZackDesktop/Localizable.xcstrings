@@ -1025,6 +1025,22 @@
         }
       }
     },
+    "etwa 650 MB" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "etwa 650 MB"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "about 650 MB"
+          }
+        }
+      }
+    },
     "keins" : {
       "localizations" : {
         "de" : {

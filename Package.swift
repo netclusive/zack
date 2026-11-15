@@ -33,7 +33,7 @@ let package = Package(
             name: "ZackWhisper",
             dependencies: ["ZackCore", .product(name: "WhisperKit", package: "argmax-oss-swift")]),
         .target(
-            name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet"],
+            name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet", "ZackWhisper"],
             resources: [.process("Localizable.xcstrings")]),
         .target(
             name: "ZackUpdate",
@@ -49,7 +49,8 @@ let package = Package(
         .testTarget(name: "ZackCoreTests", dependencies: ["ZackCore", "ZackTestSupport"]),
         .testTarget(name: "ZackEnginesTests", dependencies: ["ZackParakeet", "ZackApple", "ZackTestSupport"]),
         .testTarget(name: "ZackWhisperTests", dependencies: ["ZackWhisper", "ZackTestSupport"]),
-        .testTarget(name: "ZackDesktopTests", dependencies: ["ZackDesktop", "ZackParakeet", "ZackTestSupport"]),
+        .testTarget(
+            name: "ZackDesktopTests", dependencies: ["ZackDesktop", "ZackParakeet", "ZackWhisper", "ZackTestSupport"]),
         .testTarget(
             name: "ZackUpdateTests",
             dependencies: ["ZackUpdate", .product(name: "Sparkle", package: "Sparkle")]),

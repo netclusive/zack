@@ -12,6 +12,7 @@ public struct Settings: @unchecked Sendable {
         static let microphoneUID = "microphoneUID"
         static let microphoneName = "microphoneName"
         static let pausePlayback = "pausePlayback"
+        static let termCheck = "termCheck"
     }
 
     private let defaults: UserDefaults
@@ -35,6 +36,12 @@ public struct Settings: @unchecked Sendable {
     public var pausePlayback: Bool {
         get { defaults.object(forKey: Key.pausePlayback) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Key.pausePlayback) }
+    }
+
+    /// "Fachbegriffe gegenprüfen"; off by default, because turning it on downloads a model.
+    public var termCheck: Bool {
+        get { defaults.object(forKey: Key.termCheck) as? Bool ?? false }
+        nonmutating set { defaults.set(newValue, forKey: Key.termCheck) }
     }
 
     /// Dictation language; a missing or unknown value reads as German.

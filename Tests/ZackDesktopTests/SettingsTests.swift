@@ -78,6 +78,17 @@ struct SettingsTests {
         }
     }
 
+    // "Fachbegriffe gegenprüfen"
+
+    @Test func termCheckIsOffByDefault() throws {
+        try withSuite { defaults in
+            #expect(!Settings(defaults: defaults).termCheck)
+            Settings(defaults: defaults).termCheck = true
+            #expect(Settings(defaults: defaults).termCheck)
+            #expect(defaults.bool(forKey: "termCheck"))
+        }
+    }
+
     // "Mikrofon bereithalten"
 
     @Test func readinessDefaultsToTwoMinutesAfterADictation() throws {
