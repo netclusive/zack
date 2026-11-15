@@ -125,6 +125,8 @@ public final class SecondOpinionSlot: Sendable {
     private func load(download: Bool, generation current: Int) async {
         // Turned off while it waited for the previous run: no download, no verify with the switch off.
         guard generation == current, !Task.isCancelled else { return }
+        let clock = ContinuousClock()
+        let checkStart = clock.now
         do {
             if download {
                 try await setup.download { [weak self] fraction in
@@ -140,7 +142,9 @@ public final class SecondOpinionSlot: Sendable {
             return
         }
         guard generation == current else { return }
+        let checked = clock.now - checkStart
         state = .loading
+        let loadStart = clock.now
         do {
             try await engine.prepare()
             guard generation == current else { return }
@@ -153,6 +157,10 @@ public final class SecondOpinionSlot: Sendable {
             return
         }
         guard generation == current else { return }
+        let loaded = clock.now - loadStart
+        logger.info(
+            "term check ready: \(download ? "download" : "verify", privacy: .public) \(Self.milliseconds(checked), privacy: .public) ms, load \(Self.milliseconds(loaded), privacy: .public) ms"
+        )
         slot.set(engine)
         state = .ready
     }
@@ -169,6 +177,10 @@ public final class SecondOpinionSlot: Sendable {
         settings.termCheck = false
         slot.set(nil)
         state = .failed(reason)
+    }
+
+    private static func milliseconds(_ duration: Duration) -> Int {
+        Int(duration / .milliseconds(1))
     }
 
     private static func isUnverified(_ error: any Error) -> Bool {
