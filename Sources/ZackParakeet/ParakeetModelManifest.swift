@@ -1,15 +1,8 @@
-import CryptoKit
-import Foundation
 import ZackCore
 
 /// The Parakeet Ultra files Zack was measured with: one Hugging Face commit and size and SHA-256 of every file.
 public enum ParakeetModelManifest {
-    public struct File: Equatable, Sendable {
-        /// Relative to the model folder.
-        public let path: String
-        public let size: Int
-        public let sha256: String
-    }
+    public typealias File = ModelManifest.File
 
     /// Commit of FluidInference/parakeet-ultra-coreml (`main` since 2026-09-24); the installed copy all measurements
     /// ran with matched it file by file on 2026-11-06.
@@ -78,28 +71,4 @@ public enum ParakeetModelManifest {
             path: "parakeet_vocab.json", size: 151_122,
             sha256: "7ec60e05f1b24480736ec0eed40900f4626bce1fa9a60fd700ec7e2a59198735"),
     ]
-
-    /// Throws `ZackError.modelUnverified` with the first file that is missing, has another size or other content.
-    public static func verify(_ files: [File], in folder: URL) throws {
-        for file in files {
-            let url = folder.appending(path: file.path, directoryHint: .notDirectory)
-            guard let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize, size == file.size,
-                (try? sha256(of: url)) == file.sha256
-            else { throw ZackError.modelUnverified(file.path) }
-        }
-    }
-
-    /// Reads in 1 MB chunks, so the 594 MB encoder never sits in memory as a whole.
-    private static func sha256(of url: URL) throws -> String {
-        let handle = try FileHandle(forReadingFrom: url)
-        defer { try? handle.close() }
-        var hash = SHA256()
-        while let chunk = try handle.read(upToCount: 1 << 20), !chunk.isEmpty {
-            hash.update(data: chunk)
-        }
-        return hash.finalize().map { byte in
-            let digits = String(byte, radix: 16)
-            return digits.count == 1 ? "0" + digits : digits
-        }.joined()
-    }
 }

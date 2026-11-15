@@ -35,6 +35,23 @@ public protocol Transcriber: Sendable {
     /// Loads or downloads models; called once before the first transcription.
     func prepare() async throws
     func transcribe(_ audio: AudioClip, hints: [String]) async throws -> String
+    /// Text plus word confidences where the engine has them.
+    func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition
+}
+
+extension Transcriber {
+    /// Engines without word confidences: the text alone.
+    public func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition {
+        Recognition(text: try await transcribe(audio, hints: hints))
+    }
+}
+
+/// A second recognizer that hears the audio again with the vocabulary as a hint.
+public protocol SecondOpinion: Sendable {
+    var id: String { get }
+    /// `focus`: `TermSplice.focus` of the marked text.
+    func recognize(_ audio: AudioClip, terms: [String], focus: [String], language: DictationLanguage)
+        async throws -> String
 }
 
 /// Language-model based cleanup of a dictation.

@@ -12,43 +12,80 @@ public struct ProcessingResult: Sendable, Equatable {
     /// Cleaner ran but its output was not used (timeout, error or implausible).
     public let cleanerRejected: Bool
     public let cleanerDuration: Duration?
+    /// The second opinion was called.
+    public let checked: Bool
+    /// The second opinion replaced at least one marked range; `body` is the spliced text.
+    public let usedCheck: Bool
+    public let checkDuration: Duration?
+    /// Words below `TermCheck.threshold`; 0 where the term check does not apply.
+    public let markedWords: Int
+
+    init(
+        raw: String, ruled: String, final: String, ruledFinal: String, body: String, usedCleaner: Bool = false,
+        cleanerRejected: Bool = false, cleanerDuration: Duration? = nil, checked: Bool = false,
+        usedCheck: Bool = false, checkDuration: Duration? = nil, markedWords: Int = 0
+    ) {
+        self.raw = raw
+        self.ruled = ruled
+        self.final = final
+        self.ruledFinal = ruledFinal
+        self.body = body
+        self.usedCleaner = usedCleaner
+        self.cleanerRejected = cleanerRejected
+        self.cleanerDuration = cleanerDuration
+        self.checked = checked
+        self.usedCheck = usedCheck
+        self.checkDuration = checkDuration
+        self.markedWords = markedWords
+    }
 }
 
-/// Rule chain, optional language-model cleanup and cursor adaptation.
+/// Rule chain, optional language-model cleanup, optional term check and cursor adaptation.
 public struct TextProcessor: Sendable {
     public let vocabulary: Vocabulary
     public let cleaner: (any Cleaner)?
     public let cleanerTimeout: Duration
+    public let secondOpinion: (any SecondOpinion)?
+    public let checkTimeout: Duration
     private let snippetRule: SnippetRule
     private let rules: [any TextRule]
     private let cursorRule: CursorJoinRule
 
     public init(
         vocabulary: Vocabulary = Vocabulary(), snippets: [Snippet] = [], cleaner: (any Cleaner)? = nil,
-        cleanerTimeout: Duration = .seconds(2)
+        cleanerTimeout: Duration = .seconds(2), secondOpinion: (any SecondOpinion)? = nil,
+        checkTimeout: Duration = TermCheck.timeout
     ) {
         self.vocabulary = vocabulary
         cursorRule = CursorJoinRule(keeping: vocabulary.terms)
         self.cleaner = cleaner
         self.cleanerTimeout = cleanerTimeout
+        self.secondOpinion = secondOpinion
+        self.checkTimeout = checkTimeout
         snippetRule = SnippetRule(snippets)
         rules = [VocabularyRule(vocabulary), FillerRule(), CodeModeRule()]
     }
 
     public func process(_ raw: String, context: RuleContext) async -> ProcessingResult {
+        await process(Recognition(text: raw), audio: nil, context: context)
+    }
+
+    /// `audio` and the recognized words feed the term check; without them the result equals `process(_:context:)`.
+    public func process(_ recognition: Recognition, audio: AudioClip?, context: RuleContext) async -> ProcessingResult {
+        let raw = recognition.text
         if let snippet = snippetRule.match(raw, language: context.language) {
             let final = cursorRule.apply(snippet, context: context)
-            return ProcessingResult(
-                raw: raw, ruled: snippet, final: final, ruledFinal: final, body: snippet, usedCleaner: false,
-                cleanerRejected: false,
-                cleanerDuration: nil)
+            return ProcessingResult(raw: raw, ruled: snippet, final: final, ruledFinal: final, body: snippet)
         }
-        let ruled = applyRules(raw, context: context)
+        let ruled = applyingRules(raw, context: context)
         guard let cleaner, SignalWords.contains(ruled, language: context.language, original: raw) else {
+            if let secondOpinion, let audio,
+                let marked = checkTarget(recognition, ruled: ruled, audio: audio, context: context)
+            {
+                return await checking(raw: raw, ruled: ruled, marked: marked, by: secondOpinion, audio: audio, context)
+            }
             let final = cursorRule.apply(ruled, context: context)
-            return ProcessingResult(
-                raw: raw, ruled: ruled, final: final, ruledFinal: final, body: ruled,
-                usedCleaner: false, cleanerRejected: false, cleanerDuration: nil)
+            return ProcessingResult(raw: raw, ruled: ruled, final: final, ruledFinal: final, body: ruled)
         }
 
         let start = ContinuousClock.now
@@ -71,11 +108,64 @@ public struct TextProcessor: Sendable {
     public func needsCleaner(_ raw: String, context: RuleContext) -> Bool {
         guard cleaner != nil, snippetRule.match(raw, language: context.language) == nil else { return false }
         return SignalWords.contains(
-            applyRules(raw, context: context), language: context.language, original: raw)
+            applyingRules(raw, context: context), language: context.language, original: raw)
     }
 
-    private func applyRules(_ raw: String, context: RuleContext) -> String {
+    /// The rule chain without snippet, cleaner or cursor join.
+    public func applyingRules(_ raw: String, context: RuleContext) -> String {
         rules.reduce(raw) { $1.apply($0, context: context) }
+    }
+
+    /// True if the term check may look at this dictation: prose, no snippet and no signal word after the rules.
+    /// Independent of whether a cleaner or second opinion is set.
+    public func checkApplies(_ raw: String, context: RuleContext) -> Bool {
+        checkApplies(raw, ruled: applyingRules(raw, context: context), context: context)
+    }
+
+    /// True if `process` would call the second opinion.
+    public func needsCheck(_ recognition: Recognition, audio: AudioClip?, context: RuleContext) -> Bool {
+        guard let audio else { return false }
+        let ruled = applyingRules(recognition.text, context: context)
+        return checkTarget(recognition, ruled: ruled, audio: audio, context: context) != nil
+    }
+
+    private func checkApplies(_ raw: String, ruled: String, context: RuleContext) -> Bool {
+        guard context.mode == .prose, snippetRule.match(raw, language: context.language) == nil else { return false }
+        return !SignalWords.contains(ruled, language: context.language, original: raw)
+    }
+
+    /// The rule text with its unsure words marked, if the term check applies and marks at least one word.
+    private func checkTarget(_ recognition: Recognition, ruled: String, audio: AudioClip, context: RuleContext)
+        -> MarkedText?
+    {
+        guard secondOpinion != nil, audio.duration <= TermCheck.maxAudioSeconds, !vocabulary.terms.isEmpty,
+            checkApplies(recognition.text, ruled: ruled, context: context)
+        else { return nil }
+        let segments = SuspiciousWords.annotate(ruled, words: recognition.words, terms: vocabulary.terms)
+        let marked = SuspiciousWords.marked(segments, below: TermCheck.threshold)
+        return marked.markedCount > 0 ? marked : nil
+    }
+
+    /// Asks the second opinion and splices its rule text into the marked ranges; any failure keeps the rule text.
+    private func checking(
+        raw: String, ruled: String, marked: MarkedText, by secondOpinion: any SecondOpinion, audio: AudioClip,
+        _ context: RuleContext
+    ) async -> ProcessingResult {
+        let start = ContinuousClock.now
+        let terms = vocabulary.terms
+        let focus = TermSplice.focus(marked)
+        let language = context.language
+        let other = try? await Self.withTimeout(checkTimeout) {
+            try await secondOpinion.recognize(audio, terms: terms, focus: focus, language: language)
+        }
+        let duration = ContinuousClock.now - start
+        let spliced = other.map { TermSplice.apply(marked, other: applyingRules($0, context: context)) }
+        let usedCheck = (spliced?.replacedRuns ?? 0) > 0
+        let body = usedCheck ? spliced?.text ?? ruled : ruled
+        return ProcessingResult(
+            raw: raw, ruled: ruled, final: cursorRule.apply(body, context: context),
+            ruledFinal: cursorRule.apply(ruled, context: context), body: body, checked: true, usedCheck: usedCheck,
+            checkDuration: duration, markedWords: marked.markedCount)
     }
 
     /// Cleaners tend to drop the final sentence mark; put the one from the rule output back.

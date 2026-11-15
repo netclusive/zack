@@ -18,6 +18,8 @@ let package = Package(
         // No traits: drops the NeMo text-normalization engine (a Rust staticlib); Zack uses neither ITN nor TTS.
         .package(url: "https://github.com/FluidInference/FluidAudio.git", .upToNextMinor(from: "0.17.7"), traits: []),
         .package(url: "https://github.com/sparkle-project/Sparkle", .upToNextMinor(from: "2.10.1")),
+        // Whisper for the term check; exact, because the prompt budget depends on WhisperKit's decoder.
+        .package(url: "https://github.com/argmaxinc/argmax-oss-swift.git", exact: "1.1.1"),
     ],
     targets: [
         .target(name: "ZackCore"),
@@ -26,8 +28,12 @@ let package = Package(
             dependencies: ["ZackCore", .product(name: "FluidAudio", package: "FluidAudio")]),
         // Apple Speech and Foundation Models: system frameworks only.
         .target(name: "ZackApple", dependencies: ["ZackCore"]),
+        // Second opinion for the term check: Whisper via WhisperKit, pinned model download.
         .target(
-            name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet"],
+            name: "ZackWhisper",
+            dependencies: ["ZackCore", .product(name: "WhisperKit", package: "argmax-oss-swift")]),
+        .target(
+            name: "ZackDesktop", dependencies: ["ZackCore", "ZackParakeet", "ZackWhisper"],
             resources: [.process("Localizable.xcstrings")]),
         .target(
             name: "ZackUpdate",
@@ -35,16 +41,19 @@ let package = Package(
             resources: [.process("Localizable.xcstrings")]),
         // Bench command line behind zack-bench.
         .target(
-            name: "BenchSupport", dependencies: ["ZackCore", "ZackParakeet", "ZackApple", "ZackDesktop"]),
+            name: "BenchSupport",
+            dependencies: ["ZackCore", "ZackParakeet", "ZackApple", "ZackDesktop", "ZackWhisper"]),
         .executableTarget(name: "zack-bench", dependencies: ["BenchSupport"]),
         // Shared by the test targets only; not a product.
         .target(name: "ZackTestSupport", dependencies: ["ZackCore"], path: "Tests/ZackTestSupport"),
-        .testTarget(name: "ZackCoreTests", dependencies: ["ZackCore"]),
+        .testTarget(name: "ZackCoreTests", dependencies: ["ZackCore", "ZackTestSupport"]),
         .testTarget(name: "ZackEnginesTests", dependencies: ["ZackParakeet", "ZackApple", "ZackTestSupport"]),
-        .testTarget(name: "ZackDesktopTests", dependencies: ["ZackDesktop", "ZackParakeet", "ZackTestSupport"]),
+        .testTarget(name: "ZackWhisperTests", dependencies: ["ZackWhisper", "ZackTestSupport"]),
+        .testTarget(
+            name: "ZackDesktopTests", dependencies: ["ZackDesktop", "ZackParakeet", "ZackWhisper", "ZackTestSupport"]),
         .testTarget(
             name: "ZackUpdateTests",
             dependencies: ["ZackUpdate", .product(name: "Sparkle", package: "Sparkle")]),
-        .testTarget(name: "BenchSupportTests", dependencies: ["BenchSupport"]),
+        .testTarget(name: "BenchSupportTests", dependencies: ["BenchSupport", "ZackTestSupport"]),
     ]
 )

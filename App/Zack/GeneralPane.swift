@@ -2,7 +2,8 @@ import SwiftUI
 import ZackCore
 import ZackDesktop
 
-/// "Allgemein": language, hotkey, microphone readiness, login item, the AI cleanup and the playback pause.
+/// "Allgemein": language, hotkey, microphone readiness, login item, the AI cleanup, the term check and the playback
+/// pause.
 struct GeneralPane: View {
     let model: AppModel
 
@@ -49,6 +50,24 @@ struct GeneralPane: View {
                 }
                 .disabled(!model.cleanerAvailable)
                 if let hint = model.cleanerHint {
+                    Text(hint)
+                        .foregroundStyle(.secondary)
+                }
+                Toggle(isOn: Binding(get: { model.termCheckOn }, set: { model.setTermCheck($0) })) {
+                    Text("Fachbegriffe gegenprüfen")
+                    Text(
+                        "Ist Zack bei einem Wort unsicher, hört Whisper die Aufnahme mit den Begriffen aus dem Wörterbuch noch einmal ab und ersetzt nur dieses Wort. Lädt dafür einmalig ein Modell (\(WhisperSetup.downloadSize)). Alles bleibt auf diesem Mac."
+                    )
+                }
+                .disabled(!model.termCheckAvailable)
+                if case .downloading(let fraction) = model.termCheckState {
+                    ProgressView(value: fraction) {
+                        Text("Modell wird heruntergeladen")
+                    } currentValueLabel: {
+                        Text(fraction, format: .percent.precision(.fractionLength(0)))
+                    }
+                }
+                ForEach(model.termCheckHints, id: \.self) { hint in
                     Text(hint)
                         .foregroundStyle(.secondary)
                 }

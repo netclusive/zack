@@ -83,9 +83,12 @@ actor FakeTranscriber: Transcriber {
     private(set) var lastAudio: AudioClip?
     private var holdsNext = false
     private var held: CheckedContinuation<Void, Never>?
+    /// What `recognize` reports with the text; empty, as for an engine without confidences.
+    private let words: [RecognizedWord]
 
-    init(_ text: String) {
+    init(_ text: String, words: [RecognizedWord] = []) {
         result = .success(text)
+        self.words = words
     }
 
     func respond(with result: Result<String, ZackError>) {
@@ -115,6 +118,10 @@ actor FakeTranscriber: Transcriber {
             await withCheckedContinuation { held = $0 }
         }
         return try result.get()
+    }
+
+    func recognize(_ audio: AudioClip, hints: [String]) async throws -> Recognition {
+        Recognition(text: try await transcribe(audio, hints: hints), words: words)
     }
 }
 

@@ -7,8 +7,9 @@ public enum BenchCommand {
     static let spec = ArgumentSpec(
         values: [
             "corpus", "audio-dir", "voice", "id", "transcriber", "cleaner", "repeat", "results", "device", "language",
+            "check",
         ],
-        flags: ["all"])
+        flags: ["all", "prewarm"])
 
     /// Runs the command in `CommandLine.arguments` and exits.
     public static func main() async -> Never {
@@ -31,6 +32,7 @@ public enum BenchCommand {
             case "mic-check": try await command.micCheck()
             case "run": try await command.runBench()
             case "report": try command.report()
+            case "words": try await command.words()
             case "help": print(usage)
             default:
                 FileHandle.standardError.write(Data("error: unknown command \(arguments.command)\n\(usage)\n".utf8))
@@ -51,13 +53,16 @@ public enum BenchCommand {
           record  [--language de|en] [--audio-dir bench/corpus/audio] [--id <case>] [--all]
                   (en: bench/corpus/audio-en)
           mic-check [--repeat 5] [--device <Name>]
-          run     --transcriber <id> [--language de|en] [--cleaner none] [--repeat 5]
-                  [--audio-dir bench/corpus/audio] [--results bench/results]
+          run     --transcriber <id> [--language de|en] [--cleaner none] [--check none] [--repeat 5]
+                  [--audio-dir bench/corpus/audio] [--results bench/results] [--prewarm]
                   (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
+          words   --results <file> [--language de|en] [--transcriber parakeet-ultra]
+                  [--corpus bench/corpus/cases.json] [--audio-dir bench/corpus/audio]
 
         transcribers: \(Registry.transcriberIDs.joined(separator: ", "))
         cleaners:     \(Registry.cleanerIDs.joined(separator: ", "))
+        checks:       \(Registry.checkIDs.joined(separator: ", "))
         """
     }
 
@@ -229,7 +234,8 @@ private struct Invocation {
             corpus: try loadCorpus(), transcriber: try Registry.transcriber(transcriberID, language: defaults.language),
             cleaner: try Registry.cleaner(arguments["cleaner"] ?? "none"),
             audioDirectory: URL(filePath: arguments["audio-dir"] ?? defaults.audioDirectory),
-            repeats: repeats, language: defaults.language)
+            repeats: repeats, language: defaults.language, check: try Registry.check(arguments["check"] ?? "none"),
+            prewarm: arguments.isSet("prewarm"))
         let result = try await runner.run()
         let directory = URL(filePath: arguments["results"] ?? "bench/results")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -237,7 +243,8 @@ private struct Invocation {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let stamp = formatter.string(from: result.date).replacingOccurrences(of: ":", with: "-")
             .replacingOccurrences(of: ".", with: "-")
-        let file = directory.appending(path: "\(stamp)-\(result.transcriber)-\(result.cleaner).json")
+        let suffix = (result.check.map { "-\($0)" } ?? "") + (result.prewarm == true ? "-prewarm" : "")
+        let file = directory.appending(path: "\(stamp)-\(result.transcriber)-\(result.cleaner)\(suffix).json")
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
@@ -245,6 +252,21 @@ private struct Invocation {
         print("\n" + BenchReport.markdown([RunSummary(result)]))
         print("\n" + BenchReport.footnote)
         print("\ngespeichert: \(file.path(percentEncoded: false))")
+    }
+
+    /// One recognition per case with audio; writes the rule words with their confidence as JSON.
+    func words() async throws {
+        let file = URL(filePath: try arguments.required("results"))
+        let transcriber = try Registry.transcriber(
+            arguments["transcriber"] ?? "parakeet-ultra", language: defaults.language)
+        let cases = try await WordsExport.run(
+            corpus: try loadCorpus(), transcriber: transcriber,
+            audioDirectory: URL(filePath: arguments["audio-dir"] ?? defaults.audioDirectory),
+            language: defaults.language)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        try encoder.encode(cases).write(to: file)
+        print("\(cases.count) Fälle gespeichert: \(file.path(percentEncoded: false))")
     }
 
     func report() throws {

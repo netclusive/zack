@@ -276,6 +276,54 @@
         }
       }
     },
+    "Das Modell fehlt. Zum Laden wieder einschalten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Modell fehlt. Zum Laden wieder einschalten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model is missing. Turn this on again to download it."
+          }
+        }
+      }
+    },
+    "Das Modell ließ sich nicht laden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Modell ließ sich nicht laden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model could not be loaded."
+          }
+        }
+      }
+    },
+    "Das geladene Modell ist nicht die geprüfte Fassung und wurde gelöscht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das geladene Modell ist nicht die geprüfte Fassung und wurde gelöscht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The downloaded model is not the checked version and was deleted."
+          }
+        }
+      }
+    },
     "Das geladene Modell weicht von der geprüften Fassung ab und wurde gelöscht." : {
       "localizations" : {
         "de" : {
@@ -320,6 +368,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Checks run only with your consent, once a day. The feed and downloads come from GitHub (GitHub Inc., USA); each request sends the IP address, the preferred languages and the user agent “Zack/<Version> Sparkle/<Version>”."
+          }
+        }
+      }
+    },
+    "Download fehlgeschlagen. Bitte später erneut einschalten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download fehlgeschlagen. Bitte später erneut einschalten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The download failed. Please turn this on again later."
           }
         }
       }
@@ -548,6 +612,22 @@
         }
       }
     },
+    "Fachbegriffe gegenprüfen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fachbegriffe gegenprüfen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double-check terms"
+          }
+        }
+      }
+    },
     "Für das Einfügen mit Cmd+V und den Abbruch mit anderen Tasten, etwa fn + Pfeil." : {
       "localizations" : {
         "de" : {
@@ -640,6 +720,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In these apps, Zack dictates in code mode: file names and case commands become code, and short commands get no period."
+          }
+        }
+      }
+    },
+    "Ist Zack bei einem Wort unsicher, hört Whisper die Aufnahme mit den Begriffen aus dem Wörterbuch noch einmal ab und ersetzt nur dieses Wort. Lädt dafür einmalig ein Modell (%@). Alles bleibt auf diesem Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ist Zack bei einem Wort unsicher, hört Whisper die Aufnahme mit den Begriffen aus dem Wörterbuch noch einmal ab und ersetzt nur dieses Wort. Lädt dafür einmalig ein Modell (%@). Alles bleibt auf diesem Mac."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When Zack is unsure about a word, Whisper listens to the recording again with the terms from your dictionary and replaces only that word. Downloads a model once (%@). Everything stays on this Mac."
           }
         }
       }
@@ -752,6 +848,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Last Dictation"
+          }
+        }
+      }
+    },
+    "Lizenz Core-ML-Modell: MIT" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenz Core-ML-Modell: MIT"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Core ML model license: MIT"
+          }
+        }
+      }
+    },
+    "Lizenz Tokenizer: Apache 2.0" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenz Tokenizer: Apache 2.0"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tokenizer license: Apache 2.0"
           }
         }
       }
@@ -912,6 +1040,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloading model"
+          }
+        }
+      }
+    },
+    "Modell wird geladen … Beim ersten Mal kann das bis zu zwei Minuten dauern." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell wird geladen … Beim ersten Mal kann das bis zu zwei Minuten dauern."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading the model … The first time can take up to two minutes."
+          }
+        }
+      }
+    },
+    "Modell wird heruntergeladen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell wird heruntergeladen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading the model"
           }
         }
       }
@@ -1252,6 +1412,22 @@
         }
       }
     },
+    "Wirkt nur mit Begriffen im Wörterbuch." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wirkt nur mit Begriffen im Wörterbuch."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only works with terms in your dictionary."
+          }
+        }
+      }
+    },
     "Wörterbuch …" : {
       "localizations" : {
         "de" : {
@@ -1462,6 +1638,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“Parakeet Ultra” by Moondream (moondream/parakeet-ultra), based on “Parakeet TDT 0.6B v3” by NVIDIA (nvidia/parakeet-tdt-0.6b-v3), converted for Core ML by FluidInference (FluidInference/parakeet-ultra-coreml). Zack uses the weights unchanged."
+          }
+        }
+      }
+    },
+    "„Whisper large-v3 turbo“ von OpenAI, für Core ML umgewandelt von Argmax (argmaxinc/whisperkit-coreml), mit dem Tokenizer aus openai/whisper-large-v3. Zack lädt das Modell erst, wenn „Fachbegriffe gegenprüfen“ eingeschaltet wird, und nutzt die Gewichte unverändert." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Whisper large-v3 turbo“ von OpenAI, für Core ML umgewandelt von Argmax (argmaxinc/whisperkit-coreml), mit dem Tokenizer aus openai/whisper-large-v3. Zack lädt das Modell erst, wenn „Fachbegriffe gegenprüfen“ eingeschaltet wird, und nutzt die Gewichte unverändert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Whisper large-v3 turbo” by OpenAI, converted for Core ML by Argmax (argmaxinc/whisperkit-coreml), with the tokenizer from openai/whisper-large-v3. Zack downloads the model only when “Double-check terms” is turned on and uses the weights unchanged."
           }
         }
       }

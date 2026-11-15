@@ -65,6 +65,14 @@ extension Cleaner {
     #expect(!exact.usedCleaner)
 }
 
+@Test func checkAppliesOnlyToProseWithoutSignalOrSnippet() {
+    let processor = TextProcessor(snippets: [Snippet(name: "Gruß", text: "Viele Grüße")])
+    #expect(processor.checkApplies("Alles läuft.", context: RuleContext()))
+    #expect(!processor.checkApplies("Alles läuft.", context: RuleContext(mode: .code)))
+    #expect(!processor.checkApplies("Das Treffen ist am Dienstag, nein, am Mittwoch.", context: RuleContext()))
+    #expect(!processor.checkApplies("Baustein Gruß.", context: RuleContext()))
+}
+
 @Test func cursorJoinRunsAfterCleaner() async {
     let processor = TextProcessor(cleaner: StubCleaner(output: "Am Mittwoch."))
     let result = await processor.process(

@@ -26,15 +26,47 @@ import ZackCore
           record  [--language de|en] [--audio-dir bench/corpus/audio] [--id <case>] [--all]
                   (en: bench/corpus/audio-en)
           mic-check [--repeat 5] [--device <Name>]
-          run     --transcriber <id> [--language de|en] [--cleaner none] [--repeat 5]
-                  [--audio-dir bench/corpus/audio] [--results bench/results]
+          run     --transcriber <id> [--language de|en] [--cleaner none] [--check none] [--repeat 5]
+                  [--audio-dir bench/corpus/audio] [--results bench/results] [--prewarm]
                   (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
+          words   --results <file> [--language de|en] [--transcriber parakeet-ultra]
+                  [--corpus bench/corpus/cases.json] [--audio-dir bench/corpus/audio]
 
         transcribers: apple-speech, apple-dictation, parakeet-v3, parakeet-ultra
         cleaners:     none, apple-fm
+        checks:       none, whisper-terms
         """
     #expect(BenchCommand.usage == expected)
+}
+
+@Test func usageListsTheCheckOption() throws {
+    #expect(BenchCommand.usage.contains("[--check none]"))
+    let arguments = try Arguments(
+        ["zack-bench", "run", "--transcriber", "parakeet-ultra", "--check", "whisper-terms"], spec: BenchCommand.spec)
+    #expect(arguments["check"] == "whisper-terms")
+}
+
+@Test func runAcceptsThePrewarmFlag() throws {
+    let arguments = try Arguments(
+        ["zack-bench", "run", "--transcriber", "parakeet-ultra", "--prewarm"], spec: BenchCommand.spec)
+    #expect(arguments.isSet("prewarm"))
+}
+
+@Test func checksAreNoneAndWhisperTerms() throws {
+    #expect(Registry.checkIDs == ["none", "whisper-terms"])
+    #expect(try Registry.check("none") == nil)
+    #expect(try Registry.check("whisper-terms")?.id == "whisper-terms")
+    #expect(throws: ArgumentError.invalidValue(option: "--check", value: "nope", allowed: ["none", "whisper-terms"])) {
+        try Registry.check("nope")
+    }
+}
+
+@Test func wordsCommandIsKnown() throws {
+    let arguments = try Arguments(["zack-bench", "words", "--results", "x.json"], spec: BenchCommand.spec)
+    #expect(arguments.command == "words")
+    #expect(arguments["results"] == "x.json")
+    #expect(BenchCommand.usage.contains("  words   --results <file>"))
 }
 
 @Test func whisperIsNoLongerATranscriber() {

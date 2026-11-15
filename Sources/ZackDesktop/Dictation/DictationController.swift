@@ -72,8 +72,8 @@ public enum DictationLimits {
     /// ⌃⌥O replaces the cleaned text in place only this long after the insert; later it goes to the clipboard.
     static let ruleTextWindow: Duration = .seconds(10)
     static let failureVisible: Duration = .seconds(3)
-    /// The model cools down after 3 to 6 s without a call (probe 2026-10-29).
-    static let prewarmInterval: Duration = .seconds(3)
+    /// The model cools down after 3 to 6 s without a call (probe 2026-10-29). The bench replays it with `--prewarm`.
+    public static let prewarmInterval: Duration = .seconds(3)
     /// Longest wait for each focus read at release: the key-down snapshot, the recheck and a read after a change.
     static let recheckGrace: Duration = .milliseconds(100)
 }
@@ -510,9 +510,9 @@ public actor DictationController<C: Clock<Duration>> {
         }
         let recheck = keyDown == nil ? nil : focus.map { focus in Task { await focus.read(text: false) } }
         let processor = await makeProcessor()
-        let raw: String
+        let recognition: Recognition
         do {
-            raw = try await transcriber.transcribe(clip, hints: processor.vocabulary.terms)
+            recognition = try await transcriber.recognize(clip, hints: processor.vocabulary.terms)
         } catch {
             logger.error("recognition failed: \(String(describing: type(of: error)), privacy: .public)")
             // After Esc the audio kept for "Erneut versuchen" stays as it was; it may belong to a newer retry. A
@@ -539,7 +539,7 @@ public actor DictationController<C: Clock<Duration>> {
         let snapshot = await settledSnapshot(keyDown: keyDown, recheck: recheck)
         let resolved = ContextResolver.resolve(snapshot, memory: memory.text(app: app, element: snapshot.element))
         let context = RuleContext(mode: mode, textBeforeCursor: resolved.text, language: language)
-        let result = await process(raw, context: context, with: processor, recognition: current)
+        let result = await process(recognition, audio: clip, context: context, with: processor, recognition: current)
         // Replaced after Esc by a newer dictation or retry: cleaner session, password flag and last dictation are
         // that one's now.
         guard current == session else { return }
@@ -582,12 +582,14 @@ public actor DictationController<C: Clock<Duration>> {
         } else {
             signposts?.discardInsert()
         }
+        let checkMilliseconds = result.checkDuration.map { Int($0 / .milliseconds(1)) } ?? 0
         logger.info(
-            "inserted: audio \(clip.duration, format: .fixed(precision: 1), privacy: .public) s, cleaner \(result.usedCleaner, privacy: .public), rejected \(result.cleanerRejected, privacy: .public), context \(resolved.source.rawValue, privacy: .public), mode \(mode.rawValue, privacy: .public)"
+            "inserted: audio \(clip.duration, format: .fixed(precision: 1), privacy: .public) s, cleaner \(result.usedCleaner, privacy: .public), rejected \(result.cleanerRejected, privacy: .public), marked \(result.markedWords, privacy: .public), checked \(result.checked, privacy: .public), replaced \(result.usedCheck, privacy: .public), check \(checkMilliseconds, privacy: .public) ms, context \(resolved.source.rawValue, privacy: .public), mode \(mode.rawValue, privacy: .public)"
         )
-        // Only an accepted cleaner output differs from the rule text; ⌃⌥O has something to put back then.
+        // Only an accepted cleaner output or a replacement by the term check differs from the rule text; ⌃⌥O has
+        // something to put back then.
         ruleTextEntry =
-            result.usedCleaner && !keyDownIsSecure
+            (result.usedCleaner || result.usedCheck) && !keyDownIsSecure
             ? RuleTextEntry(
                 app: app, element: snapshot.element, start: snapshot.selection?.location, inserted: result.final,
                 ruleText: result.ruledFinal, ruleBody: result.ruled, at: clock.now, session: current,
@@ -596,14 +598,21 @@ public actor DictationController<C: Clock<Duration>> {
         scheduleReset(after: DictationLimits.insertedVisible)
     }
 
-    /// Rules and cleanup in a task that `abort` cancels; after an Esc during the recognition it is cancelled at once,
-    /// so the cleaner is not waited for and the rule text comes back.
+    /// Rules, cleanup and term check in a task that `abort` cancels; after an Esc during the recognition it is
+    /// cancelled at once, so neither cleaner nor second opinion is waited for and the rule text comes back. The pill
+    /// shows the term check like a cleanup.
     private func process(
-        _ raw: String, context: RuleContext, with processor: TextProcessor, recognition current: Int
+        _ recognized: Recognition, audio: AudioClip, context: RuleContext, with processor: TextProcessor,
+        recognition current: Int
     ) async -> ProcessingResult {
         let aborted = isAborted(current)
-        if !aborted, processor.needsCleaner(raw, context: context) { publish(.cleaning) }
-        let task = Task { await processor.process(raw, context: context) }
+        if !aborted,
+            processor.needsCleaner(recognized.text, context: context)
+                || processor.needsCheck(recognized, audio: audio, context: context)
+        {
+            publish(.cleaning)
+        }
+        let task = Task { await processor.process(recognized, audio: audio, context: context) }
         if aborted { task.cancel() } else { processing = task }
         let result = await task.value
         if processing == task { processing = nil }

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional term check (Settings > General): when Zack is unsure about a word, Whisper listens again with your
+  dictionary and replaces only that word. Off by default; turning it on downloads a model once (about 650 MB).
+
 ## [1.1.3] - 2026-11-13
 
 ### Removed
