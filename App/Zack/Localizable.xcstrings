@@ -735,7 +735,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "When Zack is unsure about a word, Whisper listens to the recording again with the terms from your vocabulary and replaces only that word. Downloads a model once (%@). Everything stays on this Mac."
+            "value" : "When Zack is unsure about a word, Whisper listens to the recording again with the terms from your dictionary and replaces only that word. Downloads a model once (%@). Everything stays on this Mac."
           }
         }
       }
@@ -1423,7 +1423,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Only works with terms in your vocabulary."
+            "value" : "Only works with terms in your dictionary."
           }
         }
       }
