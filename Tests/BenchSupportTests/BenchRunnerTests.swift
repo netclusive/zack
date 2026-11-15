@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 import Testing
 import ZackCore
 import ZackTestSupport
@@ -228,6 +229,91 @@ private func homebrewFixture() throws -> (Corpus, URL) {
         #expect(!json.contains(key), "\(key)")
     }
     #expect(json.contains("finalWer"))
+}
+
+/// Records the cleaner calls and the replayed recording time in one order.
+private final class RecordingCleaner: Cleaner {
+    enum Event: Equatable {
+        case prewarm(TextMode, [String], DictationLanguage)
+        case clean(TextMode, [String], DictationLanguage)
+        case discard
+        case sleep(Duration)
+    }
+
+    let id = "recording-cleaner"
+    private let log = Mutex<[Event]>([])
+    var events: [Event] { log.withLock { $0 } }
+
+    func record(_ event: Event) {
+        log.withLock { $0.append(event) }
+    }
+
+    func prepare() async throws {}
+
+    func clean(_ text: String, mode: TextMode, vocabulary: [String], language: DictationLanguage) async throws
+        -> String
+    {
+        record(.clean(mode, vocabulary, language))
+        return "Das Treffen ist am Mittwoch."
+    }
+
+    func prewarm(mode: TextMode, vocabulary: [String], language: DictationLanguage) {
+        record(.prewarm(mode, vocabulary, language))
+    }
+
+    func discardPrewarmed() {
+        record(.discard)
+    }
+}
+
+/// One correction case with a signal word, so the cleaner runs; its clip lasts `seconds`.
+private func correctionFixture(seconds: Int) throws -> (Corpus, URL) {
+    let json = """
+        {"vocabulary":["Homebrew"],"snippets":[],"cases":[
+         {"id":"c","group":"correction","mode":"prose","spoken":"Das Treffen ist am Dienstag, nein, am Mittwoch.",
+          "expected":"Das Treffen ist am Mittwoch.","terms":[]}]}
+        """
+    let directory = FileManager.default.temporaryDirectory.appending(path: "zack-runner-\(UUID().uuidString)")
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    try WAVFile.encode(AudioClip(samples: Array(repeating: 0.1, count: 16_000 * seconds)))
+        .write(to: directory.appending(path: "c.wav"))
+    return (try Corpus.decode(Data(json.utf8)), directory)
+}
+
+@Test func prewarmReplaysTheRecordingLikeTheApp() async throws {
+    let (corpus, directory) = try correctionFixture(seconds: 7)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let cleaner = RecordingCleaner()
+    let runner = BenchRunner(
+        corpus: corpus, transcriber: FakeTranscriber { _, _ in "Das Treffen ist am Dienstag, nein, am Mittwoch." },
+        cleaner: cleaner, audioDirectory: directory, repeats: 1, prewarm: true,
+        sleep: { cleaner.record(.sleep($0)) }, log: { _ in })
+    let result = try await runner.run()
+    // Warm-up clean, then the 7 s recording with a prewarm every 3 s, then the timed clean and the discard. The
+    // prewarm carries what the clean gets, or the cleaner would not take the readied session.
+    let prewarm = RecordingCleaner.Event.prewarm(.prose, ["Homebrew"], .german)
+    let clean = RecordingCleaner.Event.clean(.prose, ["Homebrew"], .german)
+    #expect(
+        cleaner.events == [
+            clean, prewarm, .sleep(.seconds(3)), prewarm, .sleep(.seconds(3)), prewarm, .sleep(.seconds(1)), clean,
+            .discard,
+        ])
+    #expect(result.prewarm == true)
+}
+
+@Test func runWithoutPrewarmNeitherWaitsNorPrewarms() async throws {
+    let (corpus, directory) = try correctionFixture(seconds: 7)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let cleaner = RecordingCleaner()
+    let runner = BenchRunner(
+        corpus: corpus, transcriber: FakeTranscriber { _, _ in "Das Treffen ist am Dienstag, nein, am Mittwoch." },
+        cleaner: cleaner, audioDirectory: directory, repeats: 1, sleep: { cleaner.record(.sleep($0)) },
+        log: { _ in })
+    let result = try await runner.run()
+    let clean = RecordingCleaner.Event.clean(.prose, ["Homebrew"], .german)
+    #expect(cleaner.events == [clean, clean])
+    #expect(result.prewarm == nil)
+    #expect(!String(decoding: try JSONEncoder().encode(result), as: UTF8.self).contains("prewarm"))
 }
 
 @Test func runnerAppliesItsLanguageToRulesAndWordErrorRate() async throws {

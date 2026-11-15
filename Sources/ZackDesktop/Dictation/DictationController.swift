@@ -72,8 +72,8 @@ public enum DictationLimits {
     /// ⌃⌥O replaces the cleaned text in place only this long after the insert; later it goes to the clipboard.
     static let ruleTextWindow: Duration = .seconds(10)
     static let failureVisible: Duration = .seconds(3)
-    /// The model cools down after 3 to 6 s without a call (probe 2026-10-29).
-    static let prewarmInterval: Duration = .seconds(3)
+    /// The model cools down after 3 to 6 s without a call (probe 2026-10-29). The bench replays it with `--prewarm`.
+    public static let prewarmInterval: Duration = .seconds(3)
     /// Longest wait for each focus read at release: the key-down snapshot, the recheck and a read after a change.
     static let recheckGrace: Duration = .milliseconds(100)
 }

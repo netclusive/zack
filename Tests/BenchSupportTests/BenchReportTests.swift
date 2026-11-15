@@ -546,3 +546,20 @@ private func timed(
     }
     #expect(BenchReport.latest(runs).count == 2)
 }
+
+@Test func latestKeepsPrewarmedRunsApart() {
+    let runs = [nil, true].map { prewarm in
+        RunResult(
+            date: Date(), transcriber: "parakeet-ultra", cleaner: "apple-fm", audioDir: "a", peakMemoryMB: 1,
+            prewarm: prewarm, cases: [])
+    }
+    #expect(BenchReport.latest(runs).count == 2)
+}
+
+@Test func reportMarksAPrewarmedCleaner() {
+    let run = RunResult(
+        date: Date(), transcriber: "parakeet-ultra", cleaner: "apple-fm", audioDir: "a", peakMemoryMB: 1,
+        prewarm: true, cases: [])
+    let table = BenchReport.markdown([RunSummary(run)])
+    #expect(table.contains("| parakeet-ultra | apple-fm vorgewärmt | a |"), "\(table)")
+}

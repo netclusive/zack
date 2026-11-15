@@ -9,7 +9,7 @@ public enum BenchCommand {
             "corpus", "audio-dir", "voice", "id", "transcriber", "cleaner", "repeat", "results", "device", "language",
             "check",
         ],
-        flags: ["all"])
+        flags: ["all", "prewarm"])
 
     /// Runs the command in `CommandLine.arguments` and exits.
     public static func main() async -> Never {
@@ -54,7 +54,7 @@ public enum BenchCommand {
                   (en: bench/corpus/audio-en)
           mic-check [--repeat 5] [--device <Name>]
           run     --transcriber <id> [--language de|en] [--cleaner none] [--check none] [--repeat 5]
-                  [--audio-dir bench/corpus/audio] [--results bench/results]
+                  [--audio-dir bench/corpus/audio] [--results bench/results] [--prewarm]
                   (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
           words   --results <file> [--language de|en] [--transcriber parakeet-ultra]
@@ -234,7 +234,8 @@ private struct Invocation {
             corpus: try loadCorpus(), transcriber: try Registry.transcriber(transcriberID, language: defaults.language),
             cleaner: try Registry.cleaner(arguments["cleaner"] ?? "none"),
             audioDirectory: URL(filePath: arguments["audio-dir"] ?? defaults.audioDirectory),
-            repeats: repeats, language: defaults.language, check: try Registry.check(arguments["check"] ?? "none"))
+            repeats: repeats, language: defaults.language, check: try Registry.check(arguments["check"] ?? "none"),
+            prewarm: arguments.isSet("prewarm"))
         let result = try await runner.run()
         let directory = URL(filePath: arguments["results"] ?? "bench/results")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -242,7 +243,7 @@ private struct Invocation {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let stamp = formatter.string(from: result.date).replacingOccurrences(of: ":", with: "-")
             .replacingOccurrences(of: ".", with: "-")
-        let suffix = result.check.map { "-\($0)" } ?? ""
+        let suffix = (result.check.map { "-\($0)" } ?? "") + (result.prewarm == true ? "-prewarm" : "")
         let file = directory.appending(path: "\(stamp)-\(result.transcriber)-\(result.cleaner)\(suffix).json")
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

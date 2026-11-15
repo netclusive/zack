@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import ZackCore
+import ZackDesktop
 
 enum BenchError: Error, CustomStringConvertible {
     case warmUpFailed(String, String)
@@ -32,6 +33,10 @@ struct BenchRunner {
     var language: DictationLanguage = .german
     /// Term check: recognized words and audio go to the processor's second opinion.
     var check: BenchCheck?
+    /// Replays each recording before its recognition like the app: a cleaner prewarm every
+    /// `DictationLimits.prewarmInterval` for the clip's duration, and a discard after the case.
+    var prewarm = false
+    var sleep: @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }
     var log: (String) -> Void = { print($0) }
 
     /// Timings and output of one case in one pass.
@@ -128,10 +133,26 @@ struct BenchRunner {
             audioDir: audioDirectory.lastPathComponent, peakMemoryMB: peakFootprint,
             loadMemoryMB: loadFootprint,
             osBuild: ProcessInfo.processInfo.operatingSystemVersionString, check: check?.id,
-            checkLoadMs: checkLoadMs, promptTokens: promptTokens, cases: results)
+            checkLoadMs: checkLoadMs, promptTokens: promptTokens, prewarm: prewarm ? true : nil, cases: results)
+    }
+
+    /// The recording before the release, outside the timed regions: the cleaner gets what the processor's clean
+    /// will get, or it would not take the readied session.
+    private func replayRecording(_ clip: AudioClip, mode: TextMode, processor: TextProcessor) async {
+        let duration = Duration.seconds(clip.duration)
+        var elapsed = Duration.zero
+        while elapsed < duration {
+            cleaner?.prewarm(mode: mode, vocabulary: processor.vocabulary.terms, language: language)
+            let step = min(DictationLimits.prewarmInterval, duration - elapsed)
+            await sleep(step)
+            elapsed += step
+        }
     }
 
     private func measure(_ clip: AudioClip, mode: TextMode, processor: TextProcessor, hints: [String]) async -> Pass {
+        if prewarm { await replayRecording(clip, mode: mode, processor: processor) }
+        // Like the app after every dictation: a session no cleanup took would only go stale.
+        defer { if prewarm { cleaner?.discardPrewarmed() } }
         let clock = ContinuousClock()
         var current = Pass()
         var recognition = Recognition(text: "")

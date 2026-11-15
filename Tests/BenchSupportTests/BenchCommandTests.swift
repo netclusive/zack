@@ -27,7 +27,7 @@ import ZackCore
                   (en: bench/corpus/audio-en)
           mic-check [--repeat 5] [--device <Name>]
           run     --transcriber <id> [--language de|en] [--cleaner none] [--check none] [--repeat 5]
-                  [--audio-dir bench/corpus/audio] [--results bench/results]
+                  [--audio-dir bench/corpus/audio] [--results bench/results] [--prewarm]
                   (en: --audio-dir bench/corpus/audio-en)
           report  [--results bench/results] [--all]
           words   --results <file> [--language de|en] [--transcriber parakeet-ultra]
@@ -45,6 +45,12 @@ import ZackCore
     let arguments = try Arguments(
         ["zack-bench", "run", "--transcriber", "parakeet-ultra", "--check", "whisper-terms"], spec: BenchCommand.spec)
     #expect(arguments["check"] == "whisper-terms")
+}
+
+@Test func runAcceptsThePrewarmFlag() throws {
+    let arguments = try Arguments(
+        ["zack-bench", "run", "--transcriber", "parakeet-ultra", "--prewarm"], spec: BenchCommand.spec)
+    #expect(arguments.isSet("prewarm"))
 }
 
 @Test func checksAreNoneAndWhisperTerms() throws {

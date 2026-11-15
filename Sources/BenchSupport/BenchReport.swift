@@ -139,12 +139,14 @@ public struct RunResult: Codable, Sendable {
     public let checkLoadMs: Double?
     /// Largest prompt the term check sent in this run, in tokens; nil without one or if unknown.
     public let promptTokens: Int?
+    /// The cleaner was prewarmed during each replayed recording (`--prewarm`); nil without.
+    public let prewarm: Bool?
     public let cases: [CaseResult]
 
     public init(
         date: Date, transcriber: String, cleaner: String, audioDir: String, peakMemoryMB: Double,
         loadMemoryMB: Double = 0, osBuild: String? = nil, check: String? = nil, checkLoadMs: Double? = nil,
-        promptTokens: Int? = nil, cases: [CaseResult]
+        promptTokens: Int? = nil, prewarm: Bool? = nil, cases: [CaseResult]
     ) {
         self.date = date
         self.transcriber = transcriber
@@ -156,6 +158,7 @@ public struct RunResult: Codable, Sendable {
         self.check = check
         self.checkLoadMs = checkLoadMs
         self.promptTokens = promptTokens
+        self.prewarm = prewarm
         self.cases = cases
     }
 }
@@ -246,7 +249,7 @@ public enum BenchReport {
     public static func latest(_ runs: [RunResult]) -> [RunResult] {
         var newest: [String: RunResult] = [:]
         for run in runs {
-            let key = "\(run.transcriber)|\(run.cleaner)|\(run.check ?? "none")|\(run.audioDir)"
+            let key = "\(run.transcriber)|\(run.cleaner)|\(run.check ?? "none")|\(run.prewarm == true)|\(run.audioDir)"
             if let existing = newest[key], existing.date >= run.date { continue }
             newest[key] = run
         }
@@ -284,7 +287,8 @@ public enum BenchReport {
                 memory(s.run.loadMemoryMB, for: s.run), memory(s.run.peakMemoryMB, for: s.run),
             ]
             let recognition = s.run.check.map { "\(s.run.transcriber) + \($0)" } ?? s.run.transcriber
-            let cells = [recognition, s.run.cleaner, s.run.audioDir] + quality + latency + rest
+            let cleaner = s.run.prewarm == true ? "\(s.run.cleaner) vorgewärmt" : s.run.cleaner
+            let cells = [recognition, cleaner, s.run.audioDir] + quality + latency + rest
             lines.append("| " + cells.joined(separator: " | ") + " |")
         }
         var osBuilds: [String] = []
