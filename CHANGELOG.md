@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-21
+
 ### Added
 
 - German times are written as "16:45 Uhr", whether spoken in words or recognized as "16.45 Uhr", and a range as
@@ -175,7 +177,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark tool that compares engines on a fixed set of dictation cases, with synthetic or microphone recordings and a summary report.
 - An open language model running on the Mac's GPU can be benchmarked as an alternative AI cleanup.
 
-[Unreleased]: https://github.com/netclusive/zack/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/netclusive/zack/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/netclusive/zack/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/netclusive/zack/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/netclusive/zack/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/netclusive/zack/compare/v1.1.2...v1.1.3
