@@ -1,4 +1,4 @@
 /// Package version, kept in sync with CHANGELOG.md.
 public enum Zack {
-    public static let version = "1.2.1"
+    public static let version = "1.3.0-dev"
 }
