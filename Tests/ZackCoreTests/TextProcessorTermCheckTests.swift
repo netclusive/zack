@@ -53,6 +53,18 @@ private func processor(
     #expect(result.body == homebrew)
 }
 
+/// The time rule changes the words around the marked one; the splice must still replace only that word.
+@Test(arguments: ["Um 16.45 Uhr ziehe ich Homebrew.", "Um 16:45 Uhr ziehe ich Homebrew."])
+func checkReplacesTheMarkedWordNextToAFormattedTime(answer: String) async {
+    let opinion = RecordingSecondOpinion(.answer(answer))
+    let result = await processor(opinion).process(
+        recognition("Um 16.45 Uhr ziehe ich Homeroot.", low: ["Homeroot": 0.35]), audio: second,
+        context: RuleContext())
+    #expect(result.ruled == "Um 16:45 Uhr ziehe ich Homeroot.")
+    #expect(result.body == "Um 16:45 Uhr ziehe ich Homebrew.")
+    #expect(result.usedCheck)
+}
+
 @Test func focusCarriesTheMarkedRanges() async {
     let opinion = RecordingSecondOpinion(.answer("Den Bericht von PHPStan schicke ich."))
     let result = await processor(opinion, vocabulary: "PHPStan").process(

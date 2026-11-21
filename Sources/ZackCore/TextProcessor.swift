@@ -49,6 +49,8 @@ public struct TextProcessor: Sendable {
     public let checkTimeout: Duration
     private let snippetRule: SnippetRule
     private let rules: [any TextRule]
+    /// Number formats; also applied to an accepted cleaner output, which does not run through `rules`.
+    private static let formatting: [any TextRule] = [TimeRule()]
     private let cursorRule: CursorJoinRule
 
     public init(
@@ -63,7 +65,7 @@ public struct TextProcessor: Sendable {
         self.secondOpinion = secondOpinion
         self.checkTimeout = checkTimeout
         snippetRule = SnippetRule(snippets)
-        rules = [VocabularyRule(vocabulary), FillerRule(), CodeModeRule()]
+        rules = [VocabularyRule(vocabulary), FillerRule()] + Self.formatting + [CodeModeRule()]
     }
 
     public func process(_ raw: String, context: RuleContext) async -> ProcessingResult {
@@ -97,6 +99,7 @@ public struct TextProcessor: Sendable {
         let duration = ContinuousClock.now - start
         let accepted = cleaned.flatMap { Plausibility.accept(input: ruled, output: $0) ? $0 : nil }
             .map { Self.restoringTerminator(of: ruled, in: $0) }
+            .map { output in Self.formatting.reduce(output) { $1.apply($0, context: context) } }
         let body = accepted ?? ruled
         return ProcessingResult(
             raw: raw, ruled: ruled, final: cursorRule.apply(body, context: context),

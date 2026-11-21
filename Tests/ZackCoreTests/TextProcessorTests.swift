@@ -206,6 +206,21 @@ func englishCommaSurvivesFillerRemoval(text: String) async {
     #expect(result.usedCleaner || result.cleanerRejected)
 }
 
+@Test func timesAreWrittenWithAColon() async {
+    let result = await TextProcessor().process(
+        "Wir treffen uns um sechzehn Uhr fünfundvierzig.", context: RuleContext())
+    #expect(result.final == "Wir treffen uns um 16:45 Uhr.")
+}
+
+/// The cleaner output is not run through the whole chain again, but it gets the same number formats.
+@Test func cleanerOutputGetsTheTimeFormat() async {
+    let processor = TextProcessor(cleaner: StubCleaner(output: "Das Treffen ist um 16.45 Uhr."))
+    let result = await processor.process("Das Treffen ist um 14 Uhr, nein, um 16.45 Uhr.", context: RuleContext())
+    #expect(result.usedCleaner)
+    #expect(result.final == "Das Treffen ist um 16:45 Uhr.")
+    #expect(result.ruledFinal == "Das Treffen ist um 14 Uhr, nein, um 16:45 Uhr.")
+}
+
 @Test func englishFillerWithoutCommaDoesNotCountAsComma() async {
     let text = "There is no problem, um, with the server."
     let context = RuleContext(language: .english)
