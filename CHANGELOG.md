@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Binary byte units become symbols even when the recognition spells them differently, such as "gibbibyte",
+  "tebi byte" or "TB Byte" ("64 GiB", "2 TiB"), and unit words are recognized in lower case too.
+- "pro Sekunde" after a unit symbol becomes "/s", as in "20 MB/s".
+
 ## [1.3.0] - 2026-11-21
 
 ### Added

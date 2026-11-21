@@ -39,7 +39,41 @@ func unitRuleWritesUnitSymbols(input: String, expected: String) {
     #expect(rule.apply(expected, context: RuleContext()) == expected)
 }
 
+/// Spellings Parakeet produced from Sven's dictation, and its habit of writing a binary prefix as "TB Byte".
 @Test(arguments: [
+    ("Die Partition hat 64 gibbibyte.", "Die Partition hat 64 GiB."),
+    ("vier Kibibyte", "4 KiB"),
+    ("512 maybibyte", "512 MiB"),
+    ("zwei tebi byte", "2 TiB"),
+    ("64 Gibi Byte", "64 GiB"),
+    ("64 Gibi-Byte", "64 GiB"),
+    ("2 Pebibyte", "2 PiB"),
+    ("16 Giga Byte", "16 GB"),
+    ("100 Mega Bit pro Sekunde", "100 Mbit/s"),
+    ("5 meter", "5 m"),
+    ("2 TB Byte", "2 TiB"),
+    ("64 GB-Byte", "64 GiB"),
+    ("4 KB Byte", "4 KiB"),
+    ("512 MB-Byte", "512 MiB"),
+    ("2TB Byte", "2 TiB"),
+    ("zwei TB", "2 TB"),
+    ("20 MB pro Sekunde", "20 MB/s"),
+    ("10 Gbit pro Sekunde", "10 Gbit/s"),
+    ("zehn MB pro Sekunde", "10 MB/s"),
+    ("100 km pro Stunde", "100 km/h"),
+])
+func unitRuleReadsRecognitionVariants(input: String, expected: String) {
+    let rule = UnitRule()
+    #expect(rule.apply(input, context: RuleContext()) == expected)
+    #expect(rule.apply(expected, context: RuleContext()) == expected)
+}
+
+@Test(arguments: [
+    "Byte für Byte",
+    "Das GB-Byte ist unklar.",
+    "2 TiB",
+    "20 MB/s",
+    "5 km pro Sekunde",
     "64 GB Arbeitsspeicher",
     "ein paar Gigabyte",
     "Gigabyte ist ein Hersteller.",
