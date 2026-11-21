@@ -5,7 +5,7 @@
 #                it asks nothing, so start it only for an approved release
 #   --dry-run    the same without push, publish and post-check
 #   --local      Apple Development build for the local test feed, signed with the test key; no notarization, no network
-#   --self-test  checks the CHANGELOG, appcast and version helpers without any network
+#   --self-test  checks the CHANGELOG, appcast, version and advisory helpers and the review list without any network
 # Output goes to .build/zack-release/<version>/ (.build/release belongs to SwiftPM). Team IDs come from the ignored
 # App/Local.xcconfig and are never printed.
 set -euo pipefail
@@ -79,6 +79,35 @@ version_in_range() {
         esac
     done
     return 0
+}
+
+# reviewed_reason <ghsa id> <pinned version> [list]: print the reason a review recorded for exactly this advisory and
+# pinned version; exit 1 if there is none, so a new pinned version needs a new review.
+reviewed_reason() {
+    local list="${3:-scripts/reviewed-advisories.tsv}"
+    [[ -f "$list" && "$1" == GHSA-* ]] || return 1
+    awk -F '\t' -v id="$1" -v version="$2" '
+        $1 == id && $2 == version && $3 ~ /[^[:space:]]/ { print $3; found = 1; exit }
+        END { exit(found ? 0 : 1) }
+    ' "$list"
+}
+
+# advisory_verdict <ghsa id> <pinned version> <range> [list]: print the verdict for one affected range; exit 1 if it
+# stops the release, that is the pinned version lies inside the range or the range cannot be read, and no review of
+# this advisory for this version is listed.
+advisory_verdict() {
+    local reason code=0
+    version_in_range "$2" "$3" || code=$?
+    if ((code == 1)); then
+        echo "not affected"
+        return 0
+    fi
+    if reason="$(reviewed_reason "$1" "$2" "${4:-}")"; then
+        echo "reviewed for $2: $reason"
+        return 0
+    fi
+    if ((code == 0)); then echo "AFFECTED"; else echo "RANGE UNREADABLE"; fi
+    return 1
 }
 
 # write_appcast <version> <zip-url> <sign-attributes> <notes-file> <out>
@@ -285,12 +314,13 @@ gate() {
 }
 
 # Step 3: Swift has no SCA tool in the stack matrix; check the advisories of the pinned packages instead. One line per
-# affected range; a pinned version inside a range, or a missing or unreadable range, stops the release for a review.
+# affected range; a pinned version inside a range, or a missing or unreadable range, stops the release for a review,
+# unless scripts/reviewed-advisories.tsv records a review of that advisory for the pinned version.
 advisories() {
     step "security advisories of the pinned packages"
-    local repo pinned list date severity summary range verdict review=0
+    local repo pinned list id date severity summary range verdict review=0
     local format='.[] | select(.withdrawn_at == null)'
-    format+=' | [((.published_at // "")[0:10]), (.severity // ""), (.summary // "")]'
+    format+=' | [(.ghsa_id // ""), ((.published_at // "")[0:10]), (.severity // ""), (.summary // "")]'
     format+=' + ([.vulnerabilities[]? | .vulnerable_version_range // "-"] | if length == 0 then ["-"] else . end'
     format+=' | .[] | [.]) | map(if . == "" then "-" else . end) | @tsv'
     for repo in sparkle-project/Sparkle FluidInference/FluidAudio; do
@@ -300,17 +330,9 @@ advisories() {
             || die "cannot list the advisories of $repo"
         echo "  $repo, pinned $pinned:"
         [[ -n "$list" ]] || { echo "    none"; continue; }
-        while IFS=$'\t' read -r date severity summary range; do
-            if version_in_range "$pinned" "$range"; then
-                verdict="AFFECTED"
-                review=1
-            elif (($? == 1)); then
-                verdict="not affected"
-            else
-                verdict="RANGE UNREADABLE"
-                review=1
-            fi
-            echo "    $date  $severity  $summary  (affected: $range): $verdict"
+        while IFS=$'\t' read -r id date severity summary range; do
+            verdict="$(advisory_verdict "$id" "$pinned" "$range")" || review=1
+            echo "    $id  $date  $severity  $summary  (affected: $range): $verdict"
         done <<< "$list"
     done
     ((review == 0)) || die "an advisory may affect a pinned package; review it before releasing"
@@ -716,6 +738,33 @@ XCCONFIG
         version_in_range "$version" "$range" && got=0 || got=$?
         [[ "$got" == "$code" ]] || { echo "self-test: version_in_range $version '$range'" >&2; return 1; }
     done
+
+    # A review counts only for the advisory and the pinned version it names; another version needs a new review.
+    printf '# comment\nGHSA-aaaa-bbbb-cccc\t2.10.1\tonly .pkg updates\nGHSA-dddd-eeee-ffff\t2.10.1\t \n' \
+        > "$dir/reviewed.tsv"
+    local id status
+    for case in 'GHSA-aaaa-bbbb-cccc|2.10.1|All|0|reviewed for 2.10.1: only .pkg updates' \
+        'GHSA-aaaa-bbbb-cccc|2.10.1|<= 2.10.1|0|reviewed for 2.10.1: only .pkg updates' \
+        'GHSA-aaaa-bbbb-cccc|2.11.0|All|1|RANGE UNREADABLE' \
+        'GHSA-aaaa-bbbb-cccc|2.11.0|<= 2.11.0|1|AFFECTED' \
+        'GHSA-dddd-eeee-ffff|2.10.1|All|1|RANGE UNREADABLE' \
+        'GHSA-zzzz-zzzz-zzzz|2.10.1|<= 2.9.5|0|not affected' \
+        '-|2.10.1|All|1|RANGE UNREADABLE'; do
+        IFS='|' read -r id version range code want <<< "$case"
+        got="$(advisory_verdict "$id" "$version" "$range" "$dir/reviewed.tsv")" && status=0 || status=$?
+        [[ "$status" == "$code" && "$got" == "$want" ]] \
+            || { echo "self-test: advisory_verdict $id $version '$range'" >&2; return 1; }
+    done
+    got="$(advisory_verdict GHSA-aaaa-bbbb-cccc 2.10.1 All "$dir/missing.tsv")" && status=0 || status=$?
+    [[ "$status" == 1 ]] || { echo "self-test: advisory_verdict without a review list" >&2; return 1; }
+
+    # The tracked list: every entry a GHSA id, a dotted version and a reason, separated by tabs.
+    local entry_version reason
+    while IFS=$'\t' read -r id entry_version reason; do
+        [[ -z "$id" || "$id" == \#* ]] && continue
+        [[ "$id" =~ ^GHSA(-[a-z0-9]{4}){3}$ && "$entry_version" =~ ^[0-9]+(\.[0-9]+)*$ && "$reason" =~ [^[:space:]] ]] \
+            || { echo "self-test: reviewed-advisories.tsv entry $id" >&2; return 1; }
+    done < scripts/reviewed-advisories.tsv
 
     # Without --publish the script only prints its usage; no other argument publishes.
     "$BASH" scripts/release.sh > /dev/null 2>&1 && got=0 || got=$?

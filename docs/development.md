@@ -32,6 +32,10 @@ builds a debug app with a "Debug" menu of test tools (paste test, context readin
 scan, lint and version checks alone, `--skip-static` the tests and builds; `scripts/release.sh` checks the security
 advisories in between and stops if a pinned package lies in an affected range or a range cannot be read.
 
+After reviewing such an advisory, record the result in `scripts/reviewed-advisories.tsv`: one line per advisory, with
+the GHSA id, the pinned version reviewed and the reason, separated by tabs. The release then goes ahead for exactly that
+version; after a package update it stops again until the advisory is reviewed for the new version.
+
 Logic belongs in the package targets, where `swift test` covers it; `App/Zack` keeps only the SwiftUI views and the
 wiring, and has no test target of its own.
 

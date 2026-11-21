@@ -1,0 +1,4 @@
+# Security advisories reviewed for a pinned package version, read by scripts/release.sh.
+# One entry per line, separated by tabs: GHSA id, the pinned version reviewed, why the release may go ahead.
+# A new pinned version needs a new review and a new line.
+GHSA-gcjm-h3jh-p2vc	2.10.1	affects only .pkg and .mpkg package updates; Zack ships Zack.app in a ZIP, and the advisory names app bundle updates as not affected (reviewed 2026-11-21)
