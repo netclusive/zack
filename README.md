@@ -68,11 +68,13 @@ active window.
   Zack does not insert there and shows "Field Changed · ⌃⌥V Inserts"; ⌃⌥V then inserts the text at the new place.
   This needs Accessibility and an app that reports its focused field; where an app reports none or answers too
   slowly, Zack inserts as before.
-- Numbers and times (German): numbers from 13 are written in digits ("246", "5000", from five digits with dots:
-  "12.500"), one to twelve stay words, and decimals become digits ("3,5"). A time with hours and minutes is written
-  as "16:45 Uhr", whether you say "sechzehn Uhr fünfundvierzig" or the recognition writes "16.45 Uhr"; a range
-  becomes "14:30 bis 15:40 Uhr". Times without minutes, "halb acht", ordinals, compounds such as "zwanzigjährig"
-  and phrases such as "Tausend Dank" stay as spoken.
+- Numbers, times and units (German): numbers from 13 are written in digits ("246", "5000", from five digits with
+  dots: "12.500"), one to twelve stay words, and decimals become digits ("3,5"). A time with hours and minutes is
+  written as "16:45 Uhr", whether you say "sechzehn Uhr fünfundvierzig" or the recognition writes "16.45 Uhr"; a
+  range becomes "14:30 bis 15:40 Uhr". After a number, units become symbols ("5 m", "2 TB", "600 W",
+  "100 Mbit/s", "3000 kWh", "13,5 %"), and a number before a unit is always written in digits ("zwei Terabyte"
+  becomes "2 TB"). Times without minutes, "halb acht", ordinals, compounds such as "zwanzigjährig", phrases such as
+  "Tausend Dank", units of time, "Euro" and "Grad" stay as spoken; "Grad Celsius" becomes "°C".
 
 ### Keyboard shortcuts
 

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "14:30 bis 15:40 Uhr".
 - German numbers from 13 are written in digits, from five digits with dots ("12.500"), and decimals as "3,5"; one
   to twelve stay words.
+- After a number, German units are written as symbols, such as "5 m", "2 TB", "100 Mbit/s" or "13,5 %"; units of
+  time, "Euro" and "Grad" stay words.
 
 ## [1.2.1] - 2026-11-21
 

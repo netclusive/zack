@@ -50,7 +50,7 @@ public struct TextProcessor: Sendable {
     private let snippetRule: SnippetRule
     private let rules: [any TextRule]
     /// Number formats; also applied to an accepted cleaner output, which does not run through `rules`.
-    private static let formatting: [any TextRule] = [TimeRule(), NumberRule()]
+    private static let formatting: [any TextRule] = [TimeRule(), NumberRule(), UnitRule()]
     private let cursorRule: CursorJoinRule
 
     public init(
