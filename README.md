@@ -141,8 +141,10 @@ elsewhere.
   narrower, and keeps only the current line of it. It stays in memory only, is never logged and is dropped when
   the dictation ends. Where an app does not expose it, Zack falls back to its last own dictation until the next key
   press, the next click or an app switch.
-- **Microphone readiness:** while the microphone is open between dictations, only the last half second is kept in
-  memory, continuously overwritten, never recognized or stored, and macOS shows the orange microphone indicator.
+- **Microphone readiness:** while the microphone is open between dictations, Zack keeps the last half second in
+  memory, continuously overwritten and never stored. When you press the dictation key, that half second becomes
+  the start of the recording and is recognized with it, so words spoken just before the key press can appear in
+  the text. macOS shows the orange microphone indicator.
 - **Playback pause:** to see whether Spotify is playing, Zack asks macOS which apps are sending audio right now
   (app identifiers only, no titles). It pauses and resumes Spotify through MediaRemote, a non-public macOS
   interface. The app identifiers are neither stored nor logged; the log only notes that Zack paused and resumed. A
