@@ -86,6 +86,14 @@ struct PillContentTests {
         #expect(content.accessibilityLabel == "Noch kein Diktat")
     }
 
+    @Test func fieldChangedText() throws {
+        let content = try #require(PillContent(.notice(.fieldChanged)))
+        #expect(content.icon == .alert)
+        #expect(content.text == "Feld gewechselt · ⌃⌥V fügt ein")
+        #expect(content.style == .neutral)
+        #expect(content.accessibilityLabel == "Feld gewechselt, Control-Wahl-V fügt ein")
+    }
+
     @Test func ruleTextTexts() throws {
         let pasted = try #require(PillContent(.ruleText(.pasted)))
         #expect(pasted.icon == .check)

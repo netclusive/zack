@@ -64,6 +64,8 @@ struct EnglishUITextTests {
         #expect(pill(.notice(.cancelled)) == ["Canceled", "Canceled"])
         #expect(pill(.notice(.noLastDictation)) == ["No Dictation Yet", "No Dictation Yet"])
         #expect(pill(.notice(.noCleanedVersion)) == ["No AI Version", "No AI Version"])
+        #expect(
+            pill(.notice(.fieldChanged)) == ["Field Changed · ⌃⌥V Inserts", "Field changed, Control-Option-V inserts"])
     }
 
     @Test func recordingCountdownPlural() {

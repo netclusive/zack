@@ -24,6 +24,8 @@ public enum DictationNotice: Equatable, Sendable {
     case noLastDictation
     /// ⌃⌥O without an AI-cleaned dictation to replace.
     case noCleanedVersion
+    /// The focus moved to another field or app before the paste; the text stays for ⌃⌥V.
+    case fieldChanged
 }
 
 public enum DictationState: Equatable, Sendable {
@@ -546,6 +548,10 @@ public actor DictationController<C: Clock<Duration>> {
         // Nothing takes a session that was left over: no signal word, rejected or timed out.
         processor.cleaner?.discardPrewarmed()
         prewarmedCleaner = nil
+        // Recognition and cleanup can take seconds and the reads above are older: only a read right before the paste
+        // sees a click into another field or app. The checks below run after it, so they see what came meanwhile.
+        let latest = await focusBeforePaste(snapshot, recognition: current)
+        guard current == session else { return }
         // The key-down read came back during the cleanup: the result goes nowhere, not even into "Letztes Diktat
         // kopieren".
         if keyDownIsSecure {
@@ -563,10 +569,19 @@ public actor DictationController<C: Clock<Duration>> {
         guard !isAborted(current) else { return }
         // The focus moved to a password field during the dictation: neither the field nor the clipboard gets the
         // text, and the memory stays as it was.
-        if snapshot.isSecure {
+        if snapshot.isSecure || latest?.isSecure == true {
             signposts?.discardInsert()
             logger.info("not inserted: password field at release")
             publish(.notice(.passwordFieldNotInserted))
+            scheduleReset(after: DictationLimits.failureVisible)
+            return
+        }
+        // Another field or app has the focus now: the text was fitted to the old one and must not land in the new
+        // one. It stays for ⌃⌥V, the clipboard stays untouched.
+        if let moved = latest?.element, moved != snapshot.element {
+            signposts?.discardInsert()
+            logger.info("not inserted: focus moved to another field")
+            publish(.notice(.fieldChanged))
             scheduleReset(after: DictationLimits.failureVisible)
             return
         }
@@ -617,6 +632,13 @@ public actor DictationController<C: Clock<Duration>> {
         let result = await task.value
         if processing == task { processing = nil }
         return result
+    }
+
+    /// The focus right before the paste, read without text. Nil when there is nothing to compare (no element known,
+    /// a password field anyway, Esc) or when the app does not answer within the grace; the paste then goes ahead.
+    private func focusBeforePaste(_ snapshot: FocusSnapshot, recognition current: Int) async -> FocusSnapshot? {
+        guard let focus, snapshot.element != nil, !snapshot.isSecure, !isAborted(current) else { return nil }
+        return await withinGrace(Task { await focus.read(text: false) })
     }
 
     /// The snapshot the text joins to: the key-down one, unless the recheck shows another element or selection.

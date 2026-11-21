@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- If you click into another field or app while Zack is still working, the dictation is no longer inserted there,
+  provided the app reports its focused field. The pill says so, and Control-Option-V inserts the text at the new place.
+
 ## [1.2.0] - 2026-11-15
 
 ### Added

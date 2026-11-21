@@ -533,6 +533,110 @@ struct DictationContextTests {
         #expect(await eventually { await controller.state == .idle })
     }
 
+    /// Regression: a click into another field during the cleanup went unnoticed and the paste landed there. The
+    /// queue answers the key-down read, the recheck alongside the recognition and the read before the paste.
+    @Test func focusMovedDuringTheCleanupInsertsNothing() async {
+        let focus = FakeFocusSource()
+        focus.queue(
+            FocusSnapshot(element: field, textBeforeCursor: ""), FocusSnapshot(element: field),
+            FocusSnapshot(element: other))
+        let memory = CursorMemory()
+        let controller = makeController(
+            transcriber: FakeTranscriber("Das Treffen ist am Dienstag, nein, am Mittwoch."),
+            cleaner: StubCleaner(output: "Das Treffen ist am Mittwoch."), focus: focus, memory: memory)
+        await dictate(controller, tone(), app: safari)
+        #expect(await controller.state == .notice(.fieldChanged))
+        #expect(keystrokes.pasted.isEmpty)
+        #expect(clipboard.text == nil)
+        #expect(await controller.lastText == "Das Treffen ist am Mittwoch.")
+        #expect(memory.text(app: safari, element: field) == nil)
+        await controller.replaceWithRuleText()
+        #expect(await controller.state == .notice(.noCleanedVersion))
+    }
+
+    /// A switch to another app during the recognition counts as another field.
+    @Test func otherAppAtTheInsertInsertsNothing() async {
+        let focus = FakeFocusSource()
+        let otherApp = FocusElement(pid: 7, reference: "field-1" as CFString)
+        focus.queue(
+            FocusSnapshot(element: field, textBeforeCursor: ""), FocusSnapshot(element: field),
+            FocusSnapshot(element: otherApp))
+        let controller = makeController(transcriber: FakeTranscriber("Der Server läuft."), focus: focus)
+        await dictate(controller, tone(), app: textEdit)
+        #expect(await controller.state == .notice(.fieldChanged))
+        #expect(keystrokes.pasted.isEmpty)
+        #expect(clipboard.text == nil)
+    }
+
+    /// After the notice, ⌃⌥V puts the dictation at the new place.
+    @Test func controlOptionVInsertsAfterAFieldChange() async {
+        let focus = FakeFocusSource()
+        focus.queue(
+            FocusSnapshot(element: field, textBeforeCursor: ""), FocusSnapshot(element: field),
+            FocusSnapshot(element: other))
+        let controller = makeController(transcriber: FakeTranscriber("Der Server läuft."), focus: focus)
+        await dictate(controller, tone(), app: textEdit)
+        #expect(await controller.state == .notice(.fieldChanged))
+        await controller.insertLast(app: textEdit)
+        #expect(keystrokes.pasted == ["Der Server läuft."])
+        #expect(await controller.state == .inserted(.pasted))
+    }
+
+    /// The field turned into a password field only after the recheck: the password notice, not the field notice.
+    @Test func passwordFieldAtTheInsertInsertsNothing() async {
+        let focus = FakeFocusSource()
+        focus.queue(
+            FocusSnapshot(element: field, textBeforeCursor: ""), FocusSnapshot(element: field),
+            FocusSnapshot(element: other, isSecure: true))
+        let controller = makeController(transcriber: FakeTranscriber("Der Server läuft."), focus: focus)
+        await dictate(controller, tone(), app: safari)
+        #expect(await controller.state == .notice(.passwordFieldNotInserted))
+        #expect(keystrokes.pasted.isEmpty)
+        #expect(clipboard.text == nil)
+    }
+
+    /// No answer before the paste (no element): inserted as before, or every dictation in such an app would fail.
+    @Test func unknownFocusAtTheInsertStillInserts() async {
+        let focus = FakeFocusSource()
+        focus.queue(FocusSnapshot(element: field, textBeforeCursor: ""), FocusSnapshot(element: field), .unknown)
+        let controller = makeController(transcriber: FakeTranscriber("Der Server läuft."), focus: focus)
+        await dictate(controller, tone(), app: textEdit)
+        #expect(keystrokes.pasted == ["Der Server läuft."])
+    }
+
+    /// The read before the paste gets no answer within the grace: the paste goes ahead as before.
+    @Test func slowFocusBeforeThePasteDoesNotHoldTheInsert() async {
+        let focus = FakeFocusSource()
+        focus.queue(FocusSnapshot(element: field, textBeforeCursor: ""), FocusSnapshot(element: field))
+        let cleaner = GatedCleaner()
+        let controller = makeController(
+            transcriber: FakeTranscriber("Das Treffen ist am Dienstag, nein, am Mittwoch."), cleaner: cleaner,
+            focus: focus)
+        let done = Task { await dictate(controller, tone(), app: safari) }
+        // Key-down read and recheck are done once the cleaner waits; the next read is the one before the paste.
+        #expect(await eventually { cleaner.isWaiting })
+        let sleepers = clock.sleeperCount
+        focus.holdNextRead()
+        cleaner.release()
+        #expect(await eventually { focus.heldReads == 1 && clock.sleeperCount == sleepers + 1 })
+        clock.advance(by: DictationLimits.recheckGrace)
+        await done.value
+        #expect(keystrokes.pasted == ["Das Treffen ist am Mittwoch."])
+        focus.releaseHeldRead(returning: FocusSnapshot(element: other))
+    }
+
+    /// A caret moved within the same field is no field change.
+    @Test func caretMovedInTheSameFieldStillInserts() async {
+        let focus = FakeFocusSource()
+        focus.queue(
+            FocusSnapshot(element: field, selection: TextRange(location: 0, length: 0), textBeforeCursor: ""),
+            FocusSnapshot(element: field, selection: TextRange(location: 0, length: 0)),
+            FocusSnapshot(element: field, selection: TextRange(location: 5, length: 0)))
+        let controller = makeController(transcriber: FakeTranscriber("Der Server läuft."), focus: focus)
+        await dictate(controller, tone(), app: textEdit)
+        #expect(keystrokes.pasted == ["Der Server läuft."])
+    }
+
     @Test func lateSnapshotOfAnEarlierDictationIsIgnored() async {
         // Dictation 1 (a tap): its key-down read hangs and arrives during dictation 2.
         let focus = FakeFocusSource()

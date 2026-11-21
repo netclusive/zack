@@ -409,6 +409,38 @@
         }
       }
     },
+    "Feld gewechselt · ⌃⌥V fügt ein" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feld gewechselt · ⌃⌥V fügt ein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Field Changed · ⌃⌥V Inserts"
+          }
+        }
+      }
+    },
+    "Feld gewechselt, Control-Wahl-V fügt ein" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feld gewechselt, Control-Wahl-V fügt ein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Field changed, Control-Option-V inserts"
+          }
+        }
+      }
+    },
     "Immer" : {
       "localizations" : {
         "de" : {

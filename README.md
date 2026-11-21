@@ -64,6 +64,10 @@ active window.
   before. Other players, including YouTube in a browser, keep playing.
 - Password fields: Zack does not dictate into them and shows a hint instead. While another app holds Secure Input,
   the menu shows "Secure Input Active"; dictation works, only canceling with another key does not.
+- Changed field: if you click into another field or app while the pill shows "Recognizing…" or "Cleaning Up…",
+  Zack does not insert there and shows "Field Changed · ⌃⌥V Inserts"; ⌃⌥V then inserts the text at the new place.
+  This needs Accessibility and an app that reports its focused field; where an app reports none or answers too
+  slowly, Zack inserts as before.
 
 ### Keyboard shortcuts
 

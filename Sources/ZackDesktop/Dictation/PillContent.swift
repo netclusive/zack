@@ -103,6 +103,10 @@ public struct PillContent: Equatable, Sendable {
                 self.init(.alert, UIText.localized("Noch kein Diktat"), UIText.localized("Noch kein Diktat"))
             case .noCleanedVersion:
                 self.init(.alert, UIText.localized("Keine KI-Fassung"), UIText.localized("Keine KI-Fassung"))
+            case .fieldChanged:
+                self.init(
+                    .alert, UIText.localized("Feld gewechselt · ⌃⌥V fügt ein"),
+                    UIText.localized("Feld gewechselt, Control-Wahl-V fügt ein"))
             }
         }
     }
