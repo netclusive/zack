@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - German times are written as "16:45 Uhr", whether spoken in words or recognized as "16.45 Uhr", and a range as
   "14:30 bis 15:40 Uhr".
+- German numbers from 13 are written in digits, from five digits with dots ("12.500"), and decimals as "3,5"; one
+  to twelve stay words.
 
 ## [1.2.1] - 2026-11-21
 
